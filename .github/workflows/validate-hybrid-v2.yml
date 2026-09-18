@@ -1,0 +1,35 @@
+name: Validate Hybrid SME PD V2
+
+on:
+  push:
+    branches:
+      - feature/hybrid-sme-pd-v2
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run original pipeline
+        run: python notebooks/credit_risk_pipeline.py
+      - name: Run hybrid V2 experiment
+        run: python notebooks/hybrid_pd_experiment.py
+      - name: Show information-set results
+        run: cat outputs/information_set_comparison.csv
+      - name: Upload validation outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: hybrid-pd-v2-results
+          path: |
+            outputs/information_set_comparison.csv
+            outputs/borrower_pd_comparison.csv
+            outputs/information_set_auc.png
+            outputs/utilization_trend_pd_uplift.png
