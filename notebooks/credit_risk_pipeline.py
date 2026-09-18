@@ -42,8 +42,14 @@ out=calculate_ecl(out)
 
 print("\nRISK BANDS\n",out.groupby("risk_band").agg(
     customers=("customer_id","count"), observed_default=("default","mean"),
-    exposure=("ead","sum"), ecl=("ecl_12m","sum")).round(3))
-print("\nTOTAL 12M ECL:",round(out.ecl_12m.sum(),2))
+    exposure=("ead","sum"), ecl_12m=("ecl_12m","sum")).round(3))
+print("\nIFRS 9-STYLE STAGING\n",out.groupby("stage").agg(
+    customers=("customer_id","count"), observed_default=("default","mean"),
+    exposure=("ead","sum"), ecl=("ecl","sum")).round(3))
+print("\nPORTFOLIO MEAN PREDICTED PD:",round(out.predicted_pd.mean(),4))
+print("HOLDOUT OBSERVED DEFAULT RATE:",round(out.default.mean(),4))
+print("TOTAL 12M ECL (diagnostic):",round(out.ecl_12m.sum(),2))
+print("TOTAL STAGED ECL:",round(out.ecl.sum(),2))
 print("\nBEST MODEL:",best_name)
 
 # ROC curve
