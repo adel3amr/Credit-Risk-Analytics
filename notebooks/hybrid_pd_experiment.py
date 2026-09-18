@@ -13,7 +13,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler
 
 from data_preparation import load_data, prepare_data
 from pd_model import logistic_model
@@ -37,7 +37,7 @@ sets = feature_sets(model_df)
 results, predictions = [], {}
 
 for set_name, cols in sets.items():
-    model = logistic_model()
+    # Unweighted logistic regression is intentional here: class weighting can\n    # improve minority-class ranking but distorts raw probabilities, which is\n    # undesirable when the output is interpreted as PD.\n    model = Pipeline([\n        ("imputer", SimpleImputer(strategy="median")),\n        ("scaler", StandardScaler()),\n        ("model", LogisticRegression(max_iter=2000))\n    ])
     model.fit(model_df.loc[train_idx, cols], y.loc[train_idx])
     prob = model.predict_proba(model_df.loc[test_idx, cols])[:, 1]
     predictions[set_name] = prob
@@ -53,7 +53,7 @@ comparison = (
 )
 comparison["AUC_lift_vs_financial"] = comparison["ROC_AUC"] - comparison.loc["Financial only", "ROC_AUC"]
 comparison["Gini_lift_vs_financial"] = comparison["Gini"] - comparison.loc["Financial only", "Gini"]
-comparison.to_csv(OUT / "information_set_comparison.csv")
+comparison.to_csv(OUT / "information_set_comparison.csv")\n\nprint(f"\\nHoldout observed default rate: {y.loc[test_idx].mean():.4f}")\nfor name, prob in predictions.items():\n    print(f"{name} mean predicted PD: {prob.mean():.4f}")
 
 print("\nINCREMENTAL INFORMATION TEST\n")
 print(comparison.round(4))
