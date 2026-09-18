@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score, classification_report, roc_curve
 from data_preparation import load_data, prepare_data
 from pd_model import logistic_model, random_forest_model, gradient_boosting_model
-from validation import validation_summary
+from validation import validation_summary, calibration_table
 from scorecard import add_score
 from ecl import calculate_ecl
 
@@ -63,3 +63,6 @@ plt.savefig(ROOT/"outputs/roc_curve.png",dpi=160); plt.close()
 # Save scored portfolio
 out.to_csv(ROOT/"data/processed/scored_portfolio.csv",index=False)
 res.to_csv(ROOT/"outputs/model_validation.csv")
+calibration_table(yte, best_pd, bins=10).to_csv(
+    ROOT/"outputs/calibration_deciles.csv", index=False
+)
