@@ -73,6 +73,47 @@ comparison["AUC_lift_vs_financial"] = (
 comparison["Gini_lift_vs_financial"] = (
     comparison["Gini"] - comparison.loc["Financial only", "Gini"]
 )
+# Paired bootstrap on the common holdout: quantify uncertainty in incremental AUC.
+# Resampling borrowers jointly preserves the paired nature of model comparisons.
+rng = __import__("numpy").random.default_rng(42)
+y_test = y.loc[test_idx].to_numpy()
+n_boot = 1000
+boot_rows = []
+names = ["Financial only", "Financial + Behavioral", "Hybrid"]
+for _ in range(n_boot):
+    idx = rng.integers(0, len(y_test), len(y_test))
+    y_b = y_test[idx]
+    if len(set(y_b)) < 2:
+        continue
+    aucs = {
+        name: __import__("sklearn.metrics", fromlist=["roc_auc_score"]).roc_auc_score(
+            y_b, predictions[name][idx]
+        )
+        for name in names
+    }
+    boot_rows.append({
+        "behavioral_minus_financial": aucs["Financial + Behavioral"] - aucs["Financial only"],
+        "hybrid_minus_financial": aucs["Hybrid"] - aucs["Financial only"],
+    })
+
+boot = pd.DataFrame(boot_rows)
+bootstrap_summary = pd.DataFrame({
+    "Comparison": ["Behavioral - Financial", "Hybrid - Financial"],
+    "Mean_AUC_Difference": [
+        boot["behavioral_minus_financial"].mean(),
+        boot["hybrid_minus_financial"].mean(),
+    ],
+    "CI_2.5%": [
+        boot["behavioral_minus_financial"].quantile(.025),
+        boot["hybrid_minus_financial"].quantile(.025),
+    ],
+    "CI_97.5%": [
+        boot["behavioral_minus_financial"].quantile(.975),
+        boot["hybrid_minus_financial"].quantile(.975),
+    ],
+})
+bootstrap_summary.to_csv(OUT / "auc_difference_bootstrap.csv", index=False)
+
 comparison.to_csv(OUT / "information_set_comparison.csv")
 
 observed_default_rate = y.loc[test_idx].mean()
@@ -85,6 +126,9 @@ print()
 print("INCREMENTAL INFORMATION TEST")
 print()
 print(comparison.round(4))
+print()
+print("PAIRED BOOTSTRAP AUC DIFFERENCES (95% percentile CI)")
+print(bootstrap_summary.round(4))
 
 borrower = hybrid_raw.loc[test_idx].copy()
 for name, prob in predictions.items():
@@ -130,5 +174,6 @@ print()
 print("Saved:")
 print("- outputs/information_set_comparison.csv")
 print("- outputs/borrower_pd_comparison.csv")
+print("- outputs/auc_difference_bootstrap.csv")
 print("- outputs/information_set_auc.png")
 print("- outputs/utilization_trend_pd_uplift.png")
