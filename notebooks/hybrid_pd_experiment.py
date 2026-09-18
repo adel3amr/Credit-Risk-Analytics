@@ -53,7 +53,8 @@ comparison = (
 )
 comparison["AUC_lift_vs_financial"] = comparison["ROC_AUC"] - comparison.loc["Financial only", "ROC_AUC"]
 comparison["Gini_lift_vs_financial"] = comparison["Gini"] - comparison.loc["Financial only", "Gini"]
-comparison.to_csv(OUT / "information_set_comparison.csv")\n\nprint(f"\\nHoldout observed default rate: {y.loc[test_idx].mean():.4f}")\nfor name, prob in predictions.items():\n    print(f"{name} mean predicted PD: {prob.mean():.4f}")
+comparison.to_csv(OUT / "information_set_comparison.csv")\n\nprint(f"
+Holdout observed default rate: {y.loc[test_idx].mean():.4f}")\nfor name, prob in predictions.items():\n    print(f"{name} mean predicted PD: {prob.mean():.4f}")
 
 print("\nINCREMENTAL INFORMATION TEST\n")
 print(comparison.round(4))
