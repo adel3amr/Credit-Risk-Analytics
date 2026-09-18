@@ -51,6 +51,7 @@ jobs:
           name: hybrid-pd-v2-results
           path: |
             outputs/model_validation.csv
+            outputs/calibration_deciles.csv
             outputs/information_set_comparison.csv
             outputs/borrower_pd_comparison.csv
             outputs/information_set_auc.png
