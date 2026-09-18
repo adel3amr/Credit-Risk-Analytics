@@ -1,9 +1,6 @@
 name: Validate Hybrid SME PD V2
 
 on:
-  push:
-    branches:
-      - feature/hybrid-sme-pd-v2
   pull_request:
     branches:
       - main
@@ -18,6 +15,8 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Inspect portfolio schema
+        run: python -c "import pandas as pd; df=pd.read_csv('data/raw/sme_credit_portfolio.csv', nrows=2); print('RAW_COLUMNS=' + '|'.join(df.columns))"
       - name: Run original pipeline
         run: python notebooks/credit_risk_pipeline.py
       - name: Run hybrid V2 experiment
