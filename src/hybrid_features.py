@@ -17,7 +17,7 @@ FINANCIAL_FEATURES = [
 ]
 
 BEHAVIORAL_FEATURES = [
-    "credit_utilization", "recent_delinquencies", "previous_defaults",
+    "credit_utilization", "delinquencies_12m", "previous_defaults",
     "days_past_due", "utilization_6m_change", "avg_utilization_6m",
     "months_above_80_utilization", "limit_breach_count",
 ]
@@ -49,7 +49,7 @@ def add_hybrid_features(df, random_state=42):
     util01 = _clip01(util01)
 
     dpd = out["days_past_due"].fillna(0).astype(float)
-    delinq = out["recent_delinquencies"].fillna(0).astype(float)
+    delinq = out["delinquencies_12m"].fillna(0).astype(float)
     prev_def = out["previous_defaults"].fillna(0).astype(float)
     leverage = out["leverage_ratio"].fillna(out["leverage_ratio"].median()).astype(float)
     liquidity = out["current_ratio"].fillna(out["current_ratio"].median()).astype(float)
