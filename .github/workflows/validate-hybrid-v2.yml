@@ -45,6 +45,7 @@ jobs:
         run: python notebooks/hybrid_pd_experiment.py
       - name: Show information-set results
         run: cat outputs/information_set_comparison.csv
+            outputs/auc_difference_bootstrap.csv
       - name: Upload validation outputs
         uses: actions/upload-artifact@v4
         with:
