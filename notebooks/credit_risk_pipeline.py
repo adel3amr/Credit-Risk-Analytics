@@ -9,7 +9,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]/"src"))
 import pandas as pd, numpy as np, matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score, classification_report, roc_curve
-from data_preparation import load_data, prepare_data
+from data_preparation import load_data, prepare_data, pd_feature_columns
 from pd_model import logistic_model, random_forest_model, gradient_boosting_model
 from validation import validation_summary, calibration_table
 from scorecard import add_score
@@ -18,7 +18,7 @@ from ecl import calculate_ecl
 ROOT=Path(__file__).resolve().parents[1]
 df=load_data(ROOT/"data/raw/sme_credit_portfolio.csv")
 model_df=prepare_data(df)
-X=model_df.drop(columns=["default","customer_id","pd_true"],errors="ignore")
+X=model_df[pd_feature_columns(model_df)]
 y=model_df["default"]
 Xtr,Xte,ytr,yte=train_test_split(X,y,test_size=.25,stratify=y,random_state=42)
 
