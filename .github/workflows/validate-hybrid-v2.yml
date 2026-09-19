@@ -29,11 +29,17 @@ jobs:
           assert df["pd_true"].between(0, 1).all()
           assert df["lgd"].between(0, 1).all()
           assert (df["ead"] > 0).all()
-          assert not {"default", "pd_true"}.intersection(
-              {"ebitda_margin","leverage_ratio","current_ratio","debt_to_income",
-               "credit_utilization","delinquencies_12m","previous_defaults",
-               "days_past_due","years_in_business"}
-          )
+          from src.data_preparation import prepare_data, pd_feature_columns
+          model_df = prepare_data(df)
+          pd_cols = set(pd_feature_columns(model_df))
+          forbidden = {"default", "pd_true", "customer_id", "ead", "lgd"}
+          leaked = forbidden.intersection(pd_cols)
+          assert not leaked, f"Forbidden fields leaked into PD predictors: {sorted(leaked)}"
+          assert (df["loan_amount"] > 0).all()
+          assert (df["annual_revenue"] > 0).all()
+          assert df["credit_utilization"].between(0, 1).all()
+          assert (df["collateral_value"] >= 0).all()
+          assert (df["days_past_due"] >= 0).all()
           print(f"Observed default rate: {dr:.4%}")
           print(f"Mean latent PD: {df.pd_true.mean():.4%}")
           print(f"Mean LGD: {df.lgd.mean():.4%}")
@@ -54,6 +60,7 @@ jobs:
             outputs/model_validation.csv
             outputs/calibration_deciles.csv
             outputs/information_set_comparison.csv
+            outputs/auc_difference_bootstrap.csv
             outputs/borrower_pd_comparison.csv
             outputs/information_set_auc.png
             outputs/utilization_trend_pd_uplift.png
