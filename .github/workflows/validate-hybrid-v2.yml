@@ -1,0 +1,66 @@
+name: Validate Hybrid SME PD V2
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Compile Python
+        run: python -m compileall -q src notebooks scripts
+      - name: Generate calibrated synthetic portfolio
+        run: python scripts/generate_sme_portfolio.py
+      - name: Sanity-check portfolio
+        run: |
+          python - <<'PY'
+          import pandas as pd
+          df = pd.read_csv("data/raw/sme_credit_portfolio.csv")
+          dr = df["default"].mean()
+          assert 0.02 <= dr <= 0.05, f"Observed default rate outside intended SME demo range: {dr:.4%}"
+          assert df["pd_true"].between(0, 1).all()
+          assert df["lgd"].between(0, 1).all()
+          assert (df["ead"] > 0).all()
+          from src.data_preparation import prepare_data, pd_feature_columns
+          model_df = prepare_data(df)
+          pd_cols = set(pd_feature_columns(model_df))
+          forbidden = {"default", "pd_true", "customer_id", "ead", "lgd"}
+          leaked = forbidden.intersection(pd_cols)
+          assert not leaked, f"Forbidden fields leaked into PD predictors: {sorted(leaked)}"
+          assert (df["loan_amount"] > 0).all()
+          assert (df["annual_revenue"] > 0).all()
+          assert df["credit_utilization"].between(0, 1).all()
+          assert (df["collateral_value"] >= 0).all()
+          assert (df["days_past_due"] >= 0).all()
+          print(f"Observed default rate: {dr:.4%}")
+          print(f"Mean latent PD: {df.pd_true.mean():.4%}")
+          print(f"Mean LGD: {df.lgd.mean():.4%}")
+          print(f"Total EAD: {df.ead.sum():,.0f}")
+          PY
+      - name: Run original pipeline
+        run: python notebooks/credit_risk_pipeline.py
+      - name: Run hybrid V2 experiment
+        run: python notebooks/hybrid_pd_experiment.py
+      - name: Show information-set results
+        run: cat outputs/information_set_comparison.csv
+            outputs/auc_difference_bootstrap.csv
+      - name: Upload validation outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: hybrid-pd-v2-results
+          path: |
+            outputs/model_validation.csv
+            outputs/calibration_deciles.csv
+            outputs/information_set_comparison.csv
+            outputs/auc_difference_bootstrap.csv
+            outputs/borrower_pd_comparison.csv
+            outputs/information_set_auc.png
+            outputs/utilization_trend_pd_uplift.png

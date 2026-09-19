@@ -9,16 +9,16 @@ sys.path.append(str(Path(__file__).resolve().parents[1]/"src"))
 import pandas as pd, numpy as np, matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score, classification_report, roc_curve
-from data_preparation import load_data, prepare_data
+from data_preparation import load_data, prepare_data, pd_feature_columns
 from pd_model import logistic_model, random_forest_model, gradient_boosting_model
-from validation import validation_summary
+from validation import validation_summary, calibration_table
 from scorecard import add_score
 from ecl import calculate_ecl
 
 ROOT=Path(__file__).resolve().parents[1]
 df=load_data(ROOT/"data/raw/sme_credit_portfolio.csv")
 model_df=prepare_data(df)
-X=model_df.drop(columns=["default","customer_id","pd_true"],errors="ignore")
+X=model_df[pd_feature_columns(model_df)]
 y=model_df["default"]
 Xtr,Xte,ytr,yte=train_test_split(X,y,test_size=.25,stratify=y,random_state=42)
 
@@ -42,8 +42,14 @@ out=calculate_ecl(out)
 
 print("\nRISK BANDS\n",out.groupby("risk_band").agg(
     customers=("customer_id","count"), observed_default=("default","mean"),
-    exposure=("ead","sum"), ecl=("ecl_12m","sum")).round(3))
-print("\nTOTAL 12M ECL:",round(out.ecl_12m.sum(),2))
+    exposure=("ead","sum"), ecl_12m=("ecl_12m","sum")).round(3))
+print("\nIFRS 9-STYLE STAGING\n",out.groupby("stage").agg(
+    customers=("customer_id","count"), observed_default=("default","mean"),
+    exposure=("ead","sum"), ecl=("ecl","sum")).round(3))
+print("\nPORTFOLIO MEAN PREDICTED PD:",round(out.predicted_pd.mean(),4))
+print("HOLDOUT OBSERVED DEFAULT RATE:",round(out.default.mean(),4))
+print("TOTAL 12M ECL (diagnostic):",round(out.ecl_12m.sum(),2))
+print("TOTAL STAGED ECL:",round(out.ecl.sum(),2))
 print("\nBEST MODEL:",best_name)
 
 # ROC curve
@@ -57,3 +63,6 @@ plt.savefig(ROOT/"outputs/roc_curve.png",dpi=160); plt.close()
 # Save scored portfolio
 out.to_csv(ROOT/"data/processed/scored_portfolio.csv",index=False)
 res.to_csv(ROOT/"outputs/model_validation.csv")
+calibration_table(yte, best_pd, bins=10).to_csv(
+    ROOT/"outputs/calibration_deciles.csv", index=False
+)

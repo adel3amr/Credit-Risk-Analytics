@@ -91,5 +91,42 @@ The project demonstrates how a bank can combine borrower financial information a
 - estimate expected losses,
 - support risk-based pricing and portfolio monitoring.
 
+
+## V2 — Hybrid SME PD & Risk Direction
+
+The V2 experiment extends the original point-in-time PD framework by asking a different modeling question:
+
+> **How does the information available to the model change SME risk differentiation?**
+
+Rather than changing algorithms, the experiment holds Logistic Regression constant and compares three nested information sets:
+
+1. **Financial only** — profitability, leverage, liquidity, debt burden, collateral and business maturity.
+2. **Financial + Behavioral** — adds current utilization/delinquency information and synthetic trajectory variables such as 6-month utilization change, average utilization, months above 80% and limit breaches.
+3. **Hybrid** — additionally introduces structured relationship/qualitative indicators such as relationship tenure, account conduct, management quality, reporting quality, information cooperation and covenant compliance.
+
+Run:
+
+```bash
+python notebooks/hybrid_pd_experiment.py
+```
+
+The experiment produces:
+- `outputs/information_set_comparison.csv` — AUC, Gini, KS and Brier by information set.
+- `outputs/borrower_pd_comparison.csv` — borrower-level PD comparison across the three specifications.
+- `outputs/information_set_auc.png` — discrimination comparison suitable for reporting.
+- `outputs/utilization_trend_pd_uplift.png` — relationship between utilization direction and incremental hybrid PD.
+
+### Why compare information sets?
+
+The purpose is not simply to find the algorithm with the highest AUC. Holding the modeling technique constant makes the comparison easier to interpret: it tests the incremental signal associated with broader borrower information in this synthetic experiment.
+
+This also operationalizes a portfolio-monitoring distinction between **risk level** and **risk direction**. A current utilization ratio describes a level; a sustained increase in utilization is a trajectory. Both can matter to a credit assessment.
+
+### Synthetic-data limitation
+
+All borrower data in this repository are synthetic. The V2 qualitative and trajectory variables are also synthetically derived using reproducible assumptions and seeded randomness. The default target is **not** used directly to construct these added features, which avoids direct target leakage; however, several features share underlying financial/behavioral drivers with the existing synthetic portfolio.
+
+Consequently, any improvement in model performance should be interpreted only as a demonstration of methodology under the simulated data-generating assumptions. It is **not empirical evidence** that a particular qualitative factor or behavioral trend improves real-world SME default prediction. A production model would require observed historical data, time-aware development/validation samples, governance, stability testing, calibration and independent validation.
+
 ## Disclaimer
 This is an educational portfolio project using synthetic data. It is not a production credit model and does not constitute financial, accounting, regulatory, or lending advice.
