@@ -11,6 +11,7 @@ PD_EXCLUDED_COLUMNS = {
     "pd_true",
     "ead",
     "lgd",
+    "current_credit_impaired",
 }
 
 
