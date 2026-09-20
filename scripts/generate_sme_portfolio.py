@@ -109,6 +109,17 @@ def main():
     )
     intercept = calibrate_intercept(lp, TARGET_DEFAULT_RATE)
     pd_true = np.clip(sigmoid(lp + intercept), .001, .65)
+    # Reporting-date credit impairment is distinct from the future 12M outcome.
+    # 90+ DPD is the primary observable backstop; a small additional severe-distress
+    # component represents other current credit-impaired events in the synthetic book.
+    severe_distress_prob = np.clip(
+        .002 + .020 * previous_defaults + .012 * (delinquencies_12m >= 2)
+        + .010 * (credit_utilization >= .90), 0, .10
+    )
+    current_credit_impaired = (
+        (days_past_due >= 90) | (rng.random(n) < severe_distress_prob)
+    ).astype(int)
+
     default = rng.binomial(1, pd_true)
 
     df = pd.DataFrame({
@@ -132,6 +143,7 @@ def main():
         "years_in_business": years_in_business,
         "ead": ead.round(2),
         "lgd": lgd.round(4),
+        "current_credit_impaired": current_credit_impaired,
         "default": default,
         "pd_true": pd_true.round(6),
     })
