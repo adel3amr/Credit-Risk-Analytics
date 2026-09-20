@@ -32,7 +32,7 @@ jobs:
           from src.data_preparation import prepare_data, pd_feature_columns
           model_df = prepare_data(df)
           pd_cols = set(pd_feature_columns(model_df))
-          forbidden = {"default", "pd_true", "customer_id", "ead", "lgd"}
+          forbidden = {"default", "pd_true", "customer_id", "ead", "lgd", "current_credit_impaired"}
           leaked = forbidden.intersection(pd_cols)
           assert not leaked, f"Forbidden fields leaked into PD predictors: {sorted(leaked)}"
           assert (df["loan_amount"] > 0).all()
@@ -40,6 +40,7 @@ jobs:
           assert df["credit_utilization"].between(0, 1).all()
           assert (df["collateral_value"] >= 0).all()
           assert (df["days_past_due"] >= 0).all()
+          assert set(df["current_credit_impaired"].unique()).issubset({0, 1})
           print(f"Observed default rate: {dr:.4%}")
           print(f"Mean latent PD: {df.pd_true.mean():.4%}")
           print(f"Mean LGD: {df.lgd.mean():.4%}")
