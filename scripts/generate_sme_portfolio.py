@@ -98,6 +98,19 @@ def main():
         0, 5
     ).astype(int)
 
+    # Synthetic administrative watchlist tenure. This is generated before the
+    # future default draw and is not tuned to default outcomes. Only borrowers
+    # meeting the EWS deterioration definition can have positive tenure.
+    ews_signal_count_seed = (
+        (utilization_6m_change >= .10).astype(int)
+        + ((avg_utilization_6m >= .80) | (months_above_80_utilization >= 3)).astype(int)
+        + (limit_breach_count >= 1).astype(int)
+    )
+    ews_deteriorating_seed = ews_signal_count_seed >= 2
+    months_on_ews_watchlist = np.where(
+        ews_deteriorating_seed, rng.integers(1, 13, n), 0
+    )
+
     # Arrears are uncommon in a predominantly performing portfolio.
     arrears_propensity = sigmoid(
         -4.0 + 2.0 * credit_utilization + .30 * (leverage_ratio - 2)
@@ -207,6 +220,7 @@ def main():
         "avg_utilization_6m": avg_utilization_6m.round(4),
         "months_above_80_utilization": months_above_80_utilization,
         "limit_breach_count": limit_breach_count,
+        "months_on_ews_watchlist": months_on_ews_watchlist,
         "number_of_accounts": number_of_accounts,
         "delinquencies_12m": delinquencies_12m,
         "previous_defaults": previous_defaults,
