@@ -6,9 +6,14 @@ proxies. This is an educational implementation, not an IFRS 9 accounting engine.
 """
 import numpy as np
 
+try:
+    from early_warning import add_early_warning_signals
+except ImportError:
+    from src.early_warning import add_early_warning_signals
+
 
 def assign_stage(df, pd_col="predicted_pd"):
-    out = df.copy()
+    out = add_early_warning_signals(df)
     dpd = out["days_past_due"].fillna(0)
     impaired = out["current_credit_impaired"].fillna(0).astype(int)
     delinq = out["delinquencies_12m"].fillna(0)
@@ -20,11 +25,13 @@ def assign_stage(df, pd_col="predicted_pd"):
     stage3 = (impaired == 1) | (dpd >= 90)
 
     # Simplified SICR proxy / 30-DPD backstop for non-credit-impaired exposures.
+    # The EWS contribution comes from trajectory monitoring, not the PD equation.
     stage2 = (~stage3) & (
         (dpd >= 30)
         | (delinq >= 2)
         | ((util >= 0.85) & (dpd > 0))
         | ((prev_default >= 1) & (out[pd_col] >= 0.05))
+        | (out["ews_sicr_flag"] == 1)
     )
 
     out["stage"] = np.select(
