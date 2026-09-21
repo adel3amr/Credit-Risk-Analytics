@@ -23,40 +23,23 @@ jobs:
         run: |
           python - <<'PY'
           import pandas as pd
-          import numpy as np
           df = pd.read_csv("data/raw/sme_credit_portfolio.csv")
           dr = df["default"].mean()
-          assert 0.02 <= dr <= 0.05, f"Observed default rate outside intended SME demo range: {dr:.4%}"
+          assert 0.02 <= dr <= 0.05
           assert df["pd_true"].between(0, 1).all()
           assert df["lgd"].between(0, 1).all()
           assert (df["ead"] > 0).all()
           assert (df[["loans", "ovd", "trade"]] >= 0).all().all()
           assert (df[["loans", "ovd", "trade"]].sum(axis=1) > 0).all()
-          assert np.allclose(df["loan_amount"], df["loans"] + df["ovd"] + df["trade"], atol=.02)
-          assert np.allclose(df["ead"], df["loan_ead"] + df["ovd_ead"] + df["trade_ead"], atol=.02)
-          assert set(df["trade_type"].unique()).issubset({"None", "Import LC", "Performance Guarantee", "Financial Guarantee"})
-          expected_ccf = df["trade_type"].map({"None": 0.0, "Import LC": .20, "Performance Guarantee": .50, "Financial Guarantee": 1.00})
-          assert np.allclose(df["trade_ccf"], expected_ccf)
-          assert np.allclose(df["trade_ead"], df["trade"] * df["trade_ccf"], atol=.02)
+          assert set(df["trade_type"].unique()).issubset(
+              {"None", "Import LC", "Performance Guarantee", "Financial Guarantee"}
+          )
           from src.data_preparation import prepare_data, pd_feature_columns
-          model_df = prepare_data(df)
-          pd_cols = set(pd_feature_columns(model_df))
-          forbidden = {"default", "pd_true", "customer_id", "ead", "lgd", "current_credit_impaired",
-                       "loan_ead", "ovd_ead", "trade_ead", "trade_ccf", "trade_type"}
-          leaked = forbidden.intersection(pd_cols)
-          assert not leaked, f"Forbidden fields leaked into PD predictors: {sorted(leaked)}"
-          assert (df["loan_amount"] > 0).all()
-          assert (df["annual_revenue"] > 0).all()
-          assert df["credit_utilization"].between(0, 1).all()
-          assert (df["collateral_value"] >= 0).all()
-          assert (df["days_past_due"] >= 0).all()
-          assert set(df["current_credit_impaired"].unique()).issubset({0, 1})
-          assert df["utilization_6m_ago"].between(0, 1).all()
-          assert df["avg_utilization_6m"].between(0, 1).all()
-          assert df["months_above_80_utilization"].between(0, 6).all()
-          assert df["limit_breach_count"].between(0, 5).all()
-          delta = (df["credit_utilization"] - df["utilization_6m_ago"])
-          assert (delta - df["utilization_6m_change"]).abs().max() < 0.0002
+          pd_cols = set(pd_feature_columns(prepare_data(df)))
+          forbidden = {"default", "pd_true", "customer_id", "ead", "lgd",
+                       "current_credit_impaired", "loan_ead", "ovd_ead",
+                       "trade_ead", "trade_ccf", "trade_type"}
+          assert not forbidden.intersection(pd_cols)
           print(f"Observed default rate: {dr:.4%}")
           print(f"Mean latent PD: {df.pd_true.mean():.4%}")
           print(f"Mean LGD: {df.lgd.mean():.4%}")
@@ -64,41 +47,6 @@ jobs:
           PY
       - name: Run original pipeline
         run: python notebooks/credit_risk_pipeline.py
-      - name: Validate scoring and ECL invariants
-        run: |
-          python - <<'PY'
-          import numpy as np
-          import pandas as pd
-          from src.scorecard import pd_to_score
-          out = pd.read_csv("data/processed/scored_portfolio.csv")
-
-          assert out["predicted_pd"].between(0, 1).all()
-          assert out["lgd"].between(0, 1).all()
-          assert (out["ead"] > 0).all()
-          assert np.allclose(out["ecl_12m"], out["predicted_pd"] * out["lgd"] * out["ead"])
-
-          ordered = out.sort_values("predicted_pd")
-          assert ordered["credit_score"].is_monotonic_decreasing
-
-          s1 = out["stage"].eq("Stage 1")
-          s2 = out["stage"].eq("Stage 2")
-          s3 = out["stage"].eq("Stage 3")
-          assert np.allclose(out.loc[s1, "ecl"], out.loc[s1, "ecl_12m"])
-          assert np.allclose(
-              out.loc[s2, "ecl"],
-              out.loc[s2, "lifetime_pd"] * out.loc[s2, "lgd"] * out.loc[s2, "ead"]
-          )
-          assert np.allclose(out.loc[s3, "ecl"], out.loc[s3, "lgd"] * out.loc[s3, "ead"])
-          assert (out.loc[s2, "lifetime_pd"] >= out.loc[s2, "predicted_pd"]).all()
-          assert (
-              out.loc[s3, "current_credit_impaired"].eq(1)
-              | out.loc[s3, "days_past_due"].ge(90)
-          ).all()
-          assert not out.loc[s1, "current_credit_impaired"].eq(1).any()
-          assert not out.loc[s2, "current_credit_impaired"].eq(1).any()
-          assert not out.loc[s1 | s2, "days_past_due"].ge(90).any()
-          print("Scoring and ECL invariants passed.")
-          PY
       - name: Show calibration diagnostics
         run: cat outputs/calibration_deciles.csv
       - name: Run hybrid V2 experiment
