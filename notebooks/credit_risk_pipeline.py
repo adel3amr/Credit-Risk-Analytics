@@ -115,6 +115,7 @@ ews_9m_validation = (
     out.groupby("ews_9m_validation_group")
     .agg(
         customers=("customer_id", "count"),
+        defaults=("default", "sum"),
         observed_default_rate=("default", "mean"),
         mean_predicted_pd=("predicted_pd", "mean"),
         exposure=("ead", "sum"),
