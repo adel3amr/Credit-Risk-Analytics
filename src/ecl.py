@@ -6,6 +6,26 @@ proxies. This is an educational implementation, not an IFRS 9 accounting engine.
 """
 import numpy as np
 
+# Forward-looking macro scenarios are transparent project assumptions. They are
+# deliberately modest and fixed ex ante; they are not fitted to holdout defaults.
+# The multipliers represent relative shifts to borrower PIT odds, not direct PD
+# percentage-point changes. Production IFRS 9 would estimate these relationships
+# from observed macro/credit history and approved forecasts.
+FORWARD_LOOKING_SCENARIOS = {
+    "upside": {"weight": 0.20, "odds_multiplier": 0.85},
+    "baseline": {"weight": 0.60, "odds_multiplier": 1.00},
+    "downside": {"weight": 0.20, "odds_multiplier": 1.35},
+}
+
+
+def _shift_pd_odds(pd, multiplier):
+    """Apply a scenario multiplier to default odds while keeping PD in (0,1)."""
+    p = np.clip(pd, 1e-8, 1 - 1e-8)
+    odds = p / (1 - p)
+    shifted_odds = odds * multiplier
+    return shifted_odds / (1 + shifted_odds)
+
+
 try:
     from early_warning import add_early_warning_signals
 except ImportError:
@@ -49,11 +69,29 @@ def assign_stage(df, pd_col="predicted_pd"):
 
 def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
     out = assign_stage(df, pd_col=pd_col)
-    pd12 = out[pd_col].clip(0, 1)
+    # Governed model output is a reporting-date, borrower-level 12M PIT-oriented
+    # PD. A separate scenario layer adds explicit forward-looking information.
+    pit_pd12 = out[pd_col].clip(0, 1)
+    out["pit_pd_12m"] = pit_pd12
+
+    scenario_pds = {}
+    for scenario, assumptions in FORWARD_LOOKING_SCENARIOS.items():
+        scenario_pd = _shift_pd_odds(pit_pd12, assumptions["odds_multiplier"])
+        out[f"pd_12m_{scenario}"] = scenario_pd
+        scenario_pds[scenario] = scenario_pd
+
+    forward_pd12 = sum(
+        FORWARD_LOOKING_SCENARIOS[s]["weight"] * scenario_pds[s]
+        for s in FORWARD_LOOKING_SCENARIOS
+    )
+    out["forward_looking_pd_12m"] = forward_pd12.clip(0, 1)
+
     lgd = out[lgd_col].clip(0, 1)
     ead = out[ead_col].clip(lower=0)
 
-    out["ecl_12m"] = pd12 * lgd * ead
+    # Probability-weighted forward-looking 12M ECL. LGD and EAD are held constant
+    # across scenarios in V2 so the macro overlay is isolated to PD.
+    out["ecl_12m"] = out["forward_looking_pd_12m"] * lgd * ead
 
     # Approximate cumulative PD under a constant annual hazard over remaining
     # contractual term. This replaces the previous arbitrary 2.5x multiplier.
@@ -62,8 +100,17 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
     # Cap at the contractual term generated for the borrower; do not impose a
     # minimum one-year remaining life on shorter residual terms.
     remaining_years = np.maximum(out["loan_term_months"].fillna(12) / 12.0, 0.0)
-    lifetime_pd = 1.0 - np.power(1.0 - pd12, remaining_years)
-    out["lifetime_pd"] = lifetime_pd.clip(0, 1)
+    # Apply the same scenario logic over the simplified constant-hazard term
+    # structure, then probability-weight the scenario lifetime PDs.
+    scenario_lifetime = {}
+    for scenario, scenario_pd in scenario_pds.items():
+        lp = 1.0 - np.power(1.0 - scenario_pd, remaining_years)
+        out[f"lifetime_pd_{scenario}"] = lp.clip(0, 1)
+        scenario_lifetime[scenario] = out[f"lifetime_pd_{scenario}"]
+    out["lifetime_pd"] = sum(
+        FORWARD_LOOKING_SCENARIOS[s]["weight"] * scenario_lifetime[s]
+        for s in FORWARD_LOOKING_SCENARIOS
+    ).clip(0, 1)
 
     out["ecl"] = out["ecl_12m"]
     s2 = out["stage"] == "Stage 2"
