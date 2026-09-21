@@ -70,57 +70,56 @@ def main():
     debt_to_income = np.clip(
         .12 + .075 * leverage_ratio + rng.normal(.08, .10, n), .03, .90
     )
-    # Utilization is principally a revolving/OVD behavioural measure. For borrowers
-    # without OVD it acts as a broader committed-facility utilization proxy.
-    credit_utilization = np.clip(
-        rng.beta(3.0, 2.7, n) + .035 * (leverage_ratio - 2.0), .03, .99
-    )
-
-    # 36-month monthly behavioural history ending at the reporting date (M0).
-    # The process is mean-reverting with borrower-specific drift and common monthly
-    # shocks. It is generated before the future default draw. Parameters are broad
-    # synthetic assumptions informed by observed SME asset-quality behaviour, not
-    # fitted to produce a desired Stage 2/default share.
+    # 36-month behavioural history generated strictly forward from M-35 to M0.
+    # Reporting-date utilization is therefore an OUTPUT of the history process,
+    # rather than an anchor used to reconstruct the past. This avoids conditioning
+    # historical EWS trajectories on a value that was not yet observed.
     history_months = 36
     month_labels = np.arange(-(history_months - 1), 1)
+
+    # Borrower-specific long-run utilization level reflects leverage/liquidity.
+    # Parameters are transparent synthetic assumptions, not fitted to target
+    # Stage-2 shares, AUC, or ECL.
+    long_run_util = np.clip(
+        rng.beta(3.0, 2.7, n) + .035 * (leverage_ratio - 2.0)
+        - .020 * (current_ratio - 1.45), .03, .97
+    )
     borrower_drift = rng.normal(
         .0015 * (leverage_ratio - 2.0) - .0015 * (current_ratio - 1.25),
         .0045, n
     )
     util_hist = np.empty((n, history_months))
-    util_hist[:, 0] = np.clip(
-        credit_utilization - borrower_drift * (history_months - 1)
-        + rng.normal(0, .10, n), .02, .99
-    )
+    util_hist[:, 0] = np.clip(long_run_util + rng.normal(0, .10, n), .02, .99)
     for m in range(1, history_months):
         common_shock = rng.normal(0, .012)
         idio = rng.normal(0, .035, n)
-        mean_reversion = .10 * (credit_utilization - util_hist[:, m - 1])
+        mean_reversion = .10 * (long_run_util - util_hist[:, m - 1])
         util_hist[:, m] = np.clip(
             util_hist[:, m - 1] + borrower_drift + mean_reversion + common_shock + idio,
             .02, .99
         )
-    # Anchor M0 to the independently generated reporting-date utilization.
-    util_hist[:, -1] = credit_utilization
+
+    # Current utilization is the final observed month of the chronological panel.
+    credit_utilization = util_hist[:, -1].copy()
 
     # Monthly limit-breach process: high utilization raises breach likelihood, but
     # breaches remain stochastic rather than deterministic.
     breach_lambda = np.clip((util_hist - .78) / .18, 0, 1) * 1.10
     breach_hist = np.clip(rng.poisson(breach_lambda), 0, 5).astype(int)
 
-    # Current EWS features are derived from the observed monthly panel.
+    # Current EWS features are derived only from observations available through M0.
     utilization_6m_ago = util_hist[:, -7]
     utilization_6m_change = credit_utilization - utilization_6m_ago
     avg_utilization_6m = util_hist[:, -6:].mean(axis=1)
     months_above_80_utilization = (util_hist[:, -6:] >= .80).sum(axis=1).astype(int)
     limit_breach_count = breach_hist[:, -6:].sum(axis=1).astype(int)
 
-    # Reconstruct the EWS classification at each historical month where six months
-    # of lookback exist, then measure the CURRENT consecutive deteriorating spell.
+    # Reconstruct EWS status at each month with six months of lookback, then measure
+    # the consecutive deteriorating spell ending at the reporting date.
     ews_hist = np.zeros((n, history_months), dtype=bool)
     for m in range(6, history_months):
         change_6m = util_hist[:, m] - util_hist[:, m - 6]
-        window_start = max(0, m - 5)
+        window_start = m - 5
         avg_6m = util_hist[:, window_start:m + 1].mean(axis=1)
         months_high_6m = (util_hist[:, window_start:m + 1] >= .80).sum(axis=1)
         breaches_6m = breach_hist[:, window_start:m + 1].sum(axis=1)
