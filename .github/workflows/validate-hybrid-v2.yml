@@ -41,6 +41,12 @@ jobs:
           assert (df["collateral_value"] >= 0).all()
           assert (df["days_past_due"] >= 0).all()
           assert set(df["current_credit_impaired"].unique()).issubset({0, 1})
+          assert df["utilization_6m_ago"].between(0, 1).all()
+          assert df["avg_utilization_6m"].between(0, 1).all()
+          assert df["months_above_80_utilization"].between(0, 6).all()
+          assert df["limit_breach_count"].between(0, 5).all()
+          delta = (df["credit_utilization"] - df["utilization_6m_ago"])
+          assert (delta - df["utilization_6m_change"]).abs().max() < 0.0002
           print(f"Observed default rate: {dr:.4%}")
           print(f"Mean latent PD: {df.pd_true.mean():.4%}")
           print(f"Mean LGD: {df.lgd.mean():.4%}")
