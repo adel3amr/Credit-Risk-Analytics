@@ -181,12 +181,16 @@ def main():
     )
 
     # Product-level EAD mechanics.
-    # Loans are treated as funded balances. OVD EAD combines current drawings with
-    # a 50% conversion of the undrawn limit. Trade CCFs are transparent synthetic
-    # assumptions for methodology demonstration, not regulatory prescriptions.
-    loan_ead = loans * rng.uniform(.72, 1.00, n)
+    # Internal project policy:
+    # - Term-loan EAD = 100% of the current withdrawn/outstanding amount.
+    # - OVD EAD = 100% of the total approved limit.
+    # In this synthetic schema, 'loans' represents the current term-loan
+    # outstanding amount and 'ovd' represents the total OVD limit.
+    # Trade CCFs remain transparent synthetic assumptions for methodology
+    # demonstration, not regulatory prescriptions.
+    loan_ead = loans.copy()
     ovd_drawn = ovd * credit_utilization
-    ovd_ead = ovd_drawn + 0.50 * np.maximum(ovd - ovd_drawn, 0)
+    ovd_ead = ovd.copy()
 
     trade_types = np.array(["Import LC", "Performance Guarantee", "Financial Guarantee"])
     trade_type = rng.choice(trade_types, n, p=[.45, .35, .20])
