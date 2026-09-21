@@ -74,6 +74,8 @@ out["watchlist_flag"] = (
     (out["risk_direction"] == "Deteriorating") & (out["stage"] == "Stage 1")
 ).astype(int)
 watchlist = out[out["watchlist_flag"] == 1].copy()
+# Refresh Stage 2 subset after watchlist_flag is added to the master output.
+stage2 = out[out["stage"] == "Stage 2"].copy()
 audit.to_csv(ROOT/"outputs/stage2_trigger_audit.csv", index=False)
 
 monitor_cols = [
