@@ -50,6 +50,9 @@ jobs:
             outputs/calibration_plot.png
             outputs/information_set_comparison.csv
             outputs/auc_difference_bootstrap.csv
+            outputs/train_test_validation.csv
+            outputs/train_test_calibration_deciles.csv
+            outputs/confusion_matrices.csv
             outputs/borrower_pd_comparison.csv
             outputs/information_set_auc.png
             outputs/utilization_trend_pd_uplift.png
