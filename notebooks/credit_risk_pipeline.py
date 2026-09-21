@@ -211,6 +211,25 @@ print("PORTFOLIO MEAN FORWARD-LOOKING PD:",round(out.forward_looking_pd_12m.mean
 print("HOLDOUT OBSERVED DEFAULT RATE:",round(out.default.mean(),4))
 print("TOTAL 12M ECL (diagnostic):",round(out.ecl_12m.sum(),2))
 print("TOTAL STAGED ECL:",round(out.ecl.sum(),2))
+
+# Forward-looking macro overlay diagnostics. This separates model validation
+# (performed on the PIT-oriented PD) from the scenario adjustment used for ECL.
+macro_diag = pd.DataFrame({
+    "metric": [
+        "mean_pit_pd_12m", "mean_upside_pd_12m", "mean_baseline_pd_12m",
+        "mean_downside_pd_12m", "mean_forward_looking_pd_12m",
+        "pit_12m_ecl", "forward_looking_12m_ecl", "forward_looking_staged_ecl",
+    ],
+    "value": [
+        out["pit_pd_12m"].mean(), out["pd_12m_upside"].mean(),
+        out["pd_12m_baseline"].mean(), out["pd_12m_downside"].mean(),
+        out["forward_looking_pd_12m"].mean(),
+        (out["pit_pd_12m"] * out["lgd"] * out["ead"]).sum(),
+        out["ecl_12m"].sum(), out["ecl"].sum(),
+    ],
+})
+macro_diag.to_csv(ROOT/"outputs/macro_scenario_diagnostics.csv", index=False)
+print("\nFORWARD-LOOKING MACRO DIAGNOSTICS\n", macro_diag.round(6).to_string(index=False))
 print("\nPRIMARY GOVERNED PD MODEL:",primary_name)
 
 # ROC curve
