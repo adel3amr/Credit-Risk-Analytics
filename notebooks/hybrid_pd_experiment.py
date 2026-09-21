@@ -152,6 +152,39 @@ bootstrap_summary = pd.DataFrame([{
 } for label, col in pairs])
 bootstrap_summary.to_csv(OUT / "auc_difference_bootstrap.csv", index=False)
 
+# Trajectory provenance audit: quantify whether the observed incremental signal is
+# expected from the frozen synthetic DGP rather than silently treating it as an
+# empirical discovery. The DGP explicitly includes utilization_6m_change and
+# months_above_80_utilization in latent default risk; avg utilization and breach
+# count are correlated monitoring variables but have no direct target coefficient.
+trajectory_provenance = pd.DataFrame([
+    {"feature": "utilization_6m_change", "direct_in_frozen_default_dgp": 1,
+     "dgp_coefficient": 1.20, "role": "direct latent-PD driver"},
+    {"feature": "avg_utilization_6m", "direct_in_frozen_default_dgp": 0,
+     "dgp_coefficient": 0.00, "role": "correlated behavioural summary"},
+    {"feature": "months_above_80_utilization", "direct_in_frozen_default_dgp": 1,
+     "dgp_coefficient": 0.08, "role": "direct latent-PD driver"},
+    {"feature": "limit_breach_count", "direct_in_frozen_default_dgp": 0,
+     "dgp_coefficient": 0.00, "role": "correlated EWS/conduct indicator"},
+])
+trajectory_provenance.to_csv(OUT / "trajectory_signal_provenance.csv", index=False)
+
+# Holdout-only descriptive audit. This is diagnostic, not feature selection.
+trajectory_audit = []
+for col in ["utilization_6m_change", "avg_utilization_6m",
+            "months_above_80_utilization", "limit_breach_count"]:
+    x = hybrid_raw.loc[test_idx, col].astype(float)
+    trajectory_audit.append({
+        "feature": col,
+        "mean_nondefault": x[y.loc[test_idx] == 0].mean(),
+        "mean_default": x[y.loc[test_idx] == 1].mean(),
+        "spearman_with_default": x.corr(y.loc[test_idx].astype(float), method="spearman"),
+        "spearman_with_current_utilization": x.corr(
+            hybrid_raw.loc[test_idx, "credit_utilization"].astype(float), method="spearman"
+        ),
+    })
+pd.DataFrame(trajectory_audit).to_csv(OUT / "trajectory_signal_audit.csv", index=False)
+
 print("\nINCREMENTAL INFORMATION TEST\n")
 print(comparison.round(4))
 print("\nPAIRED BOOTSTRAP AUC DIFFERENCES (95% percentile CI)")
@@ -196,6 +229,8 @@ print("Saved:")
 print("- outputs/information_set_comparison.csv")
 print("- outputs/borrower_pd_comparison.csv")
 print("- outputs/auc_difference_bootstrap.csv")
+print("- outputs/trajectory_signal_provenance.csv")
+print("- outputs/trajectory_signal_audit.csv")
 print("- outputs/train_test_validation.csv")
 print("- outputs/train_test_calibration_deciles.csv")
 print("- outputs/confusion_matrices.csv")
