@@ -23,16 +23,26 @@ jobs:
         run: |
           python - <<'PY'
           import pandas as pd
+          import numpy as np
           df = pd.read_csv("data/raw/sme_credit_portfolio.csv")
           dr = df["default"].mean()
           assert 0.02 <= dr <= 0.05, f"Observed default rate outside intended SME demo range: {dr:.4%}"
           assert df["pd_true"].between(0, 1).all()
           assert df["lgd"].between(0, 1).all()
           assert (df["ead"] > 0).all()
+          assert (df[["loans", "ovd", "trade"]] >= 0).all().all()
+          assert (df[["loans", "ovd", "trade"]].sum(axis=1) > 0).all()
+          assert np.allclose(df["loan_amount"], df["loans"] + df["ovd"] + df["trade"], atol=.02)
+          assert np.allclose(df["ead"], df["loan_ead"] + df["ovd_ead"] + df["trade_ead"], atol=.02)
+          assert set(df["trade_type"].unique()).issubset({"None", "Import LC", "Performance Guarantee", "Financial Guarantee"})
+          expected_ccf = df["trade_type"].map({"None": 0.0, "Import LC": .20, "Performance Guarantee": .50, "Financial Guarantee": 1.00})
+          assert np.allclose(df["trade_ccf"], expected_ccf)
+          assert np.allclose(df["trade_ead"], df["trade"] * df["trade_ccf"], atol=.02)
           from src.data_preparation import prepare_data, pd_feature_columns
           model_df = prepare_data(df)
           pd_cols = set(pd_feature_columns(model_df))
-          forbidden = {"default", "pd_true", "customer_id", "ead", "lgd", "current_credit_impaired"}
+          forbidden = {"default", "pd_true", "customer_id", "ead", "lgd", "current_credit_impaired",
+                       "loan_ead", "ovd_ead", "trade_ead", "trade_ccf", "trade_type"}
           leaked = forbidden.intersection(pd_cols)
           assert not leaked, f"Forbidden fields leaked into PD predictors: {sorted(leaked)}"
           assert (df["loan_amount"] > 0).all()
