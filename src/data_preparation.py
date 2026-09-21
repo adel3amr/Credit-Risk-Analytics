@@ -12,6 +12,12 @@ PD_EXCLUDED_COLUMNS = {
     "ead",
     "lgd",
     "current_credit_impaired",
+    # Product/EAD construction fields belong to exposure measurement, not borrower PD.
+    "loan_ead",
+    "ovd_ead",
+    "trade_ead",
+    "trade_ccf",
+    "trade_type",
 }
 
 
