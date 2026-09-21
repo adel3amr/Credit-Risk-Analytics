@@ -46,6 +46,9 @@ jobs:
           name: hybrid-pd-v2-results
           path: |
             outputs/model_validation.csv
+            outputs/stage2_trigger_audit.csv
+            outputs/portfolio_monitoring.csv
+            outputs/stage2_customer_review.csv
             outputs/calibration_deciles.csv
             outputs/calibration_plot.png
             outputs/information_set_comparison.csv
