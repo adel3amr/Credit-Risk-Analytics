@@ -1,132 +1,148 @@
-# Credit Risk Analytics & Probability of Default Modeling
+# Credit Risk Analytics & SME PD Modeling
 
 ## Overview
-End-to-end credit risk analytics project simulating a commercial banking SME portfolio. The project develops and validates Probability of Default (PD) models, converts PD into an interpretable credit score, segments borrowers by risk, and estimates Expected Credit Loss (ECL) using PD × LGD × EAD.
+End-to-end synthetic SME credit-risk project covering borrower PD, validation, credit scoring, early-warning monitoring, product-level EAD mechanics, aggregate LGD and a simplified IFRS 9-style staging/ECL layer.
 
-> **Data note:** The portfolio is fully synthetic and contains no real customer information.
+> **Data note:** All customer and behavioural data are synthetic. Results demonstrate methodology under the stated data-generating assumptions; they are not estimates of a real bank portfolio.
 
-## Objectives
-- Analyze portfolio-level credit risk and default behavior
-- Build an interpretable Logistic Regression PD model and benchmark tree-based models
-- Evaluate ROC-AUC, Gini, KS and Brier score
-- Produce borrower-level PDs and credit scores
-- Segment exposures into Low / Moderate / High / Very High risk
-- Estimate 12-month and simplified lifetime ECL
-- Provide a Streamlit risk dashboard
-
-## Methodology
-### PD modeling
-Three models are compared:
-1. Logistic Regression — interpretable baseline
-2. Random Forest — nonlinear benchmark
-3. Gradient Boosting — nonlinear benchmark
-
-### Model validation
-- ROC-AUC
-- Gini coefficient
-- Kolmogorov-Smirnov (KS) statistic
-- Brier score / probability calibration proxy
-
-### Credit scoring
-PD is transformed into a score using a conventional odds-based scorecard relationship. Higher scores indicate lower modeled default risk.
-
-### IFRS 9-style ECL
-A simplified framework is implemented:
-
-**12-month ECL = PD × LGD × EAD**
-
-Risk stages are assigned using PD thresholds:
-- Stage 1: PD < 3%
-- Stage 2: 3% ≤ PD < 15%
-- Stage 3: PD ≥ 15%
-
-Lifetime ECL uses illustrative maturity multipliers. These assumptions are educational and are not intended to reproduce a bank's regulatory or accounting model.
-
-## Project Structure
+## Architecture
 ```text
-credit-risk-analytics/
+Current financials + current behaviour -> 12M PD -> score / risk band
+36-month behavioural history          -> EWS / watchlist
+Reporting-date credit deterioration   -> simplified SICR / stage
+Facilities                            -> EAD
+Collateral / recovery assumptions     -> LGD
+PD + stage + LGD + EAD                -> simplified ECL
+```
+
+Logistic Regression is the governed primary PD model because interpretability and probability calibration are central to the use case. Random Forest and Gradient Boosting are challengers; the primary model is not selected by whichever algorithm happens to achieve the highest holdout AUC.
+
+## Synthetic portfolio
+- 12,000 SME borrowers.
+- 36 monthly behavioural observations per borrower (432,000 borrower-months).
+- Term loans, overdrafts (OVD) and trade-finance facilities.
+- Chronological utilization history generated forward from M-35 to reporting date M0.
+- Future 12-month default is generated only after reporting-date borrower information is constructed.
+
+### EAD policy
+For this project:
+- **Term-loan EAD = 100% of current withdrawn/outstanding amount.**
+- **OVD EAD = 100% of approved total limit.**
+- Trade-finance EAD = instrument amount x transparent synthetic CCF.
+- Total borrower EAD = sum of product EADs.
+
+Trade CCFs and other portfolio-generation parameters are synthetic methodology assumptions, not regulatory prescriptions.
+
+### LGD
+LGD is an aggregate borrower-level synthetic recovery proxy driven primarily by collateral coverage, with limited sector differentiation. Collateral is not allocated by individual facility, seniority or enforceability. A production implementation would require facility-level recovery data and recovery timing.
+
+## PD model
+The governed feature set uses current financial and behavioural information:
+- EBITDA margin
+- leverage ratio
+- current ratio
+- debt-to-income
+- collateral coverage
+- years in business
+- current credit utilization
+- delinquencies in the last 12 months
+- previous defaults
+- days past due
+- industry
+
+Trajectory variables are evaluated separately and are not forced into the governed PD merely to improve apparent model performance.
+
+Validation includes ROC-AUC, Gini, KS, Brier score, log loss, calibration-in-the-large and calibration by holdout decile.
+
+## Early-warning system
+The EWS is a separate monitoring layer using:
+- six-month utilization increase,
+- persistent high utilization,
+- limit breaches.
+
+Two or more signals produce an EWS **Deteriorating** status; one produces **Watch**. Thresholds are transparent synthetic monitoring assumptions, not empirically calibrated production triggers.
+
+A predefined internal synthetic policy moves a currently deteriorating borrower to Stage 2 after **9 consecutive months** of EWS deterioration. Nine months is **not an IFRS 9 requirement** and is not optimized on the holdout sample.
+
+## Simplified IFRS 9-style staging and ECL
+This repository is not a production IFRS 9 accounting engine.
+
+- **Stage 3:** current credit-impaired flag or DPD >= 90.
+- **Stage 2:** simplified SICR proxies including DPD/conduct/history triggers and the fixed 9-month EWS-persistence policy.
+- **Stage 1:** exposures not meeting Stage 2 or Stage 3 conditions.
+
+Stage 1 uses 12-month PD. Stage 2 uses a simplified lifetime-PD approximation based on current annual PD and the synthetic contractual term. Stage 3 uses LGD x EAD as a simplified 100% default-probability proxy.
+
+Important limitations include no true origination/reference PD comparison, no macroeconomic scenarios, no discounted cash-shortfall engine, no facility-level lifetime EAD term structure, and one borrower-level contractual term for aggregate facilities.
+
+## V2 information-set experiment
+Logistic Regression is held constant while four nested information sets are compared:
+
+1. Financial only.
+2. Financial + current behaviour.
+3. Financial + current behaviour + trajectory.
+4. Full hybrid, adding synthetic qualitative/relationship variables.
+
+The purpose is to test whether broader information adds out-of-sample discrimination, not to maximize AUC through feature accumulation. Paired bootstrap resampling is used for AUC differences.
+
+The current experiment supports keeping current behaviour in core PD. Trajectory remains useful as a separate EWS architecture; it is not included in core PD merely because it exists. Qualitative variables remain supplementary.
+
+## Current governed validation
+The latest chronological-data workflow should be treated as the current V2 baseline. On the 3,000-borrower holdout:
+- governed Logistic Regression AUC: **0.7511**, Gini: **0.5022**;
+- holdout observed default rate: **3.33%**;
+- mean predicted PD: **3.26%**;
+- Stage 1: **2,764 borrowers**, observed future default **2.9%**;
+- Stage 2: **221 borrowers**, observed future default **8.1%**;
+- Stage 3: **15 borrowers**; sample too small for inference;
+- total holdout EAD: approximately **EUR 2.390bn**;
+- diagnostic 12-month ECL: approximately **EUR 26.90m**;
+- simplified staged ECL: approximately **EUR 39.90m**.
+
+The predefined 9-month EWS policy identifies elevated-risk borrowers, but this synthetic holdout does **not** demonstrate that waiting nine months provides incremental separation over more recent deterioration. That result is retained rather than tuning the threshold after observing the holdout.
+
+## Project structure
+```text
+Credit-Risk-Analytics/
 ├── data/
-│   ├── raw/sme_credit_portfolio.csv
+│   ├── raw/
+│   │   ├── sme_credit_portfolio.csv
+│   │   └── sme_behavioral_history_36m.csv
 │   └── processed/scored_portfolio.csv
-├── notebooks/credit_risk_pipeline.py
+├── scripts/generate_sme_portfolio.py
+├── notebooks/
+│   ├── credit_risk_pipeline.py
+│   └── hybrid_pd_experiment.py
 ├── src/
 │   ├── data_preparation.py
 │   ├── pd_model.py
 │   ├── validation.py
 │   ├── scorecard.py
+│   ├── early_warning.py
 │   └── ecl.py
 ├── dashboard/app.py
 ├── outputs/
-├── reports/
-├── requirements.txt
-└── README.md
+└── docs/
 ```
 
-## How to Run
+## Run
 ```bash
 pip install -r requirements.txt
+python scripts/generate_sme_portfolio.py
 python notebooks/credit_risk_pipeline.py
+python notebooks/hybrid_pd_experiment.py
 streamlit run dashboard/app.py
 ```
 
-## Key Risk Variables
-The synthetic portfolio includes financial and behavioral indicators such as:
-- EBITDA margin
-- Leverage ratio
-- Current ratio
-- Debt-to-income ratio
-- Credit utilization
-- Recent delinquencies
-- Previous defaults
-- Days past due
-- Collateral coverage
-- Years in business
-- Industry
+Generate the synthetic data before running the analytics so the raw schema and governed feature set stay synchronized.
 
-## Business Interpretation
-The project demonstrates how a bank can combine borrower financial information and behavioral indicators to:
-- differentiate credit risk,
-- prioritize manual underwriting,
-- identify high-risk exposures,
-- estimate expected losses,
-- support risk-based pricing and portfolio monitoring.
-
-
-## V2 — Hybrid SME PD & Risk Direction
-
-The V2 experiment extends the original point-in-time PD framework by asking a different modeling question:
-
-> **How does the information available to the model change SME risk differentiation?**
-
-Rather than changing algorithms, the experiment holds Logistic Regression constant and compares three nested information sets:
-
-1. **Financial only** — profitability, leverage, liquidity, debt burden, collateral and business maturity.
-2. **Financial + Behavioral** — adds current utilization/delinquency information and synthetic trajectory variables such as 6-month utilization change, average utilization, months above 80% and limit breaches.
-3. **Hybrid** — additionally introduces structured relationship/qualitative indicators such as relationship tenure, account conduct, management quality, reporting quality, information cooperation and covenant compliance.
-
-Run:
-
-```bash
-python notebooks/hybrid_pd_experiment.py
-```
-
-The experiment produces:
-- `outputs/information_set_comparison.csv` — AUC, Gini, KS and Brier by information set.
-- `outputs/borrower_pd_comparison.csv` — borrower-level PD comparison across the three specifications.
-- `outputs/information_set_auc.png` — discrimination comparison suitable for reporting.
-- `outputs/utilization_trend_pd_uplift.png` — relationship between utilization direction and incremental hybrid PD.
-
-### Why compare information sets?
-
-The purpose is not simply to find the algorithm with the highest AUC. Holding the modeling technique constant makes the comparison easier to interpret: it tests the incremental signal associated with broader borrower information in this synthetic experiment.
-
-This also operationalizes a portfolio-monitoring distinction between **risk level** and **risk direction**. A current utilization ratio describes a level; a sustained increase in utilization is a trajectory. Both can matter to a credit assessment.
-
-### Synthetic-data limitation
-
-All borrower data in this repository are synthetic. The V2 qualitative and trajectory variables are also synthetically derived using reproducible assumptions and seeded randomness. The default target is **not** used directly to construct these added features, which avoids direct target leakage; however, several features share underlying financial/behavioral drivers with the existing synthetic portfolio.
-
-Consequently, any improvement in model performance should be interpreted only as a demonstration of methodology under the simulated data-generating assumptions. It is **not empirical evidence** that a particular qualitative factor or behavioral trend improves real-world SME default prediction. A production model would require observed historical data, time-aware development/validation samples, governance, stability testing, calibration and independent validation.
+## Governance principles
+- No future-default target leakage into reporting-date staging.
+- Governed PD features are explicit; missing required features fail rather than being silently omitted.
+- Logistic Regression is fixed as the primary model; RF/GB are challengers.
+- Holdout results are reported, not optimized.
+- The 9-month EWS threshold is fixed ex ante for V2 and is not retuned after seeing validation results.
+- Synthetic assumptions and accounting simplifications are stated explicitly.
 
 ## Disclaimer
-This is an educational portfolio project using synthetic data. It is not a production credit model and does not constitute financial, accounting, regulatory, or lending advice.
+Educational synthetic portfolio project only. It is not a production credit model and does not constitute accounting, regulatory, lending or investment advice.
