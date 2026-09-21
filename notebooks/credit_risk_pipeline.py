@@ -34,9 +34,14 @@ for name,m in models.items():
 res=pd.DataFrame(results).set_index("Model").sort_values("ROC_AUC",ascending=False)
 print("\nMODEL VALIDATION\n",res.round(4))
 
-best_name=res.index[0]; best=models[best_name]; best_pd=preds[best_name]
+# Governance decision: Logistic Regression is the primary PD model because
+# interpretability and calibration are core requirements. RF/GB remain challengers;
+# the primary model is not selected dynamically on holdout AUC.
+primary_name="Logistic Regression"
+primary=models[primary_name]
+primary_pd=preds[primary_name]
 out=df.iloc[Xte.index].copy()
-out["predicted_pd"]=best_pd
+out["predicted_pd"]=primary_pd
 out=add_score(out)
 out=calculate_ecl(out)
 
@@ -156,11 +161,11 @@ print("\nPORTFOLIO MEAN PREDICTED PD:",round(out.predicted_pd.mean(),4))
 print("HOLDOUT OBSERVED DEFAULT RATE:",round(out.default.mean(),4))
 print("TOTAL 12M ECL (diagnostic):",round(out.ecl_12m.sum(),2))
 print("TOTAL STAGED ECL:",round(out.ecl.sum(),2))
-print("\nBEST MODEL:",best_name)
+print("\nPRIMARY GOVERNED PD MODEL:",primary_name)
 
 # ROC curve
-fpr,tpr,_=roc_curve(yte,best_pd)
-plt.figure(figsize=(7,5)); plt.plot(fpr,tpr,label=f"{best_name} (AUC={roc_auc_score(yte,best_pd):.3f})")
+fpr,tpr,_=roc_curve(yte,primary_pd)
+plt.figure(figsize=(7,5)); plt.plot(fpr,tpr,label=f"{primary_name} (AUC={roc_auc_score(yte,primary_pd):.3f})")
 plt.plot([0,1],[0,1],"--"); plt.xlabel("False Positive Rate"); plt.ylabel("True Positive Rate")
 plt.title("PD Model ROC Curve"); plt.legend(); plt.tight_layout()
 (ROOT/"outputs/roc_curve.png").parent.mkdir(exist_ok=True)
@@ -169,7 +174,7 @@ plt.savefig(ROOT/"outputs/roc_curve.png",dpi=160); plt.close()
 # Save scored portfolio
 out.to_csv(ROOT/"data/processed/scored_portfolio.csv",index=False)
 res.to_csv(ROOT/"outputs/model_validation.csv")
-cal = calibration_table(yte, best_pd, bins=10)
+cal = calibration_table(yte, primary_pd, bins=10)
 cal.to_csv(ROOT/"outputs/calibration_deciles.csv", index=False)
 print("\nCALIBRATION DECILES\n", cal.round(4))
 
