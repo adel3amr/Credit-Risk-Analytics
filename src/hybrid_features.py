@@ -16,9 +16,12 @@ FINANCIAL_FEATURES = [
     "collateral_coverage", "years_in_business",
 ]
 
-BEHAVIORAL_FEATURES = [
-    "credit_utilization", "delinquencies_12m", "previous_defaults",
-    "days_past_due", "utilization_6m_change", "avg_utilization_6m",
+CURRENT_BEHAVIOR_FEATURES = [
+    "credit_utilization", "delinquencies_12m", "previous_defaults", "days_past_due",
+]
+
+TRAJECTORY_FEATURES = [
+    "utilization_6m_change", "avg_utilization_6m",
     "months_above_80_utilization", "limit_breach_count",
 ]
 
@@ -111,13 +114,15 @@ def add_hybrid_features(df, random_state=42):
 def feature_sets(df):
     """Return available columns for nested information-set experiments."""
     financial = [c for c in FINANCIAL_FEATURES if c in df.columns]
-    behavioural = financial + [c for c in BEHAVIORAL_FEATURES if c in df.columns]
-    hybrid = behavioural + [c for c in QUALITATIVE_FEATURES if c in df.columns]
+    current_behavior = financial + [c for c in CURRENT_BEHAVIOR_FEATURES if c in df.columns]
+    trajectory = current_behavior + [c for c in TRAJECTORY_FEATURES if c in df.columns]
+    hybrid = trajectory + [c for c in QUALITATIVE_FEATURES if c in df.columns]
 
     # Industry is known at underwriting and is retained in each information set.
     industry_cols = [c for c in df.columns if c.startswith("industry_")]
     return {
         "Financial only": financial + industry_cols,
-        "Financial + Behavioral": behavioural + industry_cols,
-        "Hybrid": hybrid + industry_cols,
+        "Financial + Current Behavior": current_behavior + industry_cols,
+        "Financial + Current Behavior + Trajectory": trajectory + industry_cols,
+        "Full Hybrid": hybrid + industry_cols,
     }
