@@ -264,6 +264,7 @@ def main():
         "delinquencies_12m": delinquencies_12m,
         "previous_defaults": previous_defaults,
         "collateral_value": collateral_value.round(2),
+        "collateral_coverage": collateral_coverage.round(4),
         "days_past_due": days_past_due,
         "years_in_business": years_in_business,
         "ead": ead.round(2),
