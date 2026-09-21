@@ -80,7 +80,10 @@ jobs:
           )
           assert np.allclose(out.loc[s3, "ecl"], out.loc[s3, "lgd"] * out.loc[s3, "ead"])
           assert (out.loc[s2, "lifetime_pd"] >= out.loc[s2, "predicted_pd"]).all()
-          assert out.loc[s3, "current_credit_impaired"].eq(1).all() or out.loc[s3, "days_past_due"].ge(90).all()
+          assert (
+              out.loc[s3, "current_credit_impaired"].eq(1)
+              | out.loc[s3, "days_past_due"].ge(90)
+          ).all()
           assert not out.loc[s1, "current_credit_impaired"].eq(1).any()
           assert not out.loc[s2, "current_credit_impaired"].eq(1).any()
           print("Scoring and ECL invariants passed.")
