@@ -3,22 +3,21 @@ from sklearn.model_selection import train_test_split
 
 TARGET = "default"
 
-# PD is a borrower-default model. Keep outcome/identifier fields and the separate
-# ECL risk parameters (EAD/LGD) out of the PD feature matrix.
-PD_EXCLUDED_COLUMNS = {
-    TARGET,
-    "customer_id",
-    "pd_true",
-    "ead",
-    "lgd",
-    "current_credit_impaired",
-    # Product/EAD construction fields belong to exposure measurement, not borrower PD.
-    "loan_ead",
-    "ovd_ead",
-    "trade_ead",
-    "trade_ccf",
-    "trade_type",
-}
+# Explicit feature governance: PD is driven by borrower fundamentals and current
+# observed behaviour. Product amounts/EAD mechanics, future outcomes, impairment
+# flags, pricing and trajectory indicators belong to separate risk components.
+PD_BASE_FEATURES = [
+    "ebitda_margin",
+    "leverage_ratio",
+    "current_ratio",
+    "debt_to_income",
+    "collateral_coverage",
+    "years_in_business",
+    "credit_utilization",
+    "delinquencies_12m",
+    "previous_defaults",
+    "days_past_due",
+]
 
 
 def load_data(path):
@@ -32,12 +31,14 @@ def prepare_data(df):
 
 
 def pd_feature_columns(df):
-    return [c for c in df.columns if c not in PD_EXCLUDED_COLUMNS]
+    """Return the governed borrower-PD feature set; new columns are opt-in."""
+    approved = [c for c in PD_BASE_FEATURES if c in df.columns]
+    industry_cols = sorted(c for c in df.columns if c.startswith("industry_"))
+    return approved + industry_cols
 
 
 def split_data(df, target=TARGET, test_size=0.25, random_state=42):
-    cols = [c for c in pd_feature_columns(df) if c != target]
-    X = df[cols]
+    X = df[pd_feature_columns(df)]
     y = df[target]
     return train_test_split(
         X, y, test_size=test_size, stratify=y, random_state=random_state
