@@ -57,9 +57,11 @@ audit_trace_cols = [
     "days_past_due", "current_credit_impaired", "collateral_value",
     "collateral_coverage", "loans", "loan_ead", "ovd", "ovd_ead", "trade",
     "trade_type", "trade_ccf", "trade_ead", "ead", "lgd", "loan_term_months",
-    "predicted_pd", "credit_score", "risk_band", "risk_direction",
-    "ews_signal_count", "ews_sicr_flag", "stage", "sicr_flag", "ecl_12m",
-    "lifetime_pd", "ecl", "default",
+    "predicted_pd", "pit_pd_12m", "pd_12m_upside", "pd_12m_baseline",
+    "pd_12m_downside", "forward_looking_pd_12m", "credit_score", "risk_band",
+    "risk_direction", "ews_signal_count", "ews_sicr_flag", "stage", "sicr_flag",
+    "ecl_12m", "lifetime_pd_upside", "lifetime_pd_baseline",
+    "lifetime_pd_downside", "lifetime_pd", "ecl", "default",
 ]
 audit_trace_cols = [col for col in audit_trace_cols if col in out.columns]
 audit_trace = out[audit_trace_cols].copy()
@@ -71,7 +73,9 @@ audit_dictionary = pd.DataFrame([
     ("financial/current-behaviour fields", "Raw / governed PD inputs", "Reporting-date borrower information"),
     ("utilization_6m_* / limit_breach_count", "EWS inputs", "Derived from chronological 36-month history"),
     ("months_on_ews_watchlist", "EWS", "Consecutive deteriorating months ending at M0"),
-    ("predicted_pd", "PD", "Governed Logistic Regression 12-month PD"),
+    ("predicted_pd / pit_pd_12m", "PD", "Governed Logistic Regression reporting-date 12-month PIT-oriented PD"),
+    ("pd_12m_upside / baseline / downside", "Forward-looking PD", "Fixed scenario shifts to PIT default odds; synthetic assumptions"),
+    ("forward_looking_pd_12m", "Forward-looking PD", "Probability-weighted 12-month scenario PD used in ECL"),
     ("credit_score / risk_band", "Risk segmentation", "Transformations of predicted PD; not accounting stages"),
     ("risk_direction / ews_signal_count", "EWS", "Monitoring status; separate from PD grade"),
     ("stage", "Accounting proxy", "Simplified Stage 1/2/3 assignment using reporting-date triggers"),
@@ -80,8 +84,8 @@ audit_dictionary = pd.DataFrame([
     ("trade_ead", "EAD", "Trade amount multiplied by synthetic instrument CCF"),
     ("ead", "EAD", "Sum of loan, OVD and trade EAD"),
     ("collateral_coverage / lgd", "LGD", "Aggregate borrower-level synthetic recovery proxy"),
-    ("ecl_12m", "ECL", "predicted_pd x lgd x ead"),
-    ("lifetime_pd", "ECL", "Simplified constant-annual-hazard lifetime PD approximation"),
+    ("ecl_12m", "ECL", "forward_looking_pd_12m x lgd x ead"),
+    ("lifetime_pd", "ECL", "Probability-weighted scenario lifetime PD using a simplified constant-hazard term structure"),
     ("ecl", "ECL", "Stage-dependent simplified ECL"),
     ("default", "Validation outcome", "Future 12-month synthetic outcome; not a reporting-date input"),
 ], columns=["field_or_group", "layer", "interpretation"])
@@ -174,7 +178,9 @@ print(ews_9m_validation.round(4).to_string(index=False))
 audit.to_csv(ROOT/"outputs/stage2_trigger_audit.csv", index=False)
 
 monitor_cols = [
-    "customer_id", "industry", "predicted_pd", "risk_band", "credit_score", "stage",
+    "customer_id", "industry", "predicted_pd", "pit_pd_12m", "forward_looking_pd_12m",
+    "pd_12m_upside", "pd_12m_baseline", "pd_12m_downside",
+    "risk_band", "credit_score", "stage",
     "risk_direction", "ews_signal_count", "months_on_ews_watchlist", "watchlist_flag", "days_past_due", "delinquencies_12m",
     "previous_defaults", "credit_utilization", "utilization_6m_change",
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
@@ -200,7 +206,8 @@ print("\nRISK BANDS\n",out.groupby("risk_band").agg(
 print("\nIFRS 9-STYLE STAGING\n",out.groupby("stage").agg(
     customers=("customer_id","count"), observed_default=("default","mean"),
     exposure=("ead","sum"), ecl=("ecl","sum")).round(3))
-print("\nPORTFOLIO MEAN PREDICTED PD:",round(out.predicted_pd.mean(),4))
+print("\nPORTFOLIO MEAN PIT-ORIENTED PD:",round(out.pit_pd_12m.mean(),4))
+print("PORTFOLIO MEAN FORWARD-LOOKING PD:",round(out.forward_looking_pd_12m.mean(),4))
 print("HOLDOUT OBSERVED DEFAULT RATE:",round(out.default.mean(),4))
 print("TOTAL 12M ECL (diagnostic):",round(out.ecl_12m.sum(),2))
 print("TOTAL STAGED ECL:",round(out.ecl.sum(),2))
