@@ -25,13 +25,15 @@ def assign_stage(df, pd_col="predicted_pd"):
     stage3 = (impaired == 1) | (dpd >= 90)
 
     # Simplified SICR proxy / 30-DPD backstop for non-credit-impaired exposures.
-    # The EWS contribution comes from trajectory monitoring, not the PD equation.
+    # EWS is deliberately NOT an automatic Stage 2 trigger. It is a monitoring /
+    # watchlist signal that can prompt credit review. A production IFRS 9 SICR
+    # assessment would compare reporting-date default risk with risk at initial
+    # recognition and incorporate reasonable/supportable forward-looking information.
     stage2 = (~stage3) & (
         (dpd >= 30)
         | (delinq >= 2)
         | ((util >= 0.85) & (dpd > 0))
         | ((prev_default >= 1) & (out[pd_col] >= 0.05))
-        | (out["ews_sicr_flag"] == 1)
     )
 
     out["stage"] = np.select(
