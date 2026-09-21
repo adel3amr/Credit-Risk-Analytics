@@ -168,6 +168,9 @@ def main():
         0,
     ).astype(int)
 
+    # Borrower-level collateral pool. Coverage is assessed against total EAD below.
+    # Collateral value is generated relative to committed facilities as a transparent
+    # synthetic assumption; this is not facility-level collateral allocation.
     collateral_ratio = np.clip(rng.lognormal(np.log(1.25), .42, n), .25, 3.0)
     collateral_value = loan_amount * collateral_ratio
     number_of_accounts = np.clip(rng.poisson(2.2, n) + 1, 1, 10)
@@ -194,6 +197,8 @@ def main():
     trade_ead = trade * trade_ccf
 
     ead = loan_ead + ovd_ead + trade_ead
+    # Aggregate borrower-level recovery proxy. A production implementation would
+    # allocate eligible collateral by facility, seniority and enforceability.
     collateral_coverage = collateral_value / np.maximum(ead, 1)
     lgd = np.clip(
         .62 - .22 * np.minimum(collateral_coverage, 2.0)
