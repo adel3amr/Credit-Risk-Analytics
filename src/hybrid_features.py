@@ -56,24 +56,19 @@ def add_hybrid_features(df, random_state=42):
     margin = out["ebitda_margin"].fillna(out["ebitda_margin"].median()).astype(float)
     years_business = out["years_in_business"].fillna(0).astype(float)
 
-    # Behavioural direction: percentage-point change over an illustrative 6M window.
-    stress = (
-        0.35 * util01
-        + 0.20 * np.clip(dpd / 90, 0, 1)
-        + 0.15 * np.clip(delinq / 3, 0, 1)
-        + 0.15 * np.clip(leverage / max(leverage.quantile(.95), 1e-6), 0, 1)
-        + 0.15 * np.clip(1 - liquidity / max(liquidity.quantile(.95), 1e-6), 0, 1)
-    )
-    util_change = np.clip(rng.normal((stress - .40) * .22, .08, n), -.35, .45)
-    out["utilization_6m_change"] = util_change
-    out["avg_utilization_6m"] = _clip01(util01 - util_change / 2)
-    out["months_above_80_utilization"] = np.clip(
-        np.rint(6 * _clip01((out["avg_utilization_6m"] - .55) / .35)
-                + rng.normal(0, .8, n)), 0, 6
-    ).astype(int)
-    out["limit_breach_count"] = np.clip(
-        rng.poisson(_clip01((util01 - .78) / .18) * 1.5), 0, 5
-    ).astype(int)
+    # Behavioural history is generated upstream by the synthetic portfolio
+    # generator. Do not reconstruct trajectory from current-state risk variables:
+    # that would make the incremental-information experiment partly circular.
+    required_history = [
+        "utilization_6m_change", "avg_utilization_6m",
+        "months_above_80_utilization", "limit_breach_count",
+    ]
+    missing = [col for col in required_history if col not in out.columns]
+    if missing:
+        raise ValueError(
+            "Missing generated behavioural-history fields: " + ", ".join(missing)
+            + ". Regenerate data with scripts/generate_sme_portfolio.py."
+        )
 
     # Relationship tenure cannot exceed business age in this synthetic framework.
     relationship_fraction = rng.beta(2.2, 2.0, n)
