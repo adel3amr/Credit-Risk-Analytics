@@ -47,11 +47,31 @@ def main():
     current_ratio = np.clip(rng.lognormal(np.log(1.45), .35, n), .35, 4.0)
     cash_flow = annual_revenue * np.clip(ebitda_margin + rng.normal(.015, .04, n), -.12, .32)
 
-    loan_amount = np.clip(annual_revenue * rng.uniform(.06, .38, n), 25_000, 5_000_000)
+    # Three product buckets per borrower: term loans, overdraft (OVD), and trade.
+    # Values below are facility amounts/limits. A borrower can use more than one product.
+    has_loan = rng.random(n) < .72
+    has_ovd = rng.random(n) < .58
+    has_trade = rng.random(n) < .36
+    # Ensure every borrower has at least one credit product.
+    none = ~(has_loan | has_ovd | has_trade)
+    has_loan[none] = True
+
+    loans = np.where(
+        has_loan, np.clip(annual_revenue * rng.uniform(.04, .28, n), 25_000, 4_000_000), 0.0
+    )
+    ovd = np.where(
+        has_ovd, np.clip(annual_revenue * rng.uniform(.02, .16, n), 15_000, 2_000_000), 0.0
+    )
+    trade = np.where(
+        has_trade, np.clip(annual_revenue * rng.uniform(.02, .22, n), 20_000, 3_000_000), 0.0
+    )
+    loan_amount = loans + ovd + trade
     loan_term_months = rng.choice([12, 24, 36, 48, 60], n, p=[.15, .23, .30, .17, .15])
     debt_to_income = np.clip(
         .12 + .075 * leverage_ratio + rng.normal(.08, .10, n), .03, .90
     )
+    # Utilization is principally a revolving/OVD behavioural measure. For borrowers
+    # without OVD it acts as a broader committed-facility utilization proxy.
     credit_utilization = np.clip(
         rng.beta(3.0, 2.7, n) + .035 * (leverage_ratio - 2.0), .03, .99
     )
@@ -105,8 +125,23 @@ def main():
         .035, .18,
     )
 
-    # EAD is current funded exposure; LGD falls as collateral coverage improves.
-    ead = loan_amount * rng.uniform(.72, 1.00, n)
+    # Product-level EAD mechanics.
+    # Loans are treated as funded balances. OVD EAD combines current drawings with
+    # a 50% conversion of the undrawn limit. Trade CCFs are transparent synthetic
+    # assumptions for methodology demonstration, not regulatory prescriptions.
+    loan_ead = loans * rng.uniform(.72, 1.00, n)
+    ovd_drawn = ovd * credit_utilization
+    ovd_ead = ovd_drawn + 0.50 * np.maximum(ovd - ovd_drawn, 0)
+
+    trade_types = np.array(["Import LC", "Performance Guarantee", "Financial Guarantee"])
+    trade_type = rng.choice(trade_types, n, p=[.45, .35, .20])
+    trade_ccf_map = {"Import LC": .20, "Performance Guarantee": .50, "Financial Guarantee": 1.00}
+    trade_ccf = np.array([trade_ccf_map[x] for x in trade_type])
+    trade_ccf = np.where(has_trade, trade_ccf, 0.0)
+    trade_type = np.where(has_trade, trade_type, "None")
+    trade_ead = trade * trade_ccf
+
+    ead = loan_ead + ovd_ead + trade_ead
     collateral_coverage = collateral_value / np.maximum(ead, 1)
     lgd = np.clip(
         .62 - .22 * np.minimum(collateral_coverage, 2.0)
@@ -155,6 +190,14 @@ def main():
         "leverage_ratio": leverage_ratio.round(4),
         "cash_flow": cash_flow.round(2),
         "loan_amount": loan_amount.round(2),
+        "loans": loans.round(2),
+        "ovd": ovd.round(2),
+        "trade": trade.round(2),
+        "loan_ead": loan_ead.round(2),
+        "ovd_ead": ovd_ead.round(2),
+        "trade_type": trade_type,
+        "trade_ccf": trade_ccf.round(2),
+        "trade_ead": trade_ead.round(2),
         "loan_term_months": loan_term_months,
         "interest_rate": interest_rate.round(4),
         "debt_to_income": debt_to_income.round(4),
