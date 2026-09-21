@@ -76,41 +76,80 @@ def main():
         rng.beta(3.0, 2.7, n) + .035 * (leverage_ratio - 2.0), .03, .99
     )
 
-    # Actual synthetic 6M behavioural history. A borrower-specific deterioration
-    # shock moves current utilization away from its six-month-ago level; the
-    # shock is generated before, and independently of, the future default draw.
-    deterioration_shock = rng.normal(
-        .015 * (leverage_ratio - 2.0) - .020 * (current_ratio - 1.25),
-        .09, n
+    # 36-month monthly behavioural history ending at the reporting date (M0).
+    # The process is mean-reverting with borrower-specific drift and common monthly
+    # shocks. It is generated before the future default draw. Parameters are broad
+    # synthetic assumptions informed by observed SME asset-quality behaviour, not
+    # fitted to produce a desired Stage 2/default share.
+    history_months = 36
+    month_labels = np.arange(-(history_months - 1), 1)
+    borrower_drift = rng.normal(
+        .0015 * (leverage_ratio - 2.0) - .0015 * (current_ratio - 1.25),
+        .0045, n
     )
-    utilization_6m_ago = np.clip(credit_utilization - deterioration_shock, .02, .99)
+    util_hist = np.empty((n, history_months))
+    util_hist[:, 0] = np.clip(
+        credit_utilization - borrower_drift * (history_months - 1)
+        + rng.normal(0, .10, n), .02, .99
+    )
+    for m in range(1, history_months):
+        common_shock = rng.normal(0, .012)
+        idio = rng.normal(0, .035, n)
+        mean_reversion = .10 * (credit_utilization - util_hist[:, m - 1])
+        util_hist[:, m] = np.clip(
+            util_hist[:, m - 1] + borrower_drift + mean_reversion + common_shock + idio,
+            .02, .99
+        )
+    # Anchor M0 to the independently generated reporting-date utilization.
+    util_hist[:, -1] = credit_utilization
+
+    # Monthly limit-breach process: high utilization raises breach likelihood, but
+    # breaches remain stochastic rather than deterministic.
+    breach_lambda = np.clip((util_hist - .78) / .18, 0, 1) * 1.10
+    breach_hist = np.clip(rng.poisson(breach_lambda), 0, 5).astype(int)
+
+    # Current EWS features are derived from the observed monthly panel.
+    utilization_6m_ago = util_hist[:, -7]
     utilization_6m_change = credit_utilization - utilization_6m_ago
-    avg_utilization_6m = np.clip(
-        (credit_utilization + utilization_6m_ago) / 2 + rng.normal(0, .025, n),
-        .02, .99
-    )
-    months_above_80_utilization = np.clip(
-        np.rint(6 * np.clip((avg_utilization_6m - .60) / .30, 0, 1)
-                + rng.normal(0, .65, n)), 0, 6
-    ).astype(int)
-    limit_breach_count = np.clip(
-        rng.poisson(np.clip((credit_utilization - .80) / .15, 0, 1) * 1.4),
-        0, 5
-    ).astype(int)
+    avg_utilization_6m = util_hist[:, -6:].mean(axis=1)
+    months_above_80_utilization = (util_hist[:, -6:] >= .80).sum(axis=1).astype(int)
+    limit_breach_count = breach_hist[:, -6:].sum(axis=1).astype(int)
 
-    # Synthetic administrative watchlist tenure. This is generated before the
-    # future default draw and is not tuned to default outcomes. Only borrowers
-    # meeting the EWS deterioration definition can have positive tenure.
-    ews_signal_count_seed = (
-        (utilization_6m_change >= .10).astype(int)
-        + ((avg_utilization_6m >= .80) | (months_above_80_utilization >= 3)).astype(int)
-        + (limit_breach_count >= 1).astype(int)
-    )
-    ews_deteriorating_seed = ews_signal_count_seed >= 2
-    months_on_ews_watchlist = np.where(
-        ews_deteriorating_seed, rng.integers(1, 13, n), 0
-    )
+    # Reconstruct the EWS classification at each historical month where six months
+    # of lookback exist, then measure the CURRENT consecutive deteriorating spell.
+    ews_hist = np.zeros((n, history_months), dtype=bool)
+    for m in range(6, history_months):
+        change_6m = util_hist[:, m] - util_hist[:, m - 6]
+        window_start = max(0, m - 5)
+        avg_6m = util_hist[:, window_start:m + 1].mean(axis=1)
+        months_high_6m = (util_hist[:, window_start:m + 1] >= .80).sum(axis=1)
+        breaches_6m = breach_hist[:, window_start:m + 1].sum(axis=1)
+        signals = (
+            (change_6m >= .10).astype(int)
+            + ((avg_6m >= .80) | (months_high_6m >= 3)).astype(int)
+            + (breaches_6m >= 1).astype(int)
+        )
+        ews_hist[:, m] = signals >= 2
 
+    months_on_ews_watchlist = np.zeros(n, dtype=int)
+    for i in range(n):
+        if ews_hist[i, -1]:
+            run = 0
+            for m in range(history_months - 1, 5, -1):
+                if ews_hist[i, m]:
+                    run += 1
+                else:
+                    break
+            months_on_ews_watchlist[i] = run
+
+    # Long-format behavioural panel for auditability and later SQL/time-series work.
+    history_df = pd.DataFrame({
+        "customer_id": np.repeat([f"SME{i:05d}" for i in range(1, n + 1)], history_months),
+        "month_from_reporting": np.tile(month_labels, n),
+        "credit_utilization": util_hist.reshape(-1).round(4),
+        "limit_breach_count_month": breach_hist.reshape(-1),
+        "ews_deteriorating": ews_hist.reshape(-1).astype(int),
+    })
     # Arrears are uncommon in a predominantly performing portfolio.
     arrears_propensity = sigmoid(
         -4.0 + 2.0 * credit_utilization + .30 * (leverage_ratio - 2)
@@ -236,7 +275,10 @@ def main():
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(OUT, index=False)
+    history_out = ROOT / "data" / "raw" / "sme_behavioral_history_36m.csv"
+    history_df.to_csv(history_out, index=False)
     print(f"Saved {len(df):,} borrowers to {OUT}")
+    print(f"Saved {len(history_df):,} monthly observations to {history_out}")
     print(f"Observed default rate: {df.default.mean():.4%}")
     print(f"Mean latent PD: {df.pd_true.mean():.4%}")
     print(f"Mean LGD: {df.lgd.mean():.4%}")
