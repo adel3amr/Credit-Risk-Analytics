@@ -40,6 +40,8 @@ jobs:
       - name: Show information-set results
         run: cat outputs/information_set_comparison.csv
             outputs/auc_difference_bootstrap.csv
+            outputs/trajectory_signal_provenance.csv
+            outputs/trajectory_signal_audit.csv
       - name: Upload validation outputs
         uses: actions/upload-artifact@v4
         with:
