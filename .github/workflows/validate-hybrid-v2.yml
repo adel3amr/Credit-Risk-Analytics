@@ -50,7 +50,7 @@ jobs:
             outputs/portfolio_monitoring.csv
             outputs/stage2_customer_review.csv
             outputs/ews_watchlist_review.csv
-          outputs/ews_9m_policy_validation.csv
+            outputs/ews_9m_policy_validation.csv
             outputs/calibration_deciles.csv
             outputs/calibration_plot.png
             outputs/information_set_comparison.csv
