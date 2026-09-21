@@ -54,7 +54,12 @@ trigger_cols = [
     "trigger_dpd_30_89", "trigger_delinquency", "trigger_utilization_conduct",
     "trigger_previous_default_pd", "trigger_ews_deterioration",
 ]
-out["stage2_trigger_count"] = out[trigger_cols].sum(axis=1)
+# EWS is reported alongside accounting-stage triggers but does not itself cause Stage 2.
+accounting_trigger_cols = [
+    "trigger_dpd_30_89", "trigger_delinquency", "trigger_utilization_conduct",
+    "trigger_previous_default_pd",
+]
+out["stage2_trigger_count"] = out[accounting_trigger_cols].sum(axis=1)
 
 stage2 = out[out["stage"] == "Stage 2"].copy()
 audit = pd.DataFrame({
@@ -62,11 +67,18 @@ audit = pd.DataFrame({
     "stage2_customers": [int(stage2[col].sum()) for col in trigger_cols],
 })
 audit["share_of_stage2"] = audit["stage2_customers"] / max(len(stage2), 1)
+
+# Separate monitoring population: deterioration can exist while an exposure remains
+# Stage 1. This makes risk direction visible without mechanically forcing SICR.
+out["watchlist_flag"] = (
+    (out["risk_direction"] == "Deteriorating") & (out["stage"] == "Stage 1")
+).astype(int)
+watchlist = out[out["watchlist_flag"] == 1].copy()
 audit.to_csv(ROOT/"outputs/stage2_trigger_audit.csv", index=False)
 
 monitor_cols = [
     "customer_id", "industry", "predicted_pd", "risk_band", "score", "stage",
-    "risk_direction", "ews_signal_count", "days_past_due", "delinquencies_12m",
+    "risk_direction", "ews_signal_count", "watchlist_flag", "days_past_due", "delinquencies_12m",
     "previous_defaults", "credit_utilization", "utilization_6m_change",
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
     "loans", "ovd", "trade", "trade_type", "ead", "lgd", "ecl_12m",
@@ -79,7 +91,11 @@ out[monitor_cols].sort_values(["stage", "predicted_pd"], ascending=[False, False
 stage2[monitor_cols].sort_values("predicted_pd", ascending=False).to_csv(
     ROOT/"outputs/stage2_customer_review.csv", index=False
 )
+watchlist[monitor_cols].sort_values("predicted_pd", ascending=False).to_csv(
+    ROOT/"outputs/ews_watchlist_review.csv", index=False
+)
 print("\nSTAGE 2 TRIGGER AUDIT (overlapping triggers)\n", audit.round(4))
+print("\nEWS WATCHLIST (Stage 1 deteriorating borrowers):", len(watchlist))
 
 print("\nRISK BANDS\n",out.groupby("risk_band").agg(
     customers=("customer_id","count"), observed_default=("default","mean"),
