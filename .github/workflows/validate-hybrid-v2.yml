@@ -86,6 +86,7 @@ jobs:
           ).all()
           assert not out.loc[s1, "current_credit_impaired"].eq(1).any()
           assert not out.loc[s2, "current_credit_impaired"].eq(1).any()
+          assert not out.loc[s1 | s2, "days_past_due"].ge(90).any()
           print("Scoring and ECL invariants passed.")
           PY
       - name: Show calibration diagnostics
