@@ -56,6 +56,28 @@ def main():
         rng.beta(3.0, 2.7, n) + .035 * (leverage_ratio - 2.0), .03, .99
     )
 
+    # Actual synthetic 6M behavioural history. A borrower-specific deterioration
+    # shock moves current utilization away from its six-month-ago level; the
+    # shock is generated before, and independently of, the future default draw.
+    deterioration_shock = rng.normal(
+        .015 * (leverage_ratio - 2.0) - .020 * (current_ratio - 1.25),
+        .09, n
+    )
+    utilization_6m_ago = np.clip(credit_utilization - deterioration_shock, .02, .99)
+    utilization_6m_change = credit_utilization - utilization_6m_ago
+    avg_utilization_6m = np.clip(
+        (credit_utilization + utilization_6m_ago) / 2 + rng.normal(0, .025, n),
+        .02, .99
+    )
+    months_above_80_utilization = np.clip(
+        np.rint(6 * np.clip((avg_utilization_6m - .60) / .30, 0, 1)
+                + rng.normal(0, .65, n)), 0, 6
+    ).astype(int)
+    limit_breach_count = np.clip(
+        rng.poisson(np.clip((credit_utilization - .80) / .15, 0, 1) * 1.4),
+        0, 5
+    ).astype(int)
+
     # Arrears are uncommon in a predominantly performing portfolio.
     arrears_propensity = sigmoid(
         -4.0 + 2.0 * credit_utilization + .30 * (leverage_ratio - 2)
@@ -98,6 +120,8 @@ def main():
         - 2.2 * (ebitda_margin - .12)
         - .70 * (current_ratio - 1.25)
         + 1.55 * (credit_utilization - .55)
+        + 1.20 * utilization_6m_change
+        + .08 * months_above_80_utilization
         + .55 * delinquencies_12m
         + 1.00 * previous_defaults
         + .018 * days_past_due
@@ -135,6 +159,11 @@ def main():
         "interest_rate": interest_rate.round(4),
         "debt_to_income": debt_to_income.round(4),
         "credit_utilization": credit_utilization.round(4),
+        "utilization_6m_ago": utilization_6m_ago.round(4),
+        "utilization_6m_change": utilization_6m_change.round(4),
+        "avg_utilization_6m": avg_utilization_6m.round(4),
+        "months_above_80_utilization": months_above_80_utilization,
+        "limit_breach_count": limit_breach_count,
         "number_of_accounts": number_of_accounts,
         "delinquencies_12m": delinquencies_12m,
         "previous_defaults": previous_defaults,
