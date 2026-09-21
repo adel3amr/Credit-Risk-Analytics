@@ -7,12 +7,13 @@ End-to-end synthetic SME credit-risk project covering borrower PD, validation, c
 
 ## Architecture
 ```text
-Current financials + current behaviour -> 12M PD -> score / risk band
+Current financials + current behaviour -> PIT-oriented 12M PD -> score / risk band
 36-month behavioural history          -> EWS / watchlist
+Macro scenarios                       -> forward-looking PD overlay
 Reporting-date credit deterioration   -> simplified SICR / stage
 Facilities                            -> EAD
 Collateral / recovery assumptions     -> LGD
-PD + stage + LGD + EAD                -> simplified ECL
+Forward-looking PD + stage + LGD + EAD -> simplified ECL
 ```
 
 Logistic Regression is the governed primary PD model because interpretability and probability calibration are central to the use case. Random Forest and Gradient Boosting are challengers; the primary model is not selected by whichever algorithm happens to achieve the highest holdout AUC.
@@ -73,7 +74,9 @@ This repository is not a production IFRS 9 accounting engine.
 
 Stage 1 uses 12-month PD. Stage 2 uses a simplified lifetime-PD approximation based on current annual PD and the synthetic contractual term. Stage 3 uses LGD x EAD as a simplified 100% default-probability proxy.
 
-Important limitations include no true origination/reference PD comparison, no macroeconomic scenarios, no discounted cash-shortfall engine, no facility-level lifetime EAD term structure, and one borrower-level contractual term for aggregate facilities.
+The ECL layer applies explicit upside, baseline and downside macroeconomic scenarios using GDP growth, unemployment, policy-rate and inflation shocks. These feed a fixed synthetic log-odds sensitivity mapping and are probability-weighted. The macro paths and sensitivities are methodology assumptions, not official forecasts or empirically estimated elasticities.
+
+Important limitations include no true origination/reference PD comparison, no empirically estimated macro-credit model, no discounted cash-shortfall engine, no facility-level lifetime EAD term structure, and one borrower-level contractual term for aggregate facilities.
 
 ## V2 information-set experiment
 Logistic Regression is held constant while four nested information sets are compared:
@@ -85,7 +88,7 @@ Logistic Regression is held constant while four nested information sets are comp
 
 The purpose is to test whether broader information adds out-of-sample discrimination, not to maximize AUC through feature accumulation. Paired bootstrap resampling is used for AUC differences.
 
-The current experiment supports keeping current behaviour in core PD. Trajectory remains useful as a separate EWS architecture; it is not included in core PD merely because it exists. Qualitative variables remain supplementary.
+The final V2 architecture keeps current behaviour in core PD and trajectory in the separate EWS layer. The frozen synthetic default DGP itself contains selected trajectory effects, so incremental trajectory discrimination is documented as a methodology result rather than treated as independent empirical evidence for expanding the governed PD feature set. Qualitative variables remain supplementary.
 
 ## Current governed validation
 The latest chronological-data workflow should be treated as the current V2 baseline. On the 3,000-borrower holdout:
@@ -96,10 +99,14 @@ The latest chronological-data workflow should be treated as the current V2 basel
 - Stage 2: **221 borrowers**, observed future default **8.1%**;
 - Stage 3: **15 borrowers**; sample too small for inference;
 - total holdout EAD: approximately **EUR 2.390bn**;
-- diagnostic 12-month ECL: approximately **EUR 26.90m**;
-- simplified staged ECL: approximately **EUR 39.90m**.
+- mean PIT-oriented 12-month PD: **3.26%**;
+- mean probability-weighted forward-looking PD: **3.45%**;
+- upside / baseline / downside mean scenario PD: **2.78% / 3.26% / 4.70%**;
+- PIT diagnostic 12-month ECL: approximately **EUR 26.90m**;
+- forward-looking diagnostic 12-month ECL: approximately **EUR 28.46m**;
+- simplified forward-looking staged ECL: approximately **EUR 41.72m**.
 
-The predefined 9-month EWS policy identifies elevated-risk borrowers, but this synthetic holdout does **not** demonstrate that waiting nine months provides incremental separation over more recent deterioration. That result is retained rather than tuning the threshold after observing the holdout.
+The fixed 9-month EWS policy is retained without post-holdout threshold optimization. Its results are interpreted as synthetic policy diagnostics rather than evidence of a universal SICR timing rule.
 
 ## Project structure
 ```text
@@ -143,6 +150,7 @@ Generate the synthetic data before running the analytics so the raw schema and g
 - Holdout results are reported, not optimized.
 - The 9-month EWS threshold is fixed ex ante for V2 and is not retuned after seeing validation results.
 - Synthetic assumptions and accounting simplifications are stated explicitly.
+- The V2 DGP, PD specification, EWS threshold, staging logic and macro sensitivities are frozen after final validation; no post-holdout tuning is performed.
 
 ## Disclaimer
 Educational synthetic portfolio project only. It is not a production credit model and does not constitute accounting, regulatory, lending or investment advice.
