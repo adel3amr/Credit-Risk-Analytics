@@ -50,14 +50,18 @@ out["trigger_delinquency"] = (delinq >= 2).astype(int)
 out["trigger_utilization_conduct"] = ((util >= .85) & (dpd > 0)).astype(int)
 out["trigger_previous_default_pd"] = ((prev >= 1) & (out["predicted_pd"] >= .05)).astype(int)
 out["trigger_ews_deterioration"] = out["ews_sicr_flag"].astype(int)
+out["trigger_ews_9m_persistence"] = (
+    (out["ews_sicr_flag"] == 1) & (out["months_on_ews_watchlist"].fillna(0) >= 9)
+).astype(int)
 trigger_cols = [
     "trigger_dpd_30_89", "trigger_delinquency", "trigger_utilization_conduct",
     "trigger_previous_default_pd", "trigger_ews_deterioration",
+    "trigger_ews_9m_persistence",
 ]
 # EWS is reported alongside accounting-stage triggers but does not itself cause Stage 2.
 accounting_trigger_cols = [
     "trigger_dpd_30_89", "trigger_delinquency", "trigger_utilization_conduct",
-    "trigger_previous_default_pd",
+    "trigger_previous_default_pd", "trigger_ews_9m_persistence",
 ]
 out["stage2_trigger_count"] = out[accounting_trigger_cols].sum(axis=1)
 
@@ -80,7 +84,7 @@ audit.to_csv(ROOT/"outputs/stage2_trigger_audit.csv", index=False)
 
 monitor_cols = [
     "customer_id", "industry", "predicted_pd", "risk_band", "score", "stage",
-    "risk_direction", "ews_signal_count", "watchlist_flag", "days_past_due", "delinquencies_12m",
+    "risk_direction", "ews_signal_count", "months_on_ews_watchlist", "watchlist_flag", "days_past_due", "delinquencies_12m",
     "previous_defaults", "credit_utilization", "utilization_6m_change",
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
     "loans", "ovd", "trade", "trade_type", "ead", "lgd", "ecl_12m",
