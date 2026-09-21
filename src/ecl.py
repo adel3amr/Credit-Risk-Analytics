@@ -18,16 +18,35 @@ MACRO_SCENARIO_FILE = Path(__file__).resolve().parents[1] / "config" / "macro_sc
 def load_macro_scenarios(path=MACRO_SCENARIO_FILE):
     scenarios = pd.read_csv(path)
     required = {"scenario", "weight", "real_gdp_growth_pct", "unemployment_rate_pct",
-                "policy_rate_pct", "inflation_pct", "odds_multiplier"}
+                "policy_rate_pct", "inflation_pct"}
     missing = required.difference(scenarios.columns)
     if missing:
         raise ValueError(f"Missing macro scenario fields: {sorted(missing)}")
     if not np.isclose(scenarios["weight"].sum(), 1.0):
         raise ValueError("Macro scenario weights must sum to 1.0")
-    if (scenarios["weight"] < 0).any() or (scenarios["odds_multiplier"] <= 0).any():
-        raise ValueError("Scenario weights must be non-negative and odds multipliers positive")
+    if (scenarios["weight"] < 0).any():
+        raise ValueError("Scenario weights must be non-negative")
     return scenarios
 
+
+
+# Synthetic macro-to-credit sensitivity mapping on log-odds. Coefficients are
+# fixed methodology assumptions, not estimated from the holdout or presented as
+# empirical elasticities. All shocks are measured relative to the baseline row.
+MACRO_LOG_ODDS_SENSITIVITY = {
+    "real_gdp_growth_pct": -0.10,
+    "unemployment_rate_pct": 0.08,
+    "policy_rate_pct": 0.06,
+    "inflation_pct": 0.03,
+}
+
+
+def macro_odds_multiplier(row, baseline):
+    log_odds_shift = sum(
+        beta * (float(row[var]) - float(baseline[var]))
+        for var, beta in MACRO_LOG_ODDS_SENSITIVITY.items()
+    )
+    return float(np.exp(log_odds_shift))
 
 def _shift_pd_odds(pd, multiplier):
     """Apply a scenario multiplier to default odds while keeping PD in (0,1)."""
@@ -86,14 +105,21 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
     out["pit_pd_12m"] = pit_pd12
 
     macro_scenarios = load_macro_scenarios()
+    baseline_rows = macro_scenarios[macro_scenarios["scenario"].str.lower() == "baseline"]
+    if len(baseline_rows) != 1:
+        raise ValueError("Macro scenario table must contain exactly one baseline row")
+    baseline = baseline_rows.iloc[0]
+
     scenario_pds = {}
     scenario_weights = {}
-    for row in macro_scenarios.itertuples(index=False):
-        scenario = str(row.scenario)
-        scenario_pd = _shift_pd_odds(pit_pd12, float(row.odds_multiplier))
+    for _, row in macro_scenarios.iterrows():
+        scenario = str(row["scenario"])
+        odds_multiplier = macro_odds_multiplier(row, baseline)
+        out[f"macro_odds_multiplier_{scenario}"] = odds_multiplier
+        scenario_pd = _shift_pd_odds(pit_pd12, odds_multiplier)
         out[f"pd_12m_{scenario}"] = scenario_pd
         scenario_pds[scenario] = scenario_pd
-        scenario_weights[scenario] = float(row.weight)
+        scenario_weights[scenario] = float(row["weight"])
 
     forward_pd12 = sum(
         scenario_weights[s] * scenario_pds[s] for s in scenario_pds
