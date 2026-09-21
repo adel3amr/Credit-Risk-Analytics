@@ -40,6 +40,47 @@ out["predicted_pd"]=best_pd
 out=add_score(out)
 out=calculate_ecl(out)
 
+# Transparent Stage 2 trigger audit. Flags may overlap by design.
+dpd = out["days_past_due"].fillna(0)
+delinq = out["delinquencies_12m"].fillna(0)
+util = out["credit_utilization"].fillna(0)
+prev = out["previous_defaults"].fillna(0)
+out["trigger_dpd_30_89"] = ((dpd >= 30) & (dpd < 90)).astype(int)
+out["trigger_delinquency"] = (delinq >= 2).astype(int)
+out["trigger_utilization_conduct"] = ((util >= .85) & (dpd > 0)).astype(int)
+out["trigger_previous_default_pd"] = ((prev >= 1) & (out["predicted_pd"] >= .05)).astype(int)
+out["trigger_ews_deterioration"] = out["ews_sicr_flag"].astype(int)
+trigger_cols = [
+    "trigger_dpd_30_89", "trigger_delinquency", "trigger_utilization_conduct",
+    "trigger_previous_default_pd", "trigger_ews_deterioration",
+]
+out["stage2_trigger_count"] = out[trigger_cols].sum(axis=1)
+
+stage2 = out[out["stage"] == "Stage 2"].copy()
+audit = pd.DataFrame({
+    "trigger": trigger_cols,
+    "stage2_customers": [int(stage2[col].sum()) for col in trigger_cols],
+})
+audit["share_of_stage2"] = audit["stage2_customers"] / max(len(stage2), 1)
+audit.to_csv(ROOT/"outputs/stage2_trigger_audit.csv", index=False)
+
+monitor_cols = [
+    "customer_id", "industry", "predicted_pd", "risk_band", "score", "stage",
+    "risk_direction", "ews_signal_count", "days_past_due", "delinquencies_12m",
+    "previous_defaults", "credit_utilization", "utilization_6m_change",
+    "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
+    "loans", "ovd", "trade", "trade_type", "ead", "lgd", "ecl_12m",
+    "lifetime_pd", "ecl", *trigger_cols, "stage2_trigger_count", "default",
+]
+monitor_cols = [col for col in monitor_cols if col in out.columns]
+out[monitor_cols].sort_values(["stage", "predicted_pd"], ascending=[False, False]).to_csv(
+    ROOT/"outputs/portfolio_monitoring.csv", index=False
+)
+stage2[monitor_cols].sort_values("predicted_pd", ascending=False).to_csv(
+    ROOT/"outputs/stage2_customer_review.csv", index=False
+)
+print("\nSTAGE 2 TRIGGER AUDIT (overlapping triggers)\n", audit.round(4))
+
 print("\nRISK BANDS\n",out.groupby("risk_band").agg(
     customers=("customer_id","count"), observed_default=("default","mean"),
     exposure=("ead","sum"), ecl_12m=("ecl_12m","sum")).round(3))
