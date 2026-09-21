@@ -63,6 +63,18 @@ plt.savefig(ROOT/"outputs/roc_curve.png",dpi=160); plt.close()
 # Save scored portfolio
 out.to_csv(ROOT/"data/processed/scored_portfolio.csv",index=False)
 res.to_csv(ROOT/"outputs/model_validation.csv")
-calibration_table(yte, best_pd, bins=10).to_csv(
-    ROOT/"outputs/calibration_deciles.csv", index=False
-)
+cal = calibration_table(yte, best_pd, bins=10)
+cal.to_csv(ROOT/"outputs/calibration_deciles.csv", index=False)
+print("\nCALIBRATION DECILES\n", cal.round(4))
+
+plt.figure(figsize=(7,5))
+plt.plot(cal["mean_predicted_pd"], cal["observed_default_rate"], marker="o", label="Holdout deciles")
+lim = max(cal["mean_predicted_pd"].max(), cal["observed_default_rate"].max()) * 1.05
+plt.plot([0, lim], [0, lim], "--", label="Perfect calibration")
+plt.xlabel("Mean predicted PD")
+plt.ylabel("Observed default rate")
+plt.title("PD Calibration by Holdout Decile")
+plt.legend()
+plt.tight_layout()
+plt.savefig(ROOT/"outputs/calibration_plot.png", dpi=160)
+plt.close()
