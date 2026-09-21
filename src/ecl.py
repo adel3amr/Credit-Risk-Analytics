@@ -19,14 +19,17 @@ def assign_stage(df, pd_col="predicted_pd"):
     delinq = out["delinquencies_12m"].fillna(0)
     prev_default = out["previous_defaults"].fillna(0)
     util = out["credit_utilization"].fillna(0)
+    watchlist_months = out["months_on_ews_watchlist"].fillna(0)
 
     # Reporting-date credit-impaired state only. Future default outcome is never
     # consulted in staging.
     stage3 = (impaired == 1) | (dpd >= 90)
 
     # Simplified SICR proxy / 30-DPD backstop for non-credit-impaired exposures.
-    # EWS is deliberately NOT an automatic Stage 2 trigger. It is a monitoring /
-    # watchlist signal that can prompt credit review. A production IFRS 9 SICR
+    # EWS is not an immediate Stage 2 trigger. Under this explicit synthetic policy,
+    # a borrower that remains EWS-deteriorating on the watchlist for >=9 months is
+    # transferred to Stage 2. The nine-month threshold is a project policy assumption,
+    # not an IFRS 9 requirement. A production IFRS 9 SICR
     # assessment would compare reporting-date default risk with risk at initial
     # recognition and incorporate reasonable/supportable forward-looking information.
     stage2 = (~stage3) & (
@@ -34,6 +37,7 @@ def assign_stage(df, pd_col="predicted_pd"):
         | (delinq >= 2)
         | ((util >= 0.85) & (dpd > 0))
         | ((prev_default >= 1) & (out[pd_col] >= 0.05))
+        | ((out["ews_sicr_flag"] == 1) & (watchlist_months >= 9))
     )
 
     out["stage"] = np.select(
