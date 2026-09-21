@@ -80,6 +80,49 @@ out["watchlist_flag"] = (
 watchlist = out[out["watchlist_flag"] == 1].copy()
 # Refresh Stage 2 subset after watchlist_flag is added to the master output.
 stage2 = out[out["stage"] == "Stage 2"].copy()
+# Validate the fixed 9-month persistence rule without tuning the threshold.
+other_s2_trigger_cols = [
+    "trigger_dpd_30_89", "trigger_delinquency",
+    "trigger_utilization_conduct", "trigger_previous_default_pd",
+]
+other_s2 = out[other_s2_trigger_cols].max(axis=1).astype(int)
+persistent9 = out["trigger_ews_9m_persistence"].astype(int)
+current_deteriorating = out["trigger_ews_deterioration"].astype(int)
+stage3_mask = out["stage"] == "Stage 3"
+out["ews_9m_validation_group"] = np.select(
+    [
+        stage3_mask,
+        (persistent9 == 1) & (other_s2 == 0),
+        (persistent9 == 1) & (other_s2 == 1),
+        (current_deteriorating == 1) & (persistent9 == 0) & (other_s2 == 0),
+        (other_s2 == 1) & (persistent9 == 0),
+    ],
+    [
+        "Stage 3",
+        "9m EWS persistence only",
+        "9m EWS + other Stage 2 trigger",
+        "EWS deteriorating <9m only",
+        "Other Stage 2 trigger only",
+    ],
+    default="Stage 1 - no current deterioration",
+)
+ews_9m_validation = (
+    out.groupby("ews_9m_validation_group")
+    .agg(
+        customers=("customer_id", "count"),
+        observed_default_rate=("default", "mean"),
+        mean_predicted_pd=("predicted_pd", "mean"),
+        exposure=("ead", "sum"),
+        ecl=("ecl", "sum"),
+        mean_watchlist_months=("months_on_ews_watchlist", "mean"),
+    )
+    .reset_index()
+)
+ews_9m_validation["portfolio_share"] = ews_9m_validation["customers"] / len(out)
+ews_9m_validation.to_csv(ROOT/"outputs/ews_9m_policy_validation.csv", index=False)
+print("\nFIXED 9-MONTH EWS POLICY VALIDATION")
+print(ews_9m_validation.round(4).to_string(index=False))
+
 audit.to_csv(ROOT/"outputs/stage2_trigger_audit.csv", index=False)
 
 monitor_cols = [
