@@ -131,7 +131,7 @@ print(ews_9m_validation.round(4).to_string(index=False))
 audit.to_csv(ROOT/"outputs/stage2_trigger_audit.csv", index=False)
 
 monitor_cols = [
-    "customer_id", "industry", "predicted_pd", "risk_band", "score", "stage",
+    "customer_id", "industry", "predicted_pd", "risk_band", "credit_score", "stage",
     "risk_direction", "ews_signal_count", "months_on_ews_watchlist", "watchlist_flag", "days_past_due", "delinquencies_12m",
     "previous_defaults", "credit_utilization", "utilization_6m_change",
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
