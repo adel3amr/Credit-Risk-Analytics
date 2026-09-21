@@ -45,6 +45,48 @@ out["predicted_pd"]=primary_pd
 out=add_score(out)
 out=calculate_ecl(out)
 
+# Borrower-level audit trace: preserve the full reporting-date chain from raw
+# synthetic inputs through governed PD, score/EWS/stage and ECL. This is intended
+# for manual review, not as an additional modeling dataset.
+audit_trace_cols = [
+    "customer_id", "industry", "annual_revenue", "ebitda_margin", "current_ratio",
+    "leverage_ratio", "cash_flow", "debt_to_income", "years_in_business",
+    "credit_utilization", "utilization_6m_ago", "utilization_6m_change",
+    "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
+    "months_on_ews_watchlist", "delinquencies_12m", "previous_defaults",
+    "days_past_due", "current_credit_impaired", "collateral_value",
+    "collateral_coverage", "loans", "loan_ead", "ovd", "ovd_ead", "trade",
+    "trade_type", "trade_ccf", "trade_ead", "ead", "lgd", "loan_term_months",
+    "predicted_pd", "credit_score", "risk_band", "risk_direction",
+    "ews_signal_count", "ews_sicr_flag", "stage", "sicr_flag", "ecl_12m",
+    "lifetime_pd", "ecl", "default",
+]
+audit_trace_cols = [col for col in audit_trace_cols if col in out.columns]
+audit_trace = out[audit_trace_cols].copy()
+audit_trace.to_csv(ROOT/"outputs/borrower_audit_trace.csv", index=False)
+
+# A compact data dictionary makes the manual trace review explicit.
+audit_dictionary = pd.DataFrame([
+    ("customer_id", "Raw", "Synthetic borrower identifier"),
+    ("financial/current-behaviour fields", "Raw / governed PD inputs", "Reporting-date borrower information"),
+    ("utilization_6m_* / limit_breach_count", "EWS inputs", "Derived from chronological 36-month history"),
+    ("months_on_ews_watchlist", "EWS", "Consecutive deteriorating months ending at M0"),
+    ("predicted_pd", "PD", "Governed Logistic Regression 12-month PD"),
+    ("credit_score / risk_band", "Risk segmentation", "Transformations of predicted PD; not accounting stages"),
+    ("risk_direction / ews_signal_count", "EWS", "Monitoring status; separate from PD grade"),
+    ("stage", "Accounting proxy", "Simplified Stage 1/2/3 assignment using reporting-date triggers"),
+    ("loan_ead", "EAD", "100% of synthetic current term-loan outstanding"),
+    ("ovd_ead", "EAD", "100% of synthetic approved OVD limit"),
+    ("trade_ead", "EAD", "Trade amount multiplied by synthetic instrument CCF"),
+    ("ead", "EAD", "Sum of loan, OVD and trade EAD"),
+    ("collateral_coverage / lgd", "LGD", "Aggregate borrower-level synthetic recovery proxy"),
+    ("ecl_12m", "ECL", "predicted_pd x lgd x ead"),
+    ("lifetime_pd", "ECL", "Simplified constant-annual-hazard lifetime PD approximation"),
+    ("ecl", "ECL", "Stage-dependent simplified ECL"),
+    ("default", "Validation outcome", "Future 12-month synthetic outcome; not a reporting-date input"),
+], columns=["field_or_group", "layer", "interpretation"])
+audit_dictionary.to_csv(ROOT/"outputs/borrower_audit_trace_dictionary.csv", index=False)
+
 # Transparent Stage 2 trigger audit. Flags may overlap by design.
 dpd = out["days_past_due"].fillna(0)
 delinq = out["delinquencies_12m"].fillna(0)
