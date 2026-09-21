@@ -5,17 +5,28 @@ default outcome used to validate the PD model. Stage 2 uses observable SICR
 proxies. This is an educational implementation, not an IFRS 9 accounting engine.
 """
 import numpy as np
+import pandas as pd
+from pathlib import Path
 
-# Forward-looking macro scenarios are transparent project assumptions. They are
-# deliberately modest and fixed ex ante; they are not fitted to holdout defaults.
-# The multipliers represent relative shifts to borrower PIT odds, not direct PD
-# percentage-point changes. Production IFRS 9 would estimate these relationships
-# from observed macro/credit history and approved forecasts.
-FORWARD_LOOKING_SCENARIOS = {
-    "upside": {"weight": 0.20, "odds_multiplier": 0.85},
-    "baseline": {"weight": 0.60, "odds_multiplier": 1.00},
-    "downside": {"weight": 0.20, "odds_multiplier": 1.35},
-}
+# Explicit forward-looking macro scenarios. The economic paths and PD odds
+# multipliers are transparent synthetic assumptions, fixed independently of the
+# holdout outcome. They are not presented as official forecasts or empirically
+# estimated macro elasticities.
+MACRO_SCENARIO_FILE = Path(__file__).resolve().parents[1] / "config" / "macro_scenarios.csv"
+
+
+def load_macro_scenarios(path=MACRO_SCENARIO_FILE):
+    scenarios = pd.read_csv(path)
+    required = {"scenario", "weight", "real_gdp_growth_pct", "unemployment_rate_pct",
+                "policy_rate_pct", "inflation_pct", "odds_multiplier"}
+    missing = required.difference(scenarios.columns)
+    if missing:
+        raise ValueError(f"Missing macro scenario fields: {sorted(missing)}")
+    if not np.isclose(scenarios["weight"].sum(), 1.0):
+        raise ValueError("Macro scenario weights must sum to 1.0")
+    if (scenarios["weight"] < 0).any() or (scenarios["odds_multiplier"] <= 0).any():
+        raise ValueError("Scenario weights must be non-negative and odds multipliers positive")
+    return scenarios
 
 
 def _shift_pd_odds(pd, multiplier):
@@ -74,15 +85,18 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
     pit_pd12 = out[pd_col].clip(0, 1)
     out["pit_pd_12m"] = pit_pd12
 
+    macro_scenarios = load_macro_scenarios()
     scenario_pds = {}
-    for scenario, assumptions in FORWARD_LOOKING_SCENARIOS.items():
-        scenario_pd = _shift_pd_odds(pit_pd12, assumptions["odds_multiplier"])
+    scenario_weights = {}
+    for row in macro_scenarios.itertuples(index=False):
+        scenario = str(row.scenario)
+        scenario_pd = _shift_pd_odds(pit_pd12, float(row.odds_multiplier))
         out[f"pd_12m_{scenario}"] = scenario_pd
         scenario_pds[scenario] = scenario_pd
+        scenario_weights[scenario] = float(row.weight)
 
     forward_pd12 = sum(
-        FORWARD_LOOKING_SCENARIOS[s]["weight"] * scenario_pds[s]
-        for s in FORWARD_LOOKING_SCENARIOS
+        scenario_weights[s] * scenario_pds[s] for s in scenario_pds
     )
     out["forward_looking_pd_12m"] = forward_pd12.clip(0, 1)
 
@@ -108,8 +122,7 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
         out[f"lifetime_pd_{scenario}"] = lp.clip(0, 1)
         scenario_lifetime[scenario] = out[f"lifetime_pd_{scenario}"]
     out["lifetime_pd"] = sum(
-        FORWARD_LOOKING_SCENARIOS[s]["weight"] * scenario_lifetime[s]
-        for s in FORWARD_LOOKING_SCENARIOS
+        scenario_weights[s] * scenario_lifetime[s] for s in scenario_lifetime
     ).clip(0, 1)
 
     out["ecl"] = out["ecl_12m"]
