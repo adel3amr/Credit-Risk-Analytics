@@ -32,7 +32,10 @@ def prepare_data(df):
 
 def pd_feature_columns(df):
     """Return the governed borrower-PD feature set; new columns are opt-in."""
-    approved = [c for c in PD_BASE_FEATURES if c in df.columns]
+    missing = [c for c in PD_BASE_FEATURES if c not in df.columns]
+    if missing:
+        raise ValueError(f"Missing governed PD features: {missing}")
+    approved = list(PD_BASE_FEATURES)
     industry_cols = sorted(c for c in df.columns if c.startswith("industry_"))
     return approved + industry_cols
 
