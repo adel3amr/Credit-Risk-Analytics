@@ -57,7 +57,11 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
 
     # Approximate cumulative PD under a constant annual hazard over remaining
     # contractual term. This replaces the previous arbitrary 2.5x multiplier.
-    remaining_years = np.maximum(out["loan_term_months"].fillna(12) / 12.0, 1.0)
+    # Portfolio-level approximation only: the current synthetic schema has one
+    # borrower-level term even when a borrower also has OVD/trade facilities.
+    # Cap at the contractual term generated for the borrower; do not impose a
+    # minimum one-year remaining life on shorter residual terms.
+    remaining_years = np.maximum(out["loan_term_months"].fillna(12) / 12.0, 0.0)
     lifetime_pd = 1.0 - np.power(1.0 - pd12, remaining_years)
     out["lifetime_pd"] = lifetime_pd.clip(0, 1)
 
