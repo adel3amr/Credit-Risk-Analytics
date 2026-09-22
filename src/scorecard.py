@@ -22,7 +22,8 @@ def add_score(df,pd_col="predicted_pd"):
 def add_risk_rating(df, pd_col="predicted_pd"):
     """Operational 1-10 risk rating, kept distinct from the continuous credit score.
 
-    1-6: performing PD grades
+    1: reserved for full eligible cash coverage
+    2-6: performing PD grades
     7: operational watchlist / enhanced monitoring
     8-10: non-performing Stage 3 severity grades
 
@@ -34,8 +35,8 @@ def add_risk_rating(df, pd_col="predicted_pd"):
     # Broad, transparent performing-grade cut points; not fitted on the holdout.
     rating = pd.cut(
         pdv,
-        bins=[-np.inf, .005, .01, .02, .04, .08, np.inf],
-        labels=[1, 2, 3, 4, 5, 6],
+        bins=[-np.inf, .005, .01, .02, .04, np.inf],
+        labels=[2, 3, 4, 5, 6],
     ).astype(int)
 
     watch = out.get("ews_monitoring_flag", pd.Series(0, index=out.index)).fillna(0).astype(bool)
@@ -56,6 +57,7 @@ def add_risk_rating(df, pd_col="predicted_pd"):
             out["collateral_type"].eq("Cash")
             & out["recognized_collateral_coverage"].fillna(0).ge(.999)
         )
+    # Rating 1 is reserved exclusively for full eligible cash coverage.
     # Security strength changes the internal rating but never cures an NPL.
     if "stage" in out.columns:
         full_cash &= ~out["stage"].eq("Stage 3")
