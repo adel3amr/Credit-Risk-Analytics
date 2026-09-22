@@ -211,32 +211,29 @@ def main():
     trade_ead = trade * trade_ccf
 
     ead = loan_ead + ovd_ead + trade_ead
-    # Aggregate borrower-level recovery proxy. Nominal collateral is not treated
-    # as one-for-one economic protection: apply transparent synthetic stressed
-    # recovery assumptions before deriving LGD. These are methodology-demo
-    # assumptions, not regulatory prescriptions or empirically calibrated rates.
+    # Collateral-type recovery architecture.
+    # Synthetic internal policy assumptions (not IFRS 9 prescribed haircuts):
+    # - eligible cash collateral: 100% recognized, capped at EAD;
+    # - mortgage / other collateral: 80% recognized (20% haircut);
+    # - any residual EAD remains unsecured and carries the unsecured LGD assumption.
     collateral_coverage = collateral_value / np.maximum(ead, 1)
-    collateral_haircut = 0.25
-    realization_cost_rate = 0.10
-    recovery_horizon_years = 2.0
-    recovery_discount_rate = 0.05
-    stressed_collateral_value = collateral_value * (1.0 - collateral_haircut)
-    net_collateral_recovery = stressed_collateral_value * (1.0 - realization_cost_rate)
-    discounted_collateral_recovery = net_collateral_recovery / (
-        (1.0 + recovery_discount_rate) ** recovery_horizon_years
-    )
-    recoverable_collateral = np.minimum(discounted_collateral_recovery, ead)
-    recoverable_collateral_coverage = recoverable_collateral / np.maximum(ead, 1)
+    collateral_types = np.array(["Cash", "Mortgage", "Other"])
+    collateral_type = rng_recovery.choice(collateral_types, n, p=[.15, .55, .30])
+    collateral_haircut = np.where(collateral_type == "Cash", 0.0, 0.20)
+    recognized_collateral = np.minimum(collateral_value * (1.0 - collateral_haircut), ead)
+    recognized_collateral_coverage = recognized_collateral / np.maximum(ead, 1)
+    unsecured_ead = np.maximum(ead - recognized_collateral, 0.0)
 
-    # Performing-exposure LGD retains an unsecured-loss component while recognizing
-    # discounted collateral recoveries. Industry and idiosyncratic dispersion remain
-    # explicit synthetic assumptions. Stage 3 uses the same collateral recovery basis
-    # directly as a workout cash-shortfall calculation.
-    lgd = np.clip(
-        .62 - .50 * recoverable_collateral_coverage
-        + .06 * (industry == "Hospitality") + rng_recovery.normal(0, .07, n),
-        .12, .75,
+    # LGD is expressed against total EAD. Recognized collateral is treated as
+    # recoverable under the synthetic policy above; the residual unsecured EAD
+    # carries an unsecured severity assumption plus transparent industry/idiosyncratic
+    # variation. This prevents over-collateralization from reducing LGD below the
+    # economics of the remaining unsecured exposure.
+    unsecured_lgd = np.clip(
+        .62 + .06 * (industry == "Hospitality") + rng_recovery.normal(0, .07, n),
+        .35, .85,
     )
+    lgd = np.clip(unsecured_lgd * unsecured_ead / np.maximum(ead, 1), 0.0, .85)
 
     # Latent 12M default risk. Coefficients encode plausible directions only.
     lp = (
