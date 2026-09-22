@@ -10,7 +10,7 @@ import pandas as pd, numpy as np, matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score, classification_report, roc_curve
 from data_preparation import load_data, prepare_data, pd_feature_columns
-from pd_model import logistic_model, random_forest_model, gradient_boosting_model
+from pd_model import logistic_model, random_forest_model, gradient_boosting_model, pca_logistic_model
 from validation import validation_summary, calibration_table, threshold_diagnostics
 from scorecard import add_score, add_risk_rating
 from ecl import calculate_ecl
@@ -23,6 +23,7 @@ y=model_df["default"]
 Xtr,Xte,ytr,yte=train_test_split(X,y,test_size=.25,stratify=y,random_state=42)
 
 models={"Logistic Regression":logistic_model(),
+        "PCA + Logistic Regression":pca_logistic_model(),
         "Random Forest":random_forest_model(),
         "Gradient Boosting":gradient_boosting_model()}
 results=[]
@@ -33,6 +34,22 @@ for name,m in models.items():
 
 res=pd.DataFrame(results).set_index("Model").sort_values("ROC_AUC",ascending=False)
 print("\nMODEL VALIDATION\n",res.round(4))
+
+# Experimental PCA diagnostics are exported separately. The PCA challenger does
+# not influence primary-model selection or any downstream borrower PD/ECL output.
+pca_model = models["PCA + Logistic Regression"]
+pca_diag = pd.DataFrame([{
+    "variance_retained_target": 0.95,
+    "input_features": X.shape[1],
+    "principal_components": pca_model.named_steps["pca"].n_components_,
+    "explained_variance_ratio": pca_model.named_steps["pca"].explained_variance_ratio_.sum(),
+    "roc_auc": res.loc["PCA + Logistic Regression", "ROC_AUC"],
+    "gini": res.loc["PCA + Logistic Regression", "Gini"],
+    "brier": res.loc["PCA + Logistic Regression", "Brier"],
+    "log_loss": res.loc["PCA + Logistic Regression", "LogLoss"],
+}])
+pca_diag.to_csv(ROOT/"outputs/pca_logistic_challenger.csv", index=False)
+print("\nPCA LOGISTIC CHALLENGER (experimental; not governed)\n", pca_diag.round(4).to_string(index=False))
 
 # Governance decision: Logistic Regression is the primary PD model because
 # interpretability and calibration are core requirements. RF/GB remain challengers;
