@@ -38,10 +38,11 @@ jobs:
       - name: Run hybrid V2 experiment
         run: python notebooks/hybrid_pd_experiment.py
       - name: Show information-set results
-        run: cat outputs/information_set_comparison.csv
-            outputs/auc_difference_bootstrap.csv
-            outputs/trajectory_signal_provenance.csv
-            outputs/trajectory_signal_audit.csv
+        run: |
+          cat outputs/information_set_comparison.csv
+          cat outputs/auc_difference_bootstrap.csv
+          cat outputs/trajectory_signal_provenance.csv
+          cat outputs/trajectory_signal_audit.csv
       - name: Upload validation outputs
         uses: actions/upload-artifact@v4
         with:
@@ -60,6 +61,8 @@ jobs:
             outputs/calibration_plot.png
             outputs/information_set_comparison.csv
             outputs/auc_difference_bootstrap.csv
+            outputs/trajectory_signal_provenance.csv
+            outputs/trajectory_signal_audit.csv
             outputs/train_test_validation.csv
             outputs/train_test_calibration_deciles.csv
             outputs/confusion_matrices.csv
