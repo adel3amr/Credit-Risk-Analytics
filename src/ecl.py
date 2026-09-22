@@ -69,7 +69,7 @@ def assign_stage(df, pd_col="predicted_pd"):
     delinq = out["delinquencies_12m"].fillna(0)
     prev_default = out["previous_defaults"].fillna(0)
     util = out["credit_utilization"].fillna(0)
-    watchlist_months = out["months_on_ews_watchlist"].fillna(0)
+    ews_persistence_months = out["consecutive_ews_months"].fillna(0)
 
     # Reporting-date credit-impaired state only. Future default outcome is never
     # consulted in staging.
@@ -87,7 +87,7 @@ def assign_stage(df, pd_col="predicted_pd"):
         | (delinq >= 2)
         | ((util >= 0.85) & (dpd > 0))
         | ((prev_default >= 1) & (out[pd_col] >= 0.05))
-        | ((out["ews_sicr_flag"] == 1) & (watchlist_months >= 9))
+        | ((out["ews_sicr_flag"] == 1) & (ews_persistence_months >= 9))
     )
 
     out["stage"] = np.select(
