@@ -16,7 +16,7 @@ st.caption("PD • LGD • EWS • IFRS 9-style staging • ECL • governed int
 def pct(v, decimals=2):
     return f"{float(v):.{decimals}%}"
 
-def money(v):
+def format_format_money(v):
     return f"€{float(v):,.2f}"
 
 user = st.sidebar.text_input("User", value="demo.user")
@@ -39,8 +39,8 @@ with tabs[0]:
     a,b,c,d = st.columns(4)
     a.metric("Borrowers", f"{len(df):,}")
     b.metric("Mean PD", f"{df.predicted_pd.mean():.2%}")
-    c.metric("Total EAD", money(df.ead.sum()))
-    d.metric("Total ECL", money(df.ecl.sum()))
+    c.metric("Total EAD", format_money(df.ead.sum()))
+    d.metric("Total ECL", format_money(df.ecl.sum()))
     stage_view=df.groupby("stage").agg(customers=("customer_id","count"),EAD=("ead","sum"),ECL=("ecl","sum")).reset_index()
     stage_view["EAD"]=stage_view["EAD"].map(money)
     stage_view["ECL"]=stage_view["ECL"].map(money)
@@ -53,8 +53,9 @@ with tabs[0]:
     case_cols=[x for x in ["customer_id","industry","predicted_pd","credit_score","risk_band","risk_direction","stage","days_past_due","ead","ecl"] if x in priority.columns]
     cases=priority.nlargest(12,"_priority")[case_cols].copy()
     if "predicted_pd" in cases: cases["predicted_pd"]=cases["predicted_pd"].map(pct)
-    for money in ["ead","ecl"]:
-        if money in cases: cases[money]=cases[money].map(lambda v:f"€{v:,.2f}")
+    for money_col in ["ead","ecl"]:
+        if money_col in cases:
+            cases[money_col]=cases[money_col].map(format_money)
     st.dataframe(cases,hide_index=True,use_container_width=True)
 
 with tabs[1]:
@@ -68,20 +69,20 @@ with tabs[1]:
     c.metric("Risk band", str(x.risk_band))
     d.metric("Stage", str(x.stage))
     e.metric("LGD", pct(x.lgd))
-    f.metric("ECL", money(x.ecl))
+    f.metric("ECL", format_money(x.ecl))
     st.markdown("#### Decision summary")
     ews=str(x["risk_direction"]) if "risk_direction" in df.columns else "—"
     st.write(f"**{x.risk_band}** model risk · **{ews}** EWS · **{x.stage}** accounting classification. "
-             f"Exposure is **{money(x.ead)}** with LGD of **{pct(x.lgd)}** and expected loss of **{money(x.ecl)}**.")
+             f"Exposure is **{format_money(x.ead)}** with LGD of **{pct(x.lgd)}** and expected loss of **{format_money(x.ecl)}**.")
     st.subheader("Exposure & recovery")
     recovery_rows = [
-        ("Loan EAD", money(x.loan_ead)), ("OVD EAD", money(x.ovd_ead)),
-        ("Trade EAD", money(x.trade_ead)), ("Total EAD", money(x.ead)),
-        ("Collateral", money(x.collateral_value)), ("LGD", pct(x.lgd)),
+        ("Loan EAD", format_money(x.loan_ead)), ("OVD EAD", format_money(x.ovd_ead)),
+        ("Trade EAD", format_money(x.trade_ead)), ("Total EAD", format_money(x.ead)),
+        ("Collateral", format_money(x.collateral_value)), ("LGD", pct(x.lgd)),
     ]
     for field, label in [("recognized_collateral", "Recognized collateral"), ("unsecured_ead", "Unsecured EAD")]:
         if field in df.columns:
-            recovery_rows.insert(-1, (label, money(x[field])))
+            recovery_rows.insert(-1, (label, format_money(x[field])))
     st.dataframe(pd.DataFrame(recovery_rows, columns=["Metric","Value"]), hide_index=True, use_container_width=True)
     st.subheader("Credit interpretation")
     adverse=[]
@@ -143,9 +144,9 @@ with tabs[2]:
         base=(df.pit_pd_12m*df.lgd*df.ead).sum()
         fwd=(df.forward_looking_pd_12m*df.lgd*df.ead).sum()
         m1,m2,m3=st.columns(3)
-        m1.metric("PIT 12M diagnostic ECL",money(base))
-        m2.metric("Forward-looking 12M ECL",money(fwd))
-        m3.metric("Macro overlay impact",money(fwd-base))
+        m1.metric("PIT 12M diagnostic ECL",format_money(base))
+        m2.metric("Forward-looking 12M ECL",format_money(fwd))
+        m3.metric("Macro overlay impact",format_money(fwd-base))
     if has_permission(role,"manage_macro"):
         edited=st.data_editor(scenarios,use_container_width=True,num_rows="fixed")
         if st.button("Validate proposed scenarios"):
