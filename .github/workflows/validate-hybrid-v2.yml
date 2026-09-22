@@ -53,7 +53,7 @@ jobs:
           assert np.allclose(x.loc[s1, "ecl"], expected_12m.loc[s1], rtol=1e-10, atol=.02)
           assert np.allclose(x.loc[s2, "ecl"], (x["lifetime_pd"]*x["lgd"]*x["ead"]).loc[s2], rtol=1e-10, atol=.02)
           expected_s3_recovery = np.minimum(
-              x["collateral_value"] * (1-.25) * (1-.10) / ((1+.05)**2),
+              x["recognized_collateral"] * (1-.10) / ((1+.05)**2),
               x["ead"],
           )
           assert np.allclose(

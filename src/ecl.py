@@ -155,22 +155,17 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
     s2 = out["stage"] == "Stage 2"
     s3 = out["stage"] == "Stage 3"
     out.loc[s2, "ecl"] = (out["lifetime_pd"] * lgd * ead)[s2]
-    # Simplified Stage 3 collateral-recovery workout.
-    # Generic V2 assumptions (not regulatory prescriptions):
-    # - 25% collateral haircut for stressed liquidation / valuation uncertainty;
-    # - 10% realization cost applied to the post-haircut proceeds;
-    # - 2-year recovery horizon discounted at 5% p.a.
-    # The resulting discounted net recovery is capped at EAD. Stage 3 ECL is the
-    # remaining cash shortfall. A production implementation would use collateral-
-    # specific haircuts, enforceability, workout costs, expected timing and the
-    # instrument's effective interest rate.
-    collateral = out["collateral_value"].fillna(0).clip(lower=0)
-    stage3_collateral_haircut = 0.25
+    # Simplified Stage 3 workout starts from the same collateral-type recognition
+    # architecture used by LGD (Cash 100%, Mortgage 80%, Other 65%, Unsecured 0%).
+    # We then apply explicit workout timing/cost assumptions to recognized proceeds.
+    # This avoids replacing collateral-specific recovery economics with a second,
+    # generic haircut. The 10% realization cost, 2-year horizon and 5% discount rate
+    # remain transparent synthetic assumptions, not IFRS 9 prescriptions.
+    recognized_collateral = out["recognized_collateral"].fillna(0).clip(lower=0)
     stage3_realization_cost_rate = 0.10
     stage3_recovery_years = 2.0
     stage3_discount_rate = 0.05
-    stressed_collateral = collateral * (1.0 - stage3_collateral_haircut)
-    net_recovery_before_discount = stressed_collateral * (1.0 - stage3_realization_cost_rate)
+    net_recovery_before_discount = recognized_collateral * (1.0 - stage3_realization_cost_rate)
     discounted_recovery = net_recovery_before_discount / (
         (1.0 + stage3_discount_rate) ** stage3_recovery_years
     )
