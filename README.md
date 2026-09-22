@@ -8,7 +8,7 @@ End-to-end synthetic SME credit-risk project covering borrower PD, validation, c
 ## Architecture
 ```text
 Current financials + current behaviour -> PIT-oriented 12M PD -> score / risk band
-36-month behavioural history          -> EWS / watchlist
+36-month behavioural history          -> EWS / monitoring
 Macro scenarios                       -> forward-looking PD overlay
 Reporting-date credit deterioration   -> simplified SICR / stage
 Facilities                            -> EAD
@@ -63,7 +63,7 @@ The EWS is a separate monitoring layer using:
 
 Two or more signals produce an EWS **Deteriorating** status; one produces **Watch**. Thresholds are transparent synthetic monitoring assumptions, not empirically calibrated production triggers.
 
-A predefined internal synthetic policy moves a currently deteriorating borrower to Stage 2 after **9 consecutive months** of EWS deterioration. Nine months is **not an IFRS 9 requirement** and is not optimized on the holdout sample.
+A predefined internal synthetic policy moves a currently deteriorating borrower to Stage 2 after **9 consecutive months** satisfying the EWS deterioration rule. `consecutive_ews_months` measures rule persistence, not literal operational watchlist tenure. Nine months is **not an IFRS 9 requirement** and is not optimized on the holdout sample.
 
 ## Simplified IFRS 9-style staging and ECL
 This repository is not a production IFRS 9 accounting engine.

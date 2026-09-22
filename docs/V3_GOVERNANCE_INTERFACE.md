@@ -24,7 +24,7 @@ This is application-level RBAC for the portfolio project, not enterprise authent
 Financials, current behaviour, 36-month trajectory, facilities, collateral, EAD/LGD, governed PD, score/risk band, EWS, stage, ECL and decision history.
 
 ### Override workflow
-PD/rating, SICR/stage, watchlist and recovery/collateral interventions are recorded separately from model outputs. Every proposal requires a reason code and rationale. Approval follows maker-checker: the proposer cannot approve their own override.
+PD/rating, SICR/stage, operational watchlist and recovery/collateral interventions are recorded separately from model outputs. Every proposal requires a reason code and rationale. Approval follows maker-checker: the proposer cannot approve their own override.
 
 ### Macroeconomic scenario management
 Authorized Risk Managers can prepare scenario amendments to GDP, unemployment, policy rate, inflation and scenario weights. Weights must remain non-negative and sum to 100%. A proposed scenario set should be simulated before approval and should retain version/effective-date metadata.

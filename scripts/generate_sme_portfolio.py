@@ -139,7 +139,7 @@ def main():
         )
         ews_hist[:, m] = signals >= 2
 
-    months_on_ews_watchlist = np.zeros(n, dtype=int)
+    consecutive_ews_months = np.zeros(n, dtype=int)
     for i in range(n):
         if ews_hist[i, -1]:
             run = 0
@@ -148,7 +148,7 @@ def main():
                     run += 1
                 else:
                     break
-            months_on_ews_watchlist[i] = run
+            consecutive_ews_months[i] = run
 
     # Long-format behavioural panel for auditability and later SQL/time-series work.
     history_df = pd.DataFrame({
@@ -278,7 +278,7 @@ def main():
         "avg_utilization_6m": avg_utilization_6m.round(4),
         "months_above_80_utilization": months_above_80_utilization,
         "limit_breach_count": limit_breach_count,
-        "months_on_ews_watchlist": months_on_ews_watchlist,
+        "consecutive_ews_months": consecutive_ews_months,
         "number_of_accounts": number_of_accounts,
         "delinquencies_12m": delinquencies_12m,
         "previous_defaults": previous_defaults,

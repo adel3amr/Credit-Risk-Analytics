@@ -7,7 +7,7 @@ This checkpoint freezes the methodology before the final governance/data audit. 
 - 36 months of monthly behavioural history (432,000 borrower-month observations).
 - Core PD: financial fundamentals + current observed behaviour.
 - Logistic Regression is the intended primary/interpretable PD model; RF and GB are challengers.
-- Behavioural trajectory is an EWS/watchlist layer, not forced into core PD.
+- Behavioural trajectory is an EWS/monitoring layer, not forced into core PD.
 - Qualitative variables are supplementary review inputs.
 - Loans / OVD / trade drive exposure architecture and EAD.
 - Aggregate collateral/recovery assumptions drive LGD.

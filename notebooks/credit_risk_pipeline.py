@@ -53,7 +53,7 @@ audit_trace_cols = [
     "leverage_ratio", "cash_flow", "debt_to_income", "years_in_business",
     "credit_utilization", "utilization_6m_ago", "utilization_6m_change",
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
-    "months_on_ews_watchlist", "delinquencies_12m", "previous_defaults",
+    "consecutive_ews_months", "delinquencies_12m", "previous_defaults",
     "days_past_due", "current_credit_impaired", "collateral_value",
     "collateral_coverage", "loans", "loan_ead", "ovd", "ovd_ead", "trade",
     "trade_type", "trade_ccf", "trade_ead", "ead", "lgd", "loan_term_months",
@@ -74,7 +74,7 @@ audit_dictionary = pd.DataFrame([
     ("customer_id", "Raw", "Synthetic borrower identifier"),
     ("financial/current-behaviour fields", "Raw / governed PD inputs", "Reporting-date borrower information"),
     ("utilization_6m_* / limit_breach_count", "EWS inputs", "Derived from chronological 36-month history"),
-    ("months_on_ews_watchlist", "EWS", "Consecutive deteriorating months ending at M0"),
+    ("consecutive_ews_months", "EWS", "Consecutive deteriorating months ending at M0"),
     ("predicted_pd / pit_pd_12m", "PD", "Governed Logistic Regression reporting-date 12-month PIT-oriented PD"),
     ("pd_12m_upside / baseline / downside", "Forward-looking PD", "Fixed scenario shifts to PIT default odds; synthetic assumptions"),
     ("forward_looking_pd_12m", "Forward-looking PD", "Probability-weighted 12-month scenario PD used in ECL"),
@@ -104,7 +104,7 @@ out["trigger_utilization_conduct"] = ((util >= .85) & (dpd > 0)).astype(int)
 out["trigger_previous_default_pd"] = ((prev >= 1) & (out["predicted_pd"] >= .05)).astype(int)
 out["trigger_ews_deterioration"] = out["ews_sicr_flag"].astype(int)
 out["trigger_ews_9m_persistence"] = (
-    (out["ews_sicr_flag"] == 1) & (out["months_on_ews_watchlist"].fillna(0) >= 9)
+    (out["ews_sicr_flag"] == 1) & (out["consecutive_ews_months"].fillna(0) >= 9)
 ).astype(int)
 trigger_cols = [
     "trigger_dpd_30_89", "trigger_delinquency", "trigger_utilization_conduct",
@@ -127,11 +127,11 @@ audit["share_of_stage2"] = audit["stage2_customers"] / max(len(stage2), 1)
 
 # Separate monitoring population: deterioration can exist while an exposure remains
 # Stage 1. This makes risk direction visible without mechanically forcing SICR.
-out["watchlist_flag"] = (
+out["ews_monitoring_flag"] = (
     (out["risk_direction"] == "Deteriorating") & (out["stage"] == "Stage 1")
 ).astype(int)
-watchlist = out[out["watchlist_flag"] == 1].copy()
-# Refresh Stage 2 subset after watchlist_flag is added to the master output.
+ews_monitoring = out[out["ews_monitoring_flag"] == 1].copy()
+# Refresh Stage 2 subset after the monitoring flag is added to the master output.
 stage2 = out[out["stage"] == "Stage 2"].copy()
 # Validate the fixed 9-month persistence rule without tuning the threshold.
 other_s2_trigger_cols = [
@@ -168,7 +168,7 @@ ews_9m_validation = (
         mean_predicted_pd=("predicted_pd", "mean"),
         exposure=("ead", "sum"),
         ecl=("ecl", "sum"),
-        mean_watchlist_months=("months_on_ews_watchlist", "mean"),
+        mean_consecutive_ews_months=("consecutive_ews_months", "mean"),
     )
     .reset_index()
 )
@@ -183,7 +183,7 @@ monitor_cols = [
     "customer_id", "industry", "predicted_pd", "pit_pd_12m", "forward_looking_pd_12m",
     "pd_12m_upside", "pd_12m_baseline", "pd_12m_downside",
     "risk_band", "credit_score", "stage",
-    "risk_direction", "ews_signal_count", "months_on_ews_watchlist", "watchlist_flag", "days_past_due", "delinquencies_12m",
+    "risk_direction", "ews_signal_count", "consecutive_ews_months", "ews_monitoring_flag", "days_past_due", "delinquencies_12m",
     "previous_defaults", "credit_utilization", "utilization_6m_change",
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
     "loans", "ovd", "trade", "trade_type", "ead", "lgd", "ecl_12m",
@@ -196,11 +196,11 @@ out[monitor_cols].sort_values(["stage", "predicted_pd"], ascending=[False, False
 stage2[monitor_cols].sort_values("predicted_pd", ascending=False).to_csv(
     ROOT/"outputs/stage2_customer_review.csv", index=False
 )
-watchlist[monitor_cols].sort_values("predicted_pd", ascending=False).to_csv(
-    ROOT/"outputs/ews_watchlist_review.csv", index=False
+ews_monitoring[monitor_cols].sort_values("predicted_pd", ascending=False).to_csv(
+    ROOT/"outputs/ews_monitoring_review.csv", index=False
 )
 print("\nSTAGE 2 TRIGGER AUDIT (overlapping triggers)\n", audit.round(4))
-print("\nEWS WATCHLIST (Stage 1 deteriorating borrowers):", len(watchlist))
+print("\nEWS MONITORING POPULATION (Stage 1 deteriorating borrowers):", len(ews_monitoring))
 
 print("\nRISK BANDS\n",out.groupby("risk_band").agg(
     customers=("customer_id","count"), observed_default=("default","mean"),

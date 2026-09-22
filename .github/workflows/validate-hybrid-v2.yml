@@ -29,6 +29,9 @@ jobs:
           missing = required.difference(df.columns)
           assert not missing, f"Missing required columns: {sorted(missing)}"
           assert len(df) > 0
+          assert "consecutive_ews_months" in df.columns
+          assert "months_on_ews_watchlist" not in df.columns
+          assert df["consecutive_ews_months"].between(0, 30).all()
           print(f"Generated {len(df):,} borrowers; default rate={df['default'].mean():.2%}")
           PY
       - name: Run original pipeline
@@ -82,7 +85,7 @@ jobs:
             outputs/stage2_trigger_audit.csv
             outputs/portfolio_monitoring.csv
             outputs/stage2_customer_review.csv
-            outputs/ews_watchlist_review.csv
+            outputs/ews_monitoring_review.csv
             outputs/ews_9m_policy_validation.csv
             outputs/borrower_audit_trace.csv
             outputs/borrower_audit_trace_dictionary.csv
