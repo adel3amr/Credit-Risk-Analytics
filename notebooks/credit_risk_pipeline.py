@@ -63,7 +63,9 @@ audit_trace_cols = [
     "ecl_12m", "lifetime_pd_upside", "lifetime_pd_baseline",
     "lifetime_pd_downside", "lifetime_pd", "ecl", "default",
 ]
-audit_trace_cols = [col for col in audit_trace_cols if col in out.columns]
+missing_audit_cols = [col for col in audit_trace_cols if col not in out.columns]
+if missing_audit_cols:
+    raise ValueError(f"Missing required borrower audit-trace columns: {missing_audit_cols}")
 audit_trace = out[audit_trace_cols].copy()
 audit_trace.to_csv(ROOT/"outputs/borrower_audit_trace.csv", index=False)
 
