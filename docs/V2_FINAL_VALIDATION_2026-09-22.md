@@ -56,3 +56,8 @@ The macro scenario table is illustrative rather than jurisdiction- and forecast-
 Do not merge solely because CI is green. Before merge, manually inspect the generated raw portfolio, behavioural history, borrower audit trace, macro diagnostics, validation tables, and representative borrowers across risk bands and stages. Trace selected rows from raw inputs through PD, score, EWS, EAD/LGD, stage, and ECL.
 
 PR #1 remains the V2 review workspace until that manual review is complete.
+
+
+## Stage 3 workout assumptions
+
+Stage 3 ECL uses a simplified discounted collateral-recovery cash-shortfall approach. V2 applies a generic 25% stressed collateral haircut, 10% realization cost, a two-year recovery horizon and a 5% annual discount rate. These are transparent synthetic project assumptions rather than regulatory prescriptions or empirically calibrated recovery parameters. A production implementation would segment collateral, assess enforceability and use instrument-specific effective interest rates and observed workout timing/costs.
