@@ -90,6 +90,9 @@ jobs:
             outputs/borrower_audit_trace.csv
             outputs/borrower_audit_trace_dictionary.csv
             outputs/macro_scenario_diagnostics.csv
+            outputs/ecl_coverage_diagnostics.csv
+            outputs/stage2_ecl_diagnostics.csv
+            outputs/collateral_lgd_diagnostics.csv
             outputs/calibration_deciles.csv
             outputs/calibration_plot.png
             outputs/information_set_comparison.csv

@@ -90,6 +90,14 @@ The purpose is to test whether broader information adds out-of-sample discrimina
 
 The final V2 architecture keeps current behaviour in core PD and trajectory in the separate EWS layer. The frozen synthetic default DGP itself contains selected trajectory effects, so incremental trajectory discrimination is documented as a methodology result rather than treated as independent empirical evidence for expanding the governed PD feature set. Qualitative variables remain supplementary.
 
+## Collateral and LGD methodology
+
+The recovery layer generates collateral type before collateral value so that security is conditional on the exposure rather than assuming that every SME is heavily collateralised. The synthetic portfolio mix is 35% unsecured, 10% cash collateral, 35% mortgage and 20% other collateral. Nominal collateral coverage is generated from type-specific distributions.
+
+For ECL recovery purposes, eligible cash collateral is recognized at 100% of nominal value (capped at EAD), mortgage collateral receives a 20% haircut, and other collateral receives a 35% haircut. Residual exposure after recognized collateral is treated as unsecured and carries the synthetic unsecured loss-severity assumption. These collateral shares, coverage distributions, haircuts and unsecured-LGD parameters are transparent project assumptions: they are not IFRS 9 minimums, regulatory haircuts, official benchmarks or empirically calibrated recovery rates.
+
+The architecture is intentionally causal: EAD → collateral type → nominal collateral → recognized recovery → unsecured EAD → LGD → ECL. Haircuts are not tuned to obtain a target Stage 2 ECL ratio.
+
 ## Current governed validation
 The latest chronological-data workflow should be treated as the current V2 baseline. On the 3,000-borrower holdout:
 - governed Logistic Regression AUC: **0.7673**, Gini: **0.5346**;

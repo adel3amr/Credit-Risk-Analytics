@@ -55,7 +55,8 @@ audit_trace_cols = [
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
     "consecutive_ews_months", "delinquencies_12m", "previous_defaults",
     "days_past_due", "current_credit_impaired", "collateral_value",
-    "collateral_coverage", "loans", "loan_ead", "ovd", "ovd_ead", "trade",
+    "collateral_coverage", "collateral_type", "collateral_haircut", "recognized_collateral",
+    "recognized_collateral_coverage", "unsecured_ead", "unsecured_lgd", "loans", "loan_ead", "ovd", "ovd_ead", "trade",
     "trade_type", "trade_ccf", "trade_ead", "ead", "lgd", "loan_term_months",
     "predicted_pd", "pit_pd_12m", "pd_12m_upside", "pd_12m_baseline",
     "pd_12m_downside", "forward_looking_pd_12m", "credit_score", "risk_band",
@@ -213,6 +214,54 @@ print("PORTFOLIO MEAN FORWARD-LOOKING PD:",round(out.forward_looking_pd_12m.mean
 print("HOLDOUT OBSERVED DEFAULT RATE:",round(out.default.mean(),4))
 print("TOTAL 12M ECL (diagnostic):",round(out.ecl_12m.sum(),2))
 print("TOTAL STAGED ECL:",round(out.ecl.sum(),2))
+
+# ECL coverage diagnostics: expose why provision coverage differs by stage.
+# These are diagnostics only; they do not impose arbitrary IFRS 9 loss floors.
+ecl_coverage = (
+    out.groupby("stage", observed=False)
+    .agg(
+        borrowers=("customer_id", "count"),
+        exposure=("ead", "sum"),
+        ecl=("ecl", "sum"),
+        mean_pd_12m=("forward_looking_pd_12m", "mean"),
+        mean_lifetime_pd=("lifetime_pd", "mean"),
+        mean_lgd=("lgd", "mean"),
+        mean_collateral_coverage=("collateral_coverage", "mean"),
+        mean_recognized_collateral_coverage=("recognized_collateral_coverage", "mean"),
+        median_recognized_collateral_coverage=("recognized_collateral_coverage", "median"),
+        mean_term_months=("loan_term_months", "mean"),
+    )
+    .reset_index()
+)
+ecl_coverage["ecl_to_ead"] = ecl_coverage["ecl"] / ecl_coverage["exposure"].clip(lower=1)
+ecl_coverage.to_csv(ROOT/"outputs/ecl_coverage_diagnostics.csv", index=False)
+
+collateral_diag = (
+    out.groupby("collateral_type", observed=False)
+    .agg(
+        borrowers=("customer_id", "count"),
+        exposure=("ead", "sum"),
+        mean_nominal_coverage=("collateral_coverage", "mean"),
+        mean_recognized_coverage=("recognized_collateral_coverage", "mean"),
+        mean_lgd=("lgd", "mean"),
+        ecl=("ecl", "sum"),
+    )
+    .reset_index()
+)
+collateral_diag["portfolio_share"] = collateral_diag["borrowers"] / len(out)
+collateral_diag["ecl_to_ead"] = collateral_diag["ecl"] / collateral_diag["exposure"].clip(lower=1)
+collateral_diag.to_csv(ROOT/"outputs/collateral_lgd_diagnostics.csv", index=False)
+print("\nCOLLATERAL / LGD DIAGNOSTICS\n", collateral_diag.round(4).to_string(index=False))
+
+stage2_diag = out.loc[out["stage"] == "Stage 2", [
+    "customer_id", "ead", "ecl", "forward_looking_pd_12m", "lifetime_pd",
+    "lgd", "collateral_value", "collateral_coverage", "recognized_collateral",
+    "recognized_collateral_coverage", "loan_term_months",
+    "risk_direction", "consecutive_ews_months", "days_past_due",
+]].copy()
+stage2_diag["ecl_to_ead"] = stage2_diag["ecl"] / stage2_diag["ead"].clip(lower=1)
+stage2_diag.to_csv(ROOT/"outputs/stage2_ecl_diagnostics.csv", index=False)
+print("\nECL COVERAGE DIAGNOSTICS\n", ecl_coverage.round(4).to_string(index=False))
 
 # Forward-looking macro overlay diagnostics. This separates model validation
 # (performed on the PIT-oriented PD) from the scenario adjustment used for ECL.

@@ -178,11 +178,8 @@ def main():
     ).astype(int)
 
     rng = rng_recovery
-    # Borrower-level collateral pool. Coverage is assessed against total EAD below.
-    # Collateral value is generated relative to committed facilities as a transparent
-    # synthetic assumption; this is not facility-level collateral allocation.
-    collateral_ratio = np.clip(rng.lognormal(np.log(1.25), .42, n), .25, 3.0)
-    collateral_value = loan_amount * collateral_ratio
+    # Collateral is generated after EAD because security should be expressed against
+    # the exposure it protects, not assumed as a multiple of total committed facilities.
     number_of_accounts = np.clip(rng.poisson(2.2, n) + 1, 1, 10)
     interest_rate = np.clip(
         .045 + .025 * credit_utilization + .008 * leverage_ratio
@@ -211,13 +208,53 @@ def main():
     trade_ead = trade * trade_ccf
 
     ead = loan_ead + ovd_ead + trade_ead
-    # Aggregate borrower-level recovery proxy. A production implementation would
-    # allocate eligible collateral by facility, seniority and enforceability.
-    collateral_coverage = collateral_value / np.maximum(ead, 1)
+    # Collateral DGP: generate security type first, then nominal coverage conditional
+    # on that type. This creates genuinely unsecured borrowers and avoids assuming that
+    # nearly every SME is over-collateralised. Probabilities and coverage ranges are
+    # transparent synthetic portfolio assumptions, not empirical or regulatory rates.
+    collateral_types = np.array(["Unsecured", "Cash", "Mortgage", "Other"])
+    collateral_type = rng_recovery.choice(collateral_types, n, p=[.35, .10, .35, .20])
+
+    collateral_coverage = np.zeros(n)
+    cash_mask = collateral_type == "Cash"
+    mortgage_mask = collateral_type == "Mortgage"
+    other_mask = collateral_type == "Other"
+
+    collateral_coverage[cash_mask] = np.clip(
+        rng_recovery.lognormal(np.log(.85), .20, cash_mask.sum()), .40, 1.25
+    )
+    collateral_coverage[mortgage_mask] = np.clip(
+        rng_recovery.lognormal(np.log(1.05), .35, mortgage_mask.sum()), .35, 1.80
+    )
+    collateral_coverage[other_mask] = np.clip(
+        rng_recovery.lognormal(np.log(.65), .40, other_mask.sum()), .15, 1.30
+    )
+    collateral_value = ead * collateral_coverage
+
+    # Synthetic internal recognition policy (not IFRS 9 prescribed haircuts):
+    # cash is recognized at 100%; mortgage receives a 20% haircut; other collateral
+    # receives a more conservative 35% haircut; unsecured borrowers have no collateral.
+    collateral_haircut = np.select(
+        [cash_mask, mortgage_mask, other_mask],
+        [0.00, 0.20, 0.35],
+        default=1.00,
+    )
+    recognized_collateral = np.minimum(
+        collateral_value * (1.0 - collateral_haircut), ead
+    )
+    recognized_collateral_coverage = recognized_collateral / np.maximum(ead, 1)
+    unsecured_ead = np.maximum(ead - recognized_collateral, 0.0)
+
+    # LGD is driven by loss severity on residual unsecured exposure. Collateral does
+    # not reduce PD or create a provision floor; it changes expected recovery.
+    unsecured_lgd = np.clip(
+        .62 + .06 * (industry == "Hospitality") + rng_recovery.normal(0, .07, n),
+        .35, .85,
+    )
     lgd = np.clip(
-        .62 - .22 * np.minimum(collateral_coverage, 2.0)
-        + .06 * (industry == "Hospitality") + rng_recovery.normal(0, .07, n),
-        .12, .75,
+        unsecured_lgd * unsecured_ead / np.maximum(ead, 1),
+        0.0,
+        .85,
     )
 
     # Latent 12M default risk. Coefficients encode plausible directions only.
@@ -284,6 +321,12 @@ def main():
         "previous_defaults": previous_defaults,
         "collateral_value": collateral_value.round(2),
         "collateral_coverage": collateral_coverage.round(4),
+        "collateral_type": collateral_type,
+        "collateral_haircut": collateral_haircut,
+        "recognized_collateral": recognized_collateral.round(2),
+        "recognized_collateral_coverage": recognized_collateral_coverage.round(4),
+        "unsecured_ead": unsecured_ead.round(2),
+        "unsecured_lgd": unsecured_lgd.round(4),
         "days_past_due": days_past_due,
         "years_in_business": years_in_business,
         "ead": ead.round(2),
