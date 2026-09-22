@@ -80,10 +80,8 @@ def main():
     )
     loan_amount = loans + ovd + trade
     direct_limit = loan_limit + ovd
-    direct_drawn = loans + ovd * credit_utilization
     indirect_limit = trade
     total_credit_limit = direct_limit + indirect_limit
-    total_utilized_amount = direct_drawn + trade
     loan_term_months = rng.choice([12, 24, 36, 48, 60], n, p=[.15, .23, .30, .17, .15])
     debt_to_income = np.clip(
         .12 + .075 * leverage_ratio + rng.normal(.08, .10, n), .03, .90
@@ -120,6 +118,11 @@ def main():
 
     # Current utilization is the final observed month of the chronological panel.
     credit_utilization = util_hist[:, -1].copy()
+
+    # Drawn/utilized facility amounts are reporting-date measures and therefore must
+    # be derived only after current utilization has been observed at M0.
+    direct_drawn = loans + ovd * credit_utilization
+    total_utilized_amount = direct_drawn + trade
 
     # Monthly limit-breach process: high utilization raises breach likelihood, but
     # breaches remain stochastic rather than deterministic.
