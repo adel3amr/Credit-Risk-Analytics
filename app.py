@@ -6,13 +6,15 @@ from src.governance import has_permission, validate_macro_scenarios, OverrideReq
 
 ROOT = Path(__file__).resolve().parent
 AUDIT = ROOT / "outputs" / "borrower_audit_trace.csv"
-MACRO = ROOT / "config" / "macro_scenarios.csv"\nAUDIT_LOG = ROOT / "outputs" / "governance_audit.jsonl"
+MACRO = ROOT / "config" / "macro_scenarios.csv"
+AUDIT_LOG = ROOT / "outputs" / "governance_audit.jsonl"
 
 st.set_page_config(page_title="SME Credit Risk Platform", layout="wide")
 st.title("SME Credit Risk Platform")
 st.caption("PD • EWS • IFRS 9-style staging • ECL • governed interventions")
 
-user = st.sidebar.text_input("User", value="demo.user")\nrole = st.sidebar.selectbox("Role", ["Credit Analyst","Risk Manager","Model Validation","Auditor","Admin"])
+user = st.sidebar.text_input("User", value="demo.user")
+role = st.sidebar.selectbox("Role", ["Credit Analyst","Risk Manager","Model Validation","Auditor","Admin"])
 st.sidebar.info("Portfolio demo RBAC — not production authentication.")
 
 if not AUDIT.exists():
