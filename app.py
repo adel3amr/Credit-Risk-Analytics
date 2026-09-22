@@ -11,7 +11,13 @@ AUDIT_LOG = ROOT / "outputs" / "governance_audit.jsonl"
 
 st.set_page_config(page_title="SME Credit Risk Platform", layout="wide")
 st.title("SME Credit Risk Platform")
-st.caption("PD • EWS • IFRS 9-style staging • ECL • governed interventions")
+st.caption("PD • LGD • EWS • IFRS 9-style staging • ECL • governed interventions")
+
+def pct(v, decimals=2):
+    return f"{float(v):.{decimals}%}"
+
+def money(v):
+    return f"€{float(v):,.2f}"
 
 user = st.sidebar.text_input("User", value="demo.user")
 role = st.sidebar.selectbox("Role", ["Credit Analyst","Risk Manager","Model Validation","Auditor","Admin"])
@@ -33,11 +39,11 @@ with tabs[0]:
     a,b,c,d = st.columns(4)
     a.metric("Borrowers", f"{len(df):,}")
     b.metric("Mean PD", f"{df.predicted_pd.mean():.2%}")
-    c.metric("Total EAD", f"€{df.ead.sum()/1e6:,.1f}m")
-    d.metric("Total ECL", f"€{df.ecl.sum()/1e6:,.1f}m")
+    c.metric("Total EAD", money(df.ead.sum()))
+    d.metric("Total ECL", money(df.ecl.sum()))
     stage_view=df.groupby("stage").agg(customers=("customer_id","count"),EAD=("ead","sum"),ECL=("ecl","sum")).reset_index()
-    stage_view["EAD"]=stage_view["EAD"].map(lambda v:f"€{v/1e6:,.2f}m")
-    stage_view["ECL"]=stage_view["ECL"].map(lambda v:f"€{v/1e6:,.2f}m")
+    stage_view["EAD"]=stage_view["EAD"].map(money)
+    stage_view["ECL"]=stage_view["ECL"].map(money)
     st.dataframe(stage_view,hide_index=True,use_container_width=True)
     st.markdown("#### Highest-priority cases")
     priority=df.copy()
@@ -46,9 +52,9 @@ with tabs[0]:
         priority["_priority"]+=priority["risk_direction"].eq("Deteriorating").astype(int)
     case_cols=[x for x in ["customer_id","industry","predicted_pd","credit_score","risk_band","risk_direction","stage","days_past_due","ead","ecl"] if x in priority.columns]
     cases=priority.nlargest(12,"_priority")[case_cols].copy()
-    if "predicted_pd" in cases: cases["predicted_pd"]=cases["predicted_pd"].map(lambda v:f"{v:.2%}")
+    if "predicted_pd" in cases: cases["predicted_pd"]=cases["predicted_pd"].map(pct)
     for money in ["ead","ecl"]:
-        if money in cases: cases[money]=cases[money].map(lambda v:f"€{v:,.0f}")
+        if money in cases: cases[money]=cases[money].map(lambda v:f"€{v:,.2f}")
     st.dataframe(cases,hide_index=True,use_container_width=True)
 
 with tabs[1]:
@@ -56,19 +62,27 @@ with tabs[1]:
     st.caption("One place to understand model risk, behaviour, exposure, staging and expected loss.")
     cid = st.selectbox("Customer", df.customer_id.astype(str).tolist())
     x = df[df.customer_id.astype(str).eq(cid)].iloc[0]
-    a,b,c,d,e = st.columns(5)
-    a.metric("PD", f"{x.predicted_pd:.2%}")
+    a,b,c,d,e,f = st.columns(6)
+    a.metric("PD", pct(x.predicted_pd))
     b.metric("Score", f"{x.credit_score:.0f}")
     c.metric("Risk band", str(x.risk_band))
     d.metric("Stage", str(x.stage))
-    e.metric("ECL", f"€{x.ecl:,.0f}")
+    e.metric("LGD", pct(x.lgd))
+    f.metric("ECL", money(x.ecl))
     st.markdown("#### Decision summary")
     ews=str(x["risk_direction"]) if "risk_direction" in df.columns else "—"
     st.write(f"**{x.risk_band}** model risk · **{ews}** EWS · **{x.stage}** accounting classification. "
-             f"Exposure is **€{x.ead:,.0f}** with expected loss of **€{x.ecl:,.0f}**.")
+             f"Exposure is **{money(x.ead)}** with LGD of **{pct(x.lgd)}** and expected loss of **{money(x.ecl)}**.")
     st.subheader("Exposure & recovery")
-    st.dataframe(pd.DataFrame({"Metric":["Loan EAD","OVD EAD","Trade EAD","Total EAD","Collateral","LGD"],
-                               "Value":[x.loan_ead,x.ovd_ead,x.trade_ead,x.ead,x.collateral_value,x.lgd]}), hide_index=True)
+    recovery_rows = [
+        ("Loan EAD", money(x.loan_ead)), ("OVD EAD", money(x.ovd_ead)),
+        ("Trade EAD", money(x.trade_ead)), ("Total EAD", money(x.ead)),
+        ("Collateral", money(x.collateral_value)), ("LGD", pct(x.lgd)),
+    ]
+    for field, label in [("recognized_collateral", "Recognized collateral"), ("unsecured_ead", "Unsecured EAD")]:
+        if field in df.columns:
+            recovery_rows.insert(-1, (label, money(x[field])))
+    st.dataframe(pd.DataFrame(recovery_rows, columns=["Metric","Value"]), hide_index=True, use_container_width=True)
     st.subheader("Credit interpretation")
     adverse=[]
     if "leverage_ratio" in df.columns and x.leverage_ratio >= 3: adverse.append(f"leverage {x.leverage_ratio:.1f}x")
@@ -78,7 +92,7 @@ with tabs[1]:
     if adverse: st.warning("Key adverse indicators: " + ", ".join(adverse) + ".")
     else: st.success("No major rule-based adverse indicator is elevated in the current snapshot.")
     if "forward_looking_pd_12m" in df.columns:
-        st.write(f"Model PD **{x.predicted_pd:.2%}** → macro-adjusted 12M PD **{x.forward_looking_pd_12m:.2%}**. Accounting stage remains a separate decision dimension.")
+        st.write(f"Model PD **{pct(x.predicted_pd)}** → macro-adjusted 12M PD **{pct(x.forward_looking_pd_12m)}**. Accounting stage remains a separate decision dimension.")
     st.subheader("Risk signals")
     cols=[c for c in ["days_past_due","credit_utilization","delinquencies_12m","previous_defaults","consecutive_ews_months","risk_direction","current_credit_impaired"] if c in df.columns]
     st.dataframe(pd.DataFrame({"Field":cols,"Value":[x[c] for c in cols]}), hide_index=True)
@@ -129,9 +143,9 @@ with tabs[2]:
         base=(df.pit_pd_12m*df.lgd*df.ead).sum()
         fwd=(df.forward_looking_pd_12m*df.lgd*df.ead).sum()
         m1,m2,m3=st.columns(3)
-        m1.metric("PIT 12M diagnostic ECL",f"€{base/1e6:,.2f}m")
-        m2.metric("Forward-looking 12M ECL",f"€{fwd/1e6:,.2f}m")
-        m3.metric("Macro overlay impact",f"€{(fwd-base)/1e6:,.2f}m")
+        m1.metric("PIT 12M diagnostic ECL",money(base))
+        m2.metric("Forward-looking 12M ECL",money(fwd))
+        m3.metric("Macro overlay impact",money(fwd-base))
     if has_permission(role,"manage_macro"):
         edited=st.data_editor(scenarios,use_container_width=True,num_rows="fixed")
         if st.button("Validate proposed scenarios"):
