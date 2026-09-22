@@ -127,11 +127,11 @@ audit["share_of_stage2"] = audit["stage2_customers"] / max(len(stage2), 1)
 
 # Separate monitoring population: deterioration can exist while an exposure remains
 # Stage 1. This makes risk direction visible without mechanically forcing SICR.
-out["watchlist_flag"] = (
+out["ews_monitoring_flag"] = (
     (out["risk_direction"] == "Deteriorating") & (out["stage"] == "Stage 1")
 ).astype(int)
-watchlist = out[out["watchlist_flag"] == 1].copy()
-# Refresh Stage 2 subset after watchlist_flag is added to the master output.
+ews_monitoring = out[out["ews_monitoring_flag"] == 1].copy()
+# Refresh Stage 2 subset after the monitoring flag is added to the master output.
 stage2 = out[out["stage"] == "Stage 2"].copy()
 # Validate the fixed 9-month persistence rule without tuning the threshold.
 other_s2_trigger_cols = [
@@ -168,7 +168,7 @@ ews_9m_validation = (
         mean_predicted_pd=("predicted_pd", "mean"),
         exposure=("ead", "sum"),
         ecl=("ecl", "sum"),
-        mean_watchlist_months=("consecutive_ews_months", "mean"),
+        mean_consecutive_ews_months=("consecutive_ews_months", "mean"),
     )
     .reset_index()
 )
@@ -183,7 +183,7 @@ monitor_cols = [
     "customer_id", "industry", "predicted_pd", "pit_pd_12m", "forward_looking_pd_12m",
     "pd_12m_upside", "pd_12m_baseline", "pd_12m_downside",
     "risk_band", "credit_score", "stage",
-    "risk_direction", "ews_signal_count", "consecutive_ews_months", "watchlist_flag", "days_past_due", "delinquencies_12m",
+    "risk_direction", "ews_signal_count", "consecutive_ews_months", "ews_monitoring_flag", "days_past_due", "delinquencies_12m",
     "previous_defaults", "credit_utilization", "utilization_6m_change",
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
     "loans", "ovd", "trade", "trade_type", "ead", "lgd", "ecl_12m",
@@ -200,7 +200,7 @@ watchlist[monitor_cols].sort_values("predicted_pd", ascending=False).to_csv(
     ROOT/"outputs/ews_watchlist_review.csv", index=False
 )
 print("\nSTAGE 2 TRIGGER AUDIT (overlapping triggers)\n", audit.round(4))
-print("\nEWS WATCHLIST (Stage 1 deteriorating borrowers):", len(watchlist))
+print("\nEWS MONITORING POPULATION (Stage 1 deteriorating borrowers):", len(ews_monitoring))
 
 print("\nRISK BANDS\n",out.groupby("risk_band").agg(
     customers=("customer_id","count"), observed_default=("default","mean"),
