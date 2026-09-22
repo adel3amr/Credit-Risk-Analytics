@@ -22,17 +22,38 @@ if not AUDIT.exists():
     st.stop()
 df = pd.read_csv(AUDIT)
 
-tabs = st.tabs(["Portfolio","Borrower 360","Overrides","Macro Scenarios","Admin / Audit"])
+page = st.sidebar.radio("Workspace", ["Portfolio Cockpit","Borrower Credit File","Risk Management"])
+
+# Three task-oriented workspaces keep the demo focused.
+tabs = st.tabs(["Portfolio Cockpit","Borrower Credit File","Risk Management"])
 
 with tabs[0]:
+    st.subheader("Portfolio Cockpit")
+    st.caption("Identify concentration, deterioration and loss contributors before opening a case.")
     a,b,c,d = st.columns(4)
     a.metric("Borrowers", f"{len(df):,}")
     b.metric("Mean PD", f"{df.predicted_pd.mean():.2%}")
     c.metric("Total EAD", f"€{df.ead.sum()/1e6:,.1f}m")
     d.metric("Total ECL", f"€{df.ecl.sum()/1e6:,.1f}m")
-    st.dataframe(df.groupby("stage").agg(customers=("customer_id","count"),EAD=("ead","sum"),ECL=("ecl","sum")), use_container_width=True)
+    stage_view=df.groupby("stage").agg(customers=("customer_id","count"),EAD=("ead","sum"),ECL=("ecl","sum")).reset_index()
+    stage_view["EAD"]=stage_view["EAD"].map(lambda v:f"€{v/1e6:,.2f}m")
+    stage_view["ECL"]=stage_view["ECL"].map(lambda v:f"€{v/1e6:,.2f}m")
+    st.dataframe(stage_view,hide_index=True,use_container_width=True)
+    st.markdown("#### Highest-priority cases")
+    priority=df.copy()
+    priority["_priority"]=priority["ecl"].rank(pct=True)+priority["predicted_pd"].rank(pct=True)
+    if "risk_direction" in priority.columns:
+        priority["_priority"]+=priority["risk_direction"].eq("Deteriorating").astype(int)
+    case_cols=[x for x in ["customer_id","industry","predicted_pd","credit_score","risk_band","risk_direction","stage","days_past_due","ead","ecl"] if x in priority.columns]
+    cases=priority.nlargest(12,"_priority")[case_cols].copy()
+    if "predicted_pd" in cases: cases["predicted_pd"]=cases["predicted_pd"].map(lambda v:f"{v:.2%}")
+    for money in ["ead","ecl"]:
+        if money in cases: cases[money]=cases[money].map(lambda v:f"€{v:,.0f}")
+    st.dataframe(cases,hide_index=True,use_container_width=True)
 
 with tabs[1]:
+    st.subheader("Borrower Credit File")
+    st.caption("One place to understand model risk, behaviour, exposure, staging and expected loss.")
     cid = st.selectbox("Customer", df.customer_id.astype(str).tolist())
     x = df[df.customer_id.astype(str).eq(cid)].iloc[0]
     a,b,c,d,e = st.columns(5)
@@ -41,9 +62,23 @@ with tabs[1]:
     c.metric("Risk band", str(x.risk_band))
     d.metric("Stage", str(x.stage))
     e.metric("ECL", f"€{x.ecl:,.0f}")
+    st.markdown("#### Decision summary")
+    ews=str(x["risk_direction"]) if "risk_direction" in df.columns else "—"
+    st.write(f"**{x.risk_band}** model risk · **{ews}** EWS · **{x.stage}** accounting classification. "
+             f"Exposure is **€{x.ead:,.0f}** with expected loss of **€{x.ecl:,.0f}**.")
     st.subheader("Exposure & recovery")
     st.dataframe(pd.DataFrame({"Metric":["Loan EAD","OVD EAD","Trade EAD","Total EAD","Collateral","LGD"],
                                "Value":[x.loan_ead,x.ovd_ead,x.trade_ead,x.ead,x.collateral_value,x.lgd]}), hide_index=True)
+    st.subheader("Credit interpretation")
+    adverse=[]
+    if "leverage_ratio" in df.columns and x.leverage_ratio >= 3: adverse.append(f"leverage {x.leverage_ratio:.1f}x")
+    if "credit_utilization" in df.columns and x.credit_utilization >= .8: adverse.append(f"utilization {x.credit_utilization:.1%}")
+    if "delinquencies_12m" in df.columns and x.delinquencies_12m > 0: adverse.append(f"{int(x.delinquencies_12m)} delinquency event(s)")
+    if "days_past_due" in df.columns and x.days_past_due > 0: adverse.append(f"{int(x.days_past_due)} DPD")
+    if adverse: st.warning("Key adverse indicators: " + ", ".join(adverse) + ".")
+    else: st.success("No major rule-based adverse indicator is elevated in the current snapshot.")
+    if "forward_looking_pd_12m" in df.columns:
+        st.write(f"Model PD **{x.predicted_pd:.2%}** → macro-adjusted 12M PD **{x.forward_looking_pd_12m:.2%}**. Accounting stage remains a separate decision dimension.")
     st.subheader("Risk signals")
     cols=[c for c in ["days_past_due","credit_utilization","delinquencies_12m","previous_defaults","months_on_ews_watchlist","risk_direction","current_credit_impaired"] if c in df.columns]
     st.dataframe(pd.DataFrame({"Field":cols,"Value":[x[c] for c in cols]}), hide_index=True)
@@ -86,31 +121,26 @@ with tabs[2]:
         else:
             st.info("No override waiting for approval.")
 
-with tabs[3]:
+
+    st.markdown("#### Macro scenarios")
     scenarios=pd.read_csv(MACRO)
     st.dataframe(scenarios,use_container_width=True)
+    if {"pit_pd_12m","forward_looking_pd_12m"}.issubset(df.columns):
+        base=(df.pit_pd_12m*df.lgd*df.ead).sum()
+        fwd=(df.forward_looking_pd_12m*df.lgd*df.ead).sum()
+        m1,m2,m3=st.columns(3)
+        m1.metric("PIT 12M diagnostic ECL",f"€{base/1e6:,.2f}m")
+        m2.metric("Forward-looking 12M ECL",f"€{fwd/1e6:,.2f}m")
+        m3.metric("Macro overlay impact",f"€{(fwd-base)/1e6:,.2f}m")
     if has_permission(role,"manage_macro"):
-        st.success("Authorized to prepare macro scenario amendments.")
         edited=st.data_editor(scenarios,use_container_width=True,num_rows="fixed")
-        if st.button("Validate scenario set"):
+        if st.button("Validate proposed scenarios"):
             try:
-                validate_macro_scenarios(edited)
-                st.success("Valid: scenario weights sum to 100%.")
-                st.session_state["validated_macro"] = edited.copy()
-            except ValueError as e:
-                st.error(str(e))
-    else:
-        st.info("Scenario assumptions are read-only for this role.")
+                validate_macro_scenarios(edited); st.success("Valid scenario set: weights sum to 100%.")
+            except ValueError as e: st.error(str(e))
+    else: st.info("Macro assumptions are read-only for this role.")
 
-with tabs[4]:
-    st.subheader("Access & governance")
-    st.write(f"Current demo role: **{role}**")
+    st.markdown("#### Governance")
+    st.info("Validated model coefficients are read-only. Policy, macro assumptions and human overrides are governed separately.")
     perms=["view_borrower","run_assessment","propose_override","approve_override","manage_policy","manage_macro","manage_users","view_audit"]
     st.dataframe(pd.DataFrame({"Permission":perms,"Allowed":[has_permission(role,p) for p in perms]}),hide_index=True)
-    if has_permission(role,"view_audit") and AUDIT_LOG.exists():
-        st.subheader("Recent audit activity")
-        import json
-        events=[json.loads(line) for line in AUDIT_LOG.read_text(encoding="utf-8").splitlines() if line.strip()]
-        if events:
-            st.dataframe(pd.DataFrame(events).tail(20).iloc[::-1], hide_index=True, use_container_width=True)
-    st.caption("Production deployment would connect this layer to enterprise IAM and a transactional audit store.")
