@@ -80,7 +80,7 @@ with tabs[1]:
     if "forward_looking_pd_12m" in df.columns:
         st.write(f"Model PD **{x.predicted_pd:.2%}** → macro-adjusted 12M PD **{x.forward_looking_pd_12m:.2%}**. Accounting stage remains a separate decision dimension.")
     st.subheader("Risk signals")
-    cols=[c for c in ["days_past_due","credit_utilization","delinquencies_12m","previous_defaults","months_on_ews_watchlist","risk_direction","current_credit_impaired"] if c in df.columns]
+    cols=[c for c in ["days_past_due","credit_utilization","delinquencies_12m","previous_defaults","consecutive_ews_months","risk_direction","current_credit_impaired"] if c in df.columns]
     st.dataframe(pd.DataFrame({"Field":cols,"Value":[x[c] for c in cols]}), hide_index=True)
 
 with tabs[2]:
