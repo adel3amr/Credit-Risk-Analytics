@@ -55,7 +55,8 @@ audit_trace_cols = [
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
     "consecutive_ews_months", "delinquencies_12m", "previous_defaults",
     "days_past_due", "current_credit_impaired", "collateral_value",
-    "collateral_coverage", "loans", "loan_ead", "ovd", "ovd_ead", "trade",
+    "collateral_coverage", "stressed_collateral_value", "discounted_collateral_recovery",
+    "recoverable_collateral", "recoverable_collateral_coverage", "loans", "loan_ead", "ovd", "ovd_ead", "trade",
     "trade_type", "trade_ccf", "trade_ead", "ead", "lgd", "loan_term_months",
     "predicted_pd", "pit_pd_12m", "pd_12m_upside", "pd_12m_baseline",
     "pd_12m_downside", "forward_looking_pd_12m", "credit_score", "risk_band",
@@ -226,7 +227,8 @@ ecl_coverage = (
         mean_lifetime_pd=("lifetime_pd", "mean"),
         mean_lgd=("lgd", "mean"),
         mean_collateral_coverage=("collateral_coverage", "mean"),
-        median_collateral_coverage=("collateral_coverage", "median"),
+        mean_recoverable_collateral_coverage=("recoverable_collateral_coverage", "mean"),
+        median_recoverable_collateral_coverage=("recoverable_collateral_coverage", "median"),
         mean_term_months=("loan_term_months", "mean"),
     )
     .reset_index()
@@ -236,7 +238,8 @@ ecl_coverage.to_csv(ROOT/"outputs/ecl_coverage_diagnostics.csv", index=False)
 
 stage2_diag = out.loc[out["stage"] == "Stage 2", [
     "customer_id", "ead", "ecl", "forward_looking_pd_12m", "lifetime_pd",
-    "lgd", "collateral_value", "collateral_coverage", "loan_term_months",
+    "lgd", "collateral_value", "collateral_coverage", "recoverable_collateral",
+    "recoverable_collateral_coverage", "loan_term_months",
     "risk_direction", "consecutive_ews_months", "days_past_due",
 ]].copy()
 stage2_diag["ecl_to_ead"] = stage2_diag["ecl"] / stage2_diag["ead"].clip(lower=1)
