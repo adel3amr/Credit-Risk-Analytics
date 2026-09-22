@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score, classification_report, roc_curve
 from data_preparation import load_data, prepare_data, pd_feature_columns
 from pd_model import logistic_model, random_forest_model, gradient_boosting_model
-from validation import validation_summary, calibration_table
+from validation import validation_summary, calibration_table, threshold_diagnostics
 from scorecard import add_score
 from ecl import calculate_ecl
 
@@ -40,6 +40,13 @@ print("\nMODEL VALIDATION\n",res.round(4))
 primary_name="Logistic Regression"
 primary=models[primary_name]
 primary_pd=preds[primary_name]
+
+# Fixed reference thresholds provide operational classification diagnostics without
+# optimizing a cutoff on the untouched holdout.
+threshold_diag = threshold_diagnostics(yte, primary_pd, thresholds=(0.05, 0.10))
+threshold_diag.to_csv(ROOT/"outputs/pd_threshold_diagnostics.csv", index=False)
+print("\nREFERENCE THRESHOLD DIAGNOSTICS (not optimized)\n", threshold_diag.round(4))
+
 out=df.iloc[Xte.index].copy()
 out["predicted_pd"]=primary_pd
 out=add_score(out)
