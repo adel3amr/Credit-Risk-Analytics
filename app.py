@@ -34,17 +34,142 @@ page = st.sidebar.radio("Workspace", ["Portfolio Cockpit","Borrower Credit File"
 tabs = st.tabs(["Portfolio Cockpit","Borrower Credit File","Risk Management"])
 
 with tabs[0]:
-    st.subheader("Portfolio Cockpit")
-    st.caption("Identify concentration, deterioration and loss contributors before opening a case.")
-    a,b,c,d = st.columns(4)
+    st.subheader("Portfolio Intelligence & Assessment")
+    st.caption("Automated portfolio diagnostics for credit officers. Findings are descriptive review signals, not automatic credit decisions.")
+
+    # Portfolio exposure architecture: loans and OVD are direct; trade instruments are
+    # reported separately as contingent/indirect exposure. EAD is kept distinct from
+    # nominal facility amounts so CCF treatment remains visible.
+    direct_ead = df["loan_ead"].sum() + df["ovd_ead"].sum()
+    indirect_nominal = df["trade"].sum()
+    indirect_ead = df["trade_ead"].sum()
+    total_ead = df["ead"].sum()
+    total_ecl = df["ecl"].sum()
+    unsecured = df["unsecured_ead"].sum() if "unsecured_ead" in df.columns else 0.0
+
+    a,b,c1,d,e = st.columns(5)
     a.metric("Borrowers", f"{len(df):,}")
-    b.metric("Mean PD", f"{df.predicted_pd.mean():.2%}")
-    c.metric("Total EAD", format_money(df.ead.sum()))
-    d.metric("Total ECL", format_money(df.ecl.sum()))
+    b.metric("Mean PD", pct(df["predicted_pd"].mean()))
+    c1.metric("Total EAD", format_money(total_ead))
+    d.metric("Total ECL", format_money(total_ecl))
+    e.metric("Unsecured EAD", format_money(unsecured))
+
+    st.markdown("#### Portfolio composition")
+    p1,p2,p3,p4 = st.columns(4)
+    p1.metric("Direct EAD", format_money(direct_ead))
+    p2.metric("Indirect / Trade EAD", format_money(indirect_ead))
+    p3.metric("Nominal trade facilities", format_money(indirect_nominal))
+    p4.metric("ECL / EAD", pct(total_ecl / max(total_ead, 1)))
+
+    has_loan = df["loans"].gt(0)
+    has_ovd = df["ovd"].gt(0)
+    has_trade = df["trade"].gt(0)
+    product_view = pd.DataFrame({
+        "Portfolio segment": ["Loans only","OVD only","Trade only","Mixed products"],
+        "Borrowers": [
+            (has_loan & ~has_ovd & ~has_trade).sum(),
+            (~has_loan & has_ovd & ~has_trade).sum(),
+            (~has_loan & ~has_ovd & has_trade).sum(),
+            ((has_loan.astype(int)+has_ovd.astype(int)+has_trade.astype(int)) >= 2).sum(),
+        ],
+    })
+    st.dataframe(product_view, hide_index=True, use_container_width=True)
+
+    # OVD is the facility for which the synthetic data contains both an approved limit
+    # and a current utilization ratio. We therefore report OVD utilization explicitly
+    # rather than inventing a portfolio-wide approved-limit denominator for term loans.
+    ovd_limit = df["ovd"].sum()
+    ovd_drawn_proxy = (df["ovd"] * df["credit_utilization"]).sum()
+    util_cols = st.columns(3)
+    util_cols[0].metric("OVD approved limits", format_money(ovd_limit))
+    util_cols[1].metric("OVD utilized", format_money(ovd_drawn_proxy))
+    util_cols[2].metric("OVD utilization", pct(ovd_drawn_proxy / max(ovd_limit, 1)))
+    st.caption("A true total-portfolio utilization ratio is not shown because the current synthetic schema does not store a separate approved limit for term loans. Trade nominal amount and CCF-adjusted EAD are shown separately.")
+
+    st.markdown("#### Industry assessment")
+    industry = (
+        df.groupby("industry")
+        .agg(
+            Borrowers=("customer_id","count"),
+            EAD=("ead","sum"),
+            ECL=("ecl","sum"),
+            Mean_PD=("predicted_pd","mean"),
+            Mean_LGD=("lgd","mean"),
+            Stage_2_3=("stage", lambda s: s.isin(["Stage 2","Stage 3"]).mean()),
+        )
+        .reset_index()
+    )
+    industry["Exposure_share"] = industry["EAD"] / max(total_ead, 1)
+    industry["ECL_share"] = industry["ECL"] / max(total_ecl, 1)
+    industry["Loss_intensity"] = industry["ECL"] / industry["EAD"].clip(lower=1)
+    industry_display=industry.copy()
+    for col in ["Mean_PD","Mean_LGD","Stage_2_3","Exposure_share","ECL_share","Loss_intensity"]:
+        industry_display[col]=industry_display[col].map(pct)
+    for col in ["EAD","ECL"]:
+        industry_display[col]=industry_display[col].map(format_money)
+    st.dataframe(industry_display.sort_values("ECL_share", ascending=False), hide_index=True, use_container_width=True)
+
+    st.markdown("#### Data-driven risk patterns")
+    # Broad, pre-defined monitoring cuts only. No decision-tree fitting or threshold
+    # search is performed on the holdout, avoiding a tight rule set tailored to this sample.
+    portfolio_pd = df["predicted_pd"].mean()
+    portfolio_loss = total_ecl / max(total_ead, 1)
+    patterns = []
+    checks = [
+        ("High utilization", df["credit_utilization"] >= .80),
+        ("Recent delinquency", df["delinquencies_12m"] > 0),
+        ("Previous default", df["previous_defaults"] > 0),
+        ("Deteriorating EWS", df["risk_direction"].eq("Deteriorating")),
+        ("Unsecured", df["recognized_collateral_coverage"] <= .01),
+        ("High utilization + deterioration", (df["credit_utilization"] >= .80) & df["risk_direction"].eq("Deteriorating")),
+    ]
+    min_group = max(30, int(len(df) * .01))
+    for label, mask in checks:
+        g=df.loc[mask]
+        if len(g) < min_group:
+            continue
+        patterns.append({
+            "Pattern": label,
+            "Borrowers": len(g),
+            "EAD": g["ead"].sum(),
+            "Mean PD": g["predicted_pd"].mean(),
+            "PD vs portfolio": g["predicted_pd"].mean() / max(portfolio_pd, 1e-9),
+            "ECL / EAD": g["ecl"].sum() / max(g["ead"].sum(), 1),
+            "Loss vs portfolio": (g["ecl"].sum() / max(g["ead"].sum(), 1)) / max(portfolio_loss, 1e-9),
+        })
+    patterns=pd.DataFrame(patterns)
+    if not patterns.empty:
+        patterns_display=patterns.copy()
+        patterns_display["EAD"]=patterns_display["EAD"].map(format_money)
+        patterns_display["Mean PD"]=patterns_display["Mean PD"].map(pct)
+        patterns_display["ECL / EAD"]=patterns_display["ECL / EAD"].map(pct)
+        patterns_display["PD vs portfolio"]=patterns_display["PD vs portfolio"].map(lambda v:f"{v:.2f}x")
+        patterns_display["Loss vs portfolio"]=patterns_display["Loss vs portfolio"].map(lambda v:f"{v:.2f}x")
+        st.dataframe(patterns_display.sort_values("Loss vs portfolio", ascending=False), hide_index=True, use_container_width=True)
+
+    st.markdown("#### Portfolio review actions")
+    actions=[]
+    high_ind = industry[(industry["Mean_PD"] >= portfolio_pd * 1.25) & (industry["Borrowers"] >= min_group)]
+    for _, row in high_ind.iterrows():
+        actions.append(f"Review {row['industry']} concentration: mean PD {pct(row['Mean_PD'])} versus portfolio {pct(portfolio_pd)}, across {int(row['Borrowers'])} borrowers and {format_money(row['EAD'])} EAD.")
+    det = df[(df["risk_direction"]=="Deteriorating") & (df["credit_utilization"]>=.80)]
+    if len(det) >= min_group:
+        actions.append(f"Prioritize {len(det):,} deteriorating borrowers with utilization at or above 80%, representing {format_money(det['ead'].sum())} EAD.")
+    s2u = df[df["stage"].isin(["Stage 2","Stage 3"]) & (df["recognized_collateral_coverage"]<=.01)]
+    if len(s2u):
+        actions.append(f"Review collateral/recovery strategy for {len(s2u):,} unsecured Stage 2/3 borrowers representing {format_money(s2u['ead'].sum())} EAD.")
+    if not actions:
+        actions.append("No broad portfolio trigger exceeds the current review thresholds; continue routine monitoring and case-level review.")
+    for action in actions:
+        st.write("• " + action)
+    st.caption("Recommendations are transparent screening prompts based on broad monitoring thresholds and portfolio-relative comparisons; they do not approve, decline, stage or override a borrower.")
+
     stage_view=df.groupby("stage").agg(customers=("customer_id","count"),EAD=("ead","sum"),ECL=("ecl","sum")).reset_index()
     stage_view["EAD"]=stage_view["EAD"].map(format_money)
     stage_view["ECL"]=stage_view["ECL"].map(format_money)
+    st.markdown("#### Stage distribution")
     st.dataframe(stage_view,hide_index=True,use_container_width=True)
+
     st.markdown("#### Highest-priority cases")
     priority=df.copy()
     priority["_priority"]=priority["ecl"].rank(pct=True)+priority["predicted_pd"].rank(pct=True)
@@ -54,8 +179,7 @@ with tabs[0]:
     cases=priority.nlargest(12,"_priority")[case_cols].copy()
     if "predicted_pd" in cases: cases["predicted_pd"]=cases["predicted_pd"].map(pct)
     for money_col in ["ead","ecl"]:
-        if money_col in cases:
-            cases[money_col]=cases[money_col].map(format_money)
+        if money_col in cases: cases[money_col]=cases[money_col].map(format_money)
     st.dataframe(cases,hide_index=True,use_container_width=True)
 
 with tabs[1]:
