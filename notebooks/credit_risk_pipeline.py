@@ -214,6 +214,35 @@ print("HOLDOUT OBSERVED DEFAULT RATE:",round(out.default.mean(),4))
 print("TOTAL 12M ECL (diagnostic):",round(out.ecl_12m.sum(),2))
 print("TOTAL STAGED ECL:",round(out.ecl.sum(),2))
 
+# ECL coverage diagnostics: expose why provision coverage differs by stage.
+# These are diagnostics only; they do not impose arbitrary IFRS 9 loss floors.
+ecl_coverage = (
+    out.groupby("stage", observed=False)
+    .agg(
+        borrowers=("customer_id", "count"),
+        exposure=("ead", "sum"),
+        ecl=("ecl", "sum"),
+        mean_pd_12m=("forward_looking_pd_12m", "mean"),
+        mean_lifetime_pd=("lifetime_pd", "mean"),
+        mean_lgd=("lgd", "mean"),
+        mean_collateral_coverage=("collateral_coverage", "mean"),
+        median_collateral_coverage=("collateral_coverage", "median"),
+        mean_term_months=("loan_term_months", "mean"),
+    )
+    .reset_index()
+)
+ecl_coverage["ecl_to_ead"] = ecl_coverage["ecl"] / ecl_coverage["exposure"].clip(lower=1)
+ecl_coverage.to_csv(ROOT/"outputs/ecl_coverage_diagnostics.csv", index=False)
+
+stage2_diag = out.loc[out["stage"] == "Stage 2", [
+    "customer_id", "ead", "ecl", "forward_looking_pd_12m", "lifetime_pd",
+    "lgd", "collateral_value", "collateral_coverage", "loan_term_months",
+    "risk_direction", "consecutive_ews_months", "days_past_due",
+]].copy()
+stage2_diag["ecl_to_ead"] = stage2_diag["ecl"] / stage2_diag["ead"].clip(lower=1)
+stage2_diag.to_csv(ROOT/"outputs/stage2_ecl_diagnostics.csv", index=False)
+print("\nECL COVERAGE DIAGNOSTICS\n", ecl_coverage.round(4).to_string(index=False))
+
 # Forward-looking macro overlay diagnostics. This separates model validation
 # (performed on the PIT-oriented PD) from the scenario adjustment used for ECL.
 macro_diag = pd.DataFrame({
