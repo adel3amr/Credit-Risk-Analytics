@@ -33,6 +33,27 @@ jobs:
           PY
       - name: Run original pipeline
         run: python notebooks/credit_risk_pipeline.py
+      - name: Audit accounting identities
+        run: |
+          python - <<'PY'
+          import numpy as np
+          import pandas as pd
+          x = pd.read_csv("outputs/borrower_audit_trace.csv")
+          assert np.allclose(x["ead"], x["loan_ead"] + x["ovd_ead"] + x["trade_ead"], atol=.02)
+          assert np.allclose(x["pit_pd_12m"], x["predicted_pd"], atol=1e-12)
+          assert np.allclose(x["pd_12m_baseline"], x["pit_pd_12m"], atol=1e-12)
+          expected_12m = x["forward_looking_pd_12m"] * x["lgd"] * x["ead"]
+          assert np.allclose(x["ecl_12m"], expected_12m, rtol=1e-10, atol=.02)
+          s1 = x["stage"].eq("Stage 1")
+          s2 = x["stage"].eq("Stage 2")
+          s3 = x["stage"].eq("Stage 3")
+          assert np.allclose(x.loc[s1, "ecl"], expected_12m.loc[s1], rtol=1e-10, atol=.02)
+          assert np.allclose(x.loc[s2, "ecl"], (x["lifetime_pd"]*x["lgd"]*x["ead"]).loc[s2], rtol=1e-10, atol=.02)
+          assert np.allclose(x.loc[s3, "ecl"], (x["lgd"]*x["ead"]).loc[s3], rtol=1e-10, atol=.02)
+          assert (x.loc[s1, "days_past_due"] < 30).all()
+          assert not ((x["stage"] != "Stage 3") & (x["current_credit_impaired"] == 1)).any()
+          print("Borrower audit identities: PASS")
+          PY
       - name: Show calibration diagnostics
         run: cat outputs/calibration_deciles.csv
       - name: Run hybrid V2 experiment
