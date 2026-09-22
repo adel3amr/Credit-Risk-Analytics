@@ -21,6 +21,15 @@ def pct(v, decimals=2):
 def format_money(v):
     return f"€{float(v):,.2f}"
 
+def compact_money(v):
+    """Compact display for portfolio headline KPIs only."""
+    value = float(v)
+    if abs(value) >= 1_000_000_000:
+        return f"€{value / 1_000_000_000:.2f}bn"
+    if abs(value) >= 1_000_000:
+        return f"€{value / 1_000_000:.2f}m"
+    return format_money(value)
+
 user = st.sidebar.text_input("User", value="demo.user")
 role = st.sidebar.selectbox("Role", ["Credit Analyst","Risk Manager","Model Validation","Auditor","Admin"])
 st.sidebar.info("Portfolio demo RBAC — not production authentication.")
@@ -53,15 +62,15 @@ with tabs[0]:
     a,b,c1,d,e = st.columns(5)
     a.metric("Borrowers", f"{len(df):,}")
     b.metric("Mean PD", pct(df["predicted_pd"].mean()))
-    c1.metric("Total EAD", format_money(total_ead))
-    d.metric("Total ECL", format_money(total_ecl))
-    e.metric("Unsecured EAD", format_money(unsecured))
+    c1.metric("Total EAD", compact_money(total_ead))
+    d.metric("Total ECL", compact_money(total_ecl))
+    e.metric("Unsecured EAD", compact_money(unsecured))
 
     st.markdown("#### Portfolio composition")
     p1,p2,p3,p4 = st.columns(4)
-    p1.metric("Direct EAD", format_money(direct_ead))
-    p2.metric("Indirect / Trade EAD", format_money(indirect_ead))
-    p3.metric("Nominal trade facilities", format_money(indirect_nominal))
+    p1.metric("Direct EAD", compact_money(direct_ead))
+    p2.metric("Indirect / Trade EAD", compact_money(indirect_ead))
+    p3.metric("Nominal trade facilities", compact_money(indirect_nominal))
     p4.metric("ECL / EAD", pct(total_ecl / max(total_ead, 1)))
 
     has_loan = df["loans"].gt(0)
@@ -85,7 +94,7 @@ with tabs[0]:
     total_limit = df["total_credit_limit"].sum()
     total_utilized = df["total_utilized_amount"].sum()
     u1,u2,u3,u4 = st.columns(4)
-    u1.metric("Total credit limits", format_money(total_limit))
+    u1.metric("Total credit limits", compact_money(total_limit))
     u2.metric("Direct utilization", pct(direct_drawn / max(direct_limit, 1)))
     u3.metric("Indirect utilization", pct(indirect_nominal / max(indirect_limit, 1)))
     u4.metric("Total portfolio utilization", pct(total_utilized / max(total_limit, 1)))
@@ -116,12 +125,13 @@ with tabs[0]:
     industry["Exposure_share"] = industry["EAD"] / max(total_ead, 1)
     industry["ECL_share"] = industry["ECL"] / max(total_ecl, 1)
     industry["Loss_intensity"] = industry["ECL"] / industry["EAD"].clip(lower=1)
+    industry = industry.sort_values("ECL_share", ascending=False)
     industry_display=industry.copy()
     for col in ["Mean_PD","Mean_LGD","Stage_2_3","Exposure_share","ECL_share","Loss_intensity"]:
         industry_display[col]=industry_display[col].map(pct)
     for col in ["EAD","ECL"]:
         industry_display[col]=industry_display[col].map(format_money)
-    st.dataframe(industry_display.sort_values("ECL_share", ascending=False), hide_index=True, use_container_width=True)
+    st.dataframe(industry_display, hide_index=True, use_container_width=True)
 
     st.markdown("#### Data-driven risk patterns")
     # Broad, pre-defined monitoring cuts only. No decision-tree fitting or threshold
@@ -153,13 +163,14 @@ with tabs[0]:
         })
     patterns=pd.DataFrame(patterns)
     if not patterns.empty:
+        patterns = patterns.sort_values("Loss vs portfolio", ascending=False)
         patterns_display=patterns.copy()
         patterns_display["EAD"]=patterns_display["EAD"].map(format_money)
         patterns_display["Mean PD"]=patterns_display["Mean PD"].map(pct)
         patterns_display["ECL / EAD"]=patterns_display["ECL / EAD"].map(pct)
         patterns_display["PD vs portfolio"]=patterns_display["PD vs portfolio"].map(lambda v:f"{v:.2f}x")
         patterns_display["Loss vs portfolio"]=patterns_display["Loss vs portfolio"].map(lambda v:f"{v:.2f}x")
-        st.dataframe(patterns_display.sort_values("Loss vs portfolio", ascending=False), hide_index=True, use_container_width=True)
+        st.dataframe(patterns_display, hide_index=True, use_container_width=True)
 
     st.markdown("#### Portfolio review actions")
     actions=[]
@@ -201,10 +212,11 @@ with tabs[1]:
     st.caption("One place to understand model risk, behaviour, exposure, staging and expected loss.")
     cid = st.selectbox("Customer", df.customer_id.astype(str).tolist())
     x = df[df.customer_id.astype(str).eq(cid)].iloc[0]
-    a,b,c,d,e,f = st.columns(6)
+    a,b,c = st.columns(3)
     a.metric("PD", pct(x.predicted_pd))
     b.metric("Score", f"{x.credit_score:.0f}")
     c.metric("Risk band", str(x.risk_band))
+    d,e,f = st.columns(3)
     d.metric("Stage", str(x.stage))
     e.metric("LGD", pct(x.lgd))
     f.metric("ECL", format_money(x.ecl))
