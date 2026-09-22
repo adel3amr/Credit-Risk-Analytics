@@ -47,3 +47,30 @@ def validation_summary(y_true, y_prob):
         "Observed_DR": float(np.mean(y_true)),
         "Calibration_in_the_large": calibration_in_the_large(y_true, y_prob),
     }
+
+
+def threshold_diagnostics(y_true, y_prob, thresholds=(0.05, 0.10)):
+    """Reference classification diagnostics without threshold optimization.
+
+    A PD model remains probabilistic. These fixed thresholds are operational
+    illustrations only; they are not selected on the validation sample.
+    """
+    y=np.asarray(y_true).astype(int)
+    p=np.asarray(y_prob, dtype=float)
+    rows=[]
+    for threshold in thresholds:
+        flagged=p >= threshold
+        tp=int(((y==1) & flagged).sum())
+        fp=int(((y==0) & flagged).sum())
+        tn=int(((y==0) & ~flagged).sum())
+        fn=int(((y==1) & ~flagged).sum())
+        rows.append({
+            "threshold": threshold,
+            "TN": tn, "FP": fp, "FN": fn, "TP": tp,
+            "default_capture_recall": tp / max(tp+fn, 1),
+            "precision": tp / max(tp+fp, 1),
+            "specificity": tn / max(tn+fp, 1),
+            "false_positive_rate": fp / max(fp+tn, 1),
+            "flagged_population": flagged.mean(),
+        })
+    return pd.DataFrame(rows)
