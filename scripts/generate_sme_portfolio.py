@@ -64,9 +64,14 @@ def main():
     none = ~(has_loan | has_ovd | has_trade)
     has_loan[none] = True
 
-    loans = np.where(
+    # Term-loan approved limit and current outstanding are separated so portfolio
+    # utilization has a genuine denominator. The draw ratio is a broad synthetic
+    # facility assumption and is not fitted to default, ECL or staging outcomes.
+    loan_limit = np.where(
         has_loan, np.clip(annual_revenue * rng.uniform(.04, .28, n), 25_000, 4_000_000), 0.0
     )
+    loan_draw_ratio = np.where(has_loan, rng.uniform(.55, 1.00, n), 0.0)
+    loans = loan_limit * loan_draw_ratio
     ovd = np.where(
         has_ovd, np.clip(annual_revenue * rng.uniform(.02, .16, n), 15_000, 2_000_000), 0.0
     )
@@ -74,6 +79,11 @@ def main():
         has_trade, np.clip(annual_revenue * rng.uniform(.02, .22, n), 20_000, 3_000_000), 0.0
     )
     loan_amount = loans + ovd + trade
+    direct_limit = loan_limit + ovd
+    direct_drawn = loans + ovd * credit_utilization
+    indirect_limit = trade
+    total_credit_limit = direct_limit + indirect_limit
+    total_utilized_amount = direct_drawn + trade
     loan_term_months = rng.choice([12, 24, 36, 48, 60], n, p=[.15, .23, .30, .17, .15])
     debt_to_income = np.clip(
         .12 + .075 * leverage_ratio + rng.normal(.08, .10, n), .03, .90
@@ -298,9 +308,16 @@ def main():
         "leverage_ratio": leverage_ratio.round(4),
         "cash_flow": cash_flow.round(2),
         "loan_amount": loan_amount.round(2),
+        "loan_limit": loan_limit.round(2),
+        "loan_draw_ratio": loan_draw_ratio.round(4),
         "loans": loans.round(2),
         "ovd": ovd.round(2),
         "trade": trade.round(2),
+        "direct_limit": direct_limit.round(2),
+        "direct_drawn": direct_drawn.round(2),
+        "indirect_limit": indirect_limit.round(2),
+        "total_credit_limit": total_credit_limit.round(2),
+        "total_utilized_amount": total_utilized_amount.round(2),
         "loan_ead": loan_ead.round(2),
         "ovd_ead": ovd_ead.round(2),
         "trade_type": trade_type,
