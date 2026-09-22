@@ -197,7 +197,7 @@ stage2[monitor_cols].sort_values("predicted_pd", ascending=False).to_csv(
     ROOT/"outputs/stage2_customer_review.csv", index=False
 )
 watchlist[monitor_cols].sort_values("predicted_pd", ascending=False).to_csv(
-    ROOT/"outputs/ews_watchlist_review.csv", index=False
+    ROOT/"outputs/ews_monitoring_review.csv", index=False
 )
 print("\nSTAGE 2 TRIGGER AUDIT (overlapping triggers)\n", audit.round(4))
 print("\nEWS MONITORING POPULATION (Stage 1 deteriorating borrowers):", len(ews_monitoring))
