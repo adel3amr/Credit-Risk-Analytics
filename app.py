@@ -49,6 +49,14 @@ with tabs[0]:
     st.subheader("Portfolio Intelligence & Assessment")
     st.caption("Automated portfolio diagnostics for credit officers. Findings are descriptive review signals, not automatic credit decisions.")
 
+    st.download_button(
+        "Download full portfolio CSV",
+        data=df.to_csv(index=False).encode("utf-8"),
+        file_name="sme_credit_risk_portfolio.csv",
+        mime="text/csv",
+        use_container_width=False,
+    )
+
     # Portfolio exposure architecture: loans and OVD are direct; trade instruments are
     # reported separately as contingent/indirect exposure. EAD is kept distinct from
     # nominal facility amounts so CCF treatment remains visible.
@@ -210,7 +218,27 @@ with tabs[0]:
 with tabs[1]:
     st.subheader("Borrower Credit File")
     st.caption("One place to understand model risk, behaviour, exposure, staging and expected loss.")
-    cid = st.selectbox("Customer", df.customer_id.astype(str).tolist())
+    st.markdown("#### Find customer")
+    search_mode = st.radio("Filter by", ["Customer number", "Risk rating", "Industry"], horizontal=True)
+    customer_ids = df.customer_id.astype(str)
+    filtered_customers = df.copy()
+
+    if search_mode == "Customer number":
+        customer_search = st.text_input("Customer number", placeholder="e.g. SME11286")
+        if customer_search:
+            filtered_customers = df[customer_ids.str.contains(customer_search.strip(), case=False, na=False)]
+    elif search_mode == "Risk rating":
+        selected_rating = st.selectbox("Risk rating", sorted(df["risk_rating"].dropna().astype(int).unique().tolist()))
+        filtered_customers = df[df["risk_rating"].astype(int).eq(selected_rating)]
+    else:
+        selected_industry = st.selectbox("Industry", sorted(df["industry"].dropna().astype(str).unique().tolist()))
+        filtered_customers = df[df["industry"].astype(str).eq(selected_industry)]
+
+    if filtered_customers.empty:
+        st.warning("No customers match the selected filter.")
+        st.stop()
+
+    cid = st.selectbox("Customer", filtered_customers.customer_id.astype(str).tolist())
     x = df[df.customer_id.astype(str).eq(cid)].iloc[0]
     a,b,c,d = st.columns(4)
     a.metric("PD", pct(x.predicted_pd))
@@ -244,7 +272,7 @@ with tabs[1]:
     if "delinquencies_12m" in df.columns and x.delinquencies_12m > 0: adverse.append(f"{int(x.delinquencies_12m)} delinquency event(s)")
     if "days_past_due" in df.columns and x.days_past_due > 0: adverse.append(f"{int(x.days_past_due)} DPD")
     if adverse: st.warning("Key adverse indicators: " + ", ".join(adverse) + ".")
-    else: st.success("No major rule-based adverse indicator is elevated in the current snapshot.")
+    else: st.success("No significant adverse indicators.")
     if "forward_looking_pd_12m" in df.columns:
         st.write(f"Model PD **{pct(x.predicted_pd)}** → macro-adjusted 12M PD **{pct(x.forward_looking_pd_12m)}**. Accounting stage remains a separate decision dimension.")
     st.subheader("Risk signals")
