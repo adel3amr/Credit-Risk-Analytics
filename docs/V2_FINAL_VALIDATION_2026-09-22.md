@@ -6,7 +6,7 @@ V2 is frozen for manual review. No further tuning of the synthetic DGP, governed
 The governed borrower PD remains the unweighted Logistic Regression using current financial and current behavioural variables. Trajectory remains a separate EWS / monitoring layer.
 
 ## Why trajectory was not promoted into core PD
-The holdout information-set experiment shows an AUC increase from 0.7511 for Financial + Current Behavior to 0.7639 after adding trajectory. The paired bootstrap mean difference is +0.0129 with a 95% percentile interval of [0.0025, 0.0229].
+The holdout information-set experiment shows an AUC increase from 0.7673 for Financial + Current Behavior to 0.7643 after adding trajectory. The paired bootstrap mean difference is -0.0030 with a 95% percentile interval of [-0.0134, 0.0070]. The final audited run therefore provides no evidence of incremental trajectory discrimination beyond current behaviour.
 
 This is not treated as independent evidence for model expansion because the frozen synthetic default DGP explicitly contains utilization_6m_change (coefficient 1.20) and months_above_80_utilization (coefficient 0.08). The observed trajectory uplift is therefore partly expected by construction. avg_utilization_6m and limit_breach_count are correlated monitoring summaries rather than direct DGP default terms.
 
@@ -15,28 +15,28 @@ Accordingly, the result is retained as a transparent methodology finding, not us
 ## Governed holdout baseline
 - Holdout borrowers: 3,000
 - Observed 12M default rate: 3.33%
-- Logistic Regression AUC: 0.7511
-- Gini: 0.5022
-- Mean PIT-oriented PD: 3.26%
-- Stage 1: 2,764 borrowers
-- Stage 2: 221 borrowers
-- Stage 3: 15 borrowers
-- Holdout EAD: approximately EUR 2.390bn
+- Logistic Regression AUC: 0.7673
+- Gini: 0.5346
+- Mean PIT-oriented PD: 3.33%
+- Stage 1: 2,760 borrowers
+- Stage 2: 231 borrowers
+- Stage 3: 9 borrowers
+- Holdout EAD: approximately EUR 2.394bn
 
 ## Forward-looking ECL overlay
 Illustrative synthetic macro assumptions produce:
-- upside mean PD: 2.78%
-- baseline mean PD: 3.26%
-- downside mean PD: 4.70%
-- probability-weighted forward-looking mean PD: 3.45%
-- PIT 12M diagnostic ECL: approximately EUR 26.90m
-- forward-looking 12M diagnostic ECL: approximately EUR 28.46m
-- forward-looking staged ECL: approximately EUR 41.72m
+- upside mean PD: 2.84%
+- baseline mean PD: 3.33%
+- downside mean PD: 4.82%
+- probability-weighted forward-looking mean PD: 3.53%
+- PIT 12M diagnostic ECL: approximately EUR 25.97m
+- forward-looking 12M diagnostic ECL: approximately EUR 27.53m
+- forward-looking staged ECL: approximately EUR 37.75m
 
 Macro variables and log-odds sensitivities are fixed synthetic assumptions, not official forecasts and not empirically estimated elasticities.
 
 ## Auditability
-The borrower audit trace is a required 3,000-row holdout output. Required columns fail closed if absent. CI now checks:
+The borrower audit trace is a required 3,000-row holdout output. Independent artifact review confirmed zero scenario-ordering violations, a strictly inverse PD-to-score ranking, no zero-EAD borrowers, and accounting identities within rounding tolerance. Required columns fail closed if absent. CI now checks:
 1. EAD = loan EAD + OVD EAD + trade EAD.
 2. PIT PD = governed predicted PD.
 3. Baseline scenario PD = PIT PD.
