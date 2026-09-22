@@ -244,7 +244,7 @@ with tabs[1]:
     if "delinquencies_12m" in df.columns and x.delinquencies_12m > 0: adverse.append(f"{int(x.delinquencies_12m)} delinquency event(s)")
     if "days_past_due" in df.columns and x.days_past_due > 0: adverse.append(f"{int(x.days_past_due)} DPD")
     if adverse: st.warning("Key adverse indicators: " + ", ".join(adverse) + ".")
-    else: st.success("No major rule-based adverse indicator is elevated in the current snapshot.")
+    else: st.success("No significant adverse indicators.")
     if "forward_looking_pd_12m" in df.columns:
         st.write(f"Model PD **{pct(x.predicted_pd)}** → macro-adjusted 12M PD **{pct(x.forward_looking_pd_12m)}**. Accounting stage remains a separate decision dimension.")
     st.subheader("Risk signals")
