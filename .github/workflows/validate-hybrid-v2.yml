@@ -50,10 +50,15 @@ jobs:
           assert np.allclose(x.loc[s1, "ecl"], expected_12m.loc[s1], rtol=1e-10, atol=.02)
           assert np.allclose(x.loc[s2, "ecl"], (x["lifetime_pd"]*x["lgd"]*x["ead"]).loc[s2], rtol=1e-10, atol=.02)
           expected_s3_recovery = np.minimum(
-    x["collateral_value"] * (1-.25) * (1-.10) / ((1+.05)**2),
-    x["ead"],
-)
-assert np.allclose(x.loc[s3, "ecl"], np.maximum(x["ead"]-expected_s3_recovery, 0.0).loc[s3], rtol=1e-10, atol=.02)
+              x["collateral_value"] * (1-.25) * (1-.10) / ((1+.05)**2),
+              x["ead"],
+          )
+          assert np.allclose(
+              x.loc[s3, "ecl"],
+              np.maximum(x["ead"]-expected_s3_recovery, 0.0).loc[s3],
+              rtol=1e-10,
+              atol=.02,
+          )
           assert (x.loc[s1, "days_past_due"] < 30).all()
           assert not ((x["stage"] != "Stage 3") & (x["current_credit_impaired"] == 1)).any()
           print("Borrower audit identities: PASS")
