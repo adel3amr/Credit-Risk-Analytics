@@ -33,7 +33,14 @@ def calibrate_intercept(linear_predictor, target_rate):
 
 
 def main():
-    rng = np.random.default_rng(SEED)
+    # Independent deterministic RNG streams prevent unrelated component edits from
+    # silently changing every downstream synthetic variable.
+    seed_sequence = np.random.SeedSequence(SEED)
+    (
+        rng_borrower, rng_facility, rng_behavior, rng_credit,
+        rng_recovery, rng_default,
+    ) = [np.random.default_rng(s) for s in seed_sequence.spawn(6)]
+    rng = rng_borrower
     n = N
 
     industries = np.array(["Manufacturing", "Retail", "Services", "Construction",
@@ -47,6 +54,7 @@ def main():
     current_ratio = np.clip(rng.lognormal(np.log(1.45), .35, n), .35, 4.0)
     cash_flow = annual_revenue * np.clip(ebitda_margin + rng.normal(.015, .04, n), -.12, .32)
 
+    rng = rng_facility
     # Three product buckets per borrower: term loans, overdraft (OVD), and trade.
     # Values below are facility amounts/limits. A borrower can use more than one product.
     has_loan = rng.random(n) < .72
@@ -70,6 +78,7 @@ def main():
     debt_to_income = np.clip(
         .12 + .075 * leverage_ratio + rng.normal(.08, .10, n), .03, .90
     )
+    rng = rng_behavior
     # 36-month behavioural history generated strictly forward from M-35 to M0.
     # Reporting-date utilization is therefore an OUTPUT of the history process,
     # rather than an anchor used to reconstruct the past. This avoids conditioning
@@ -149,6 +158,7 @@ def main():
         "limit_breach_count_month": breach_hist.reshape(-1),
         "ews_deteriorating": ews_hist.reshape(-1).astype(int),
     })
+    rng = rng_credit
     # Arrears are uncommon in a predominantly performing portfolio.
     arrears_propensity = sigmoid(
         -4.0 + 2.0 * credit_utilization + .30 * (leverage_ratio - 2)
@@ -167,6 +177,7 @@ def main():
         0,
     ).astype(int)
 
+    rng = rng_recovery
     # Borrower-level collateral pool. Coverage is assessed against total EAD below.
     # Collateral value is generated relative to committed facilities as a transparent
     # synthetic assumption; this is not facility-level collateral allocation.
@@ -175,7 +186,7 @@ def main():
     number_of_accounts = np.clip(rng.poisson(2.2, n) + 1, 1, 10)
     interest_rate = np.clip(
         .045 + .025 * credit_utilization + .008 * leverage_ratio
-        + .006 * delinquencies_12m + rng.normal(0, .008, n),
+        + .006 * delinquencies_12m + rng_credit.normal(0, .008, n),
         .035, .18,
     )
 
@@ -192,7 +203,7 @@ def main():
     ovd_ead = ovd.copy()
 
     trade_types = np.array(["Import LC", "Performance Guarantee", "Financial Guarantee"])
-    trade_type = rng.choice(trade_types, n, p=[.45, .35, .20])
+    trade_type = rng_facility.choice(trade_types, n, p=[.45, .35, .20])
     trade_ccf_map = {"Import LC": .20, "Performance Guarantee": .50, "Financial Guarantee": 1.00}
     trade_ccf = np.array([trade_ccf_map[x] for x in trade_type])
     trade_ccf = np.where(has_trade, trade_ccf, 0.0)
@@ -205,7 +216,7 @@ def main():
     collateral_coverage = collateral_value / np.maximum(ead, 1)
     lgd = np.clip(
         .62 - .22 * np.minimum(collateral_coverage, 2.0)
-        + .06 * (industry == "Hospitality") + rng.normal(0, .07, n),
+        + .06 * (industry == "Hospitality") + rng_recovery.normal(0, .07, n),
         .12, .75,
     )
 
@@ -236,10 +247,10 @@ def main():
         + .010 * (credit_utilization >= .90), 0, .10
     )
     current_credit_impaired = (
-        (days_past_due >= 90) | (rng.random(n) < severe_distress_prob)
+        (days_past_due >= 90) | (rng_credit.random(n) < severe_distress_prob)
     ).astype(int)
 
-    default = rng.binomial(1, pd_true)
+    default = rng_default.binomial(1, pd_true)
 
     df = pd.DataFrame({
         "customer_id": [f"SME{i:05d}" for i in range(1, n + 1)],
