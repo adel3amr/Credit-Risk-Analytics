@@ -236,6 +236,23 @@ ecl_coverage = (
 ecl_coverage["ecl_to_ead"] = ecl_coverage["ecl"] / ecl_coverage["exposure"].clip(lower=1)
 ecl_coverage.to_csv(ROOT/"outputs/ecl_coverage_diagnostics.csv", index=False)
 
+collateral_diag = (
+    out.groupby("collateral_type", observed=False)
+    .agg(
+        borrowers=("customer_id", "count"),
+        exposure=("ead", "sum"),
+        mean_nominal_coverage=("collateral_coverage", "mean"),
+        mean_recognized_coverage=("recognized_collateral_coverage", "mean"),
+        mean_lgd=("lgd", "mean"),
+        ecl=("ecl", "sum"),
+    )
+    .reset_index()
+)
+collateral_diag["portfolio_share"] = collateral_diag["borrowers"] / len(out)
+collateral_diag["ecl_to_ead"] = collateral_diag["ecl"] / collateral_diag["exposure"].clip(lower=1)
+collateral_diag.to_csv(ROOT/"outputs/collateral_lgd_diagnostics.csv", index=False)
+print("\nCOLLATERAL / LGD DIAGNOSTICS\n", collateral_diag.round(4).to_string(index=False))
+
 stage2_diag = out.loc[out["stage"] == "Stage 2", [
     "customer_id", "ead", "ecl", "forward_looking_pd_12m", "lifetime_pd",
     "lgd", "collateral_value", "collateral_coverage", "recognized_collateral",
