@@ -155,7 +155,12 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
     s2 = out["stage"] == "Stage 2"
     s3 = out["stage"] == "Stage 3"
     out.loc[s2, "ecl"] = (out["lifetime_pd"] * lgd * ead)[s2]
-    # Credit-impaired proxy: PD=100%; discounting/recovery timing is out of scope.
-    out.loc[s3, "ecl"] = (lgd * ead)[s3]
+    # Explicit simplified Stage 3 recovery policy: recognize the unsecured shortfall
+    # after nominal borrower-level collateral. Collateral is capped at EAD, so
+    # over-collateralization cannot create negative ECL. This is an internal project
+    # assumption, not a full IFRS 9 discounted cash-shortfall calculation; collateral
+    # haircuts, realization costs/timing and enforceability are outside V2 scope.
+    collateral = out["collateral_value"].fillna(0).clip(lower=0)
+    out.loc[s3, "ecl"] = np.maximum(ead - collateral, 0.0)[s3]
     out["lifetime_ecl"] = out["ecl"]
     return out
