@@ -14,4 +14,5 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install -r requirements.txt
+      - run: python scripts/generate_sme_portfolio.py
       - run: python experiments/bootstrap_confidence_intervals.py
