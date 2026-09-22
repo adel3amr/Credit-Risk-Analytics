@@ -82,7 +82,7 @@ jobs:
             outputs/stage2_trigger_audit.csv
             outputs/portfolio_monitoring.csv
             outputs/stage2_customer_review.csv
-            outputs/ews_watchlist_review.csv
+            outputs/ews_monitoring_review.csv
             outputs/ews_9m_policy_validation.csv
             outputs/borrower_audit_trace.csv
             outputs/borrower_audit_trace_dictionary.csv
