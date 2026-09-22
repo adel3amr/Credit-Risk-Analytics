@@ -1,0 +1,6 @@
+role,view_borrower,run_assessment,propose_override,approve_override,manage_policy,manage_macro,manage_users,view_audit
+Credit Analyst,1,1,1,0,0,0,0,1
+Risk Manager,1,1,1,1,1,1,0,1
+Model Validation,1,0,0,0,0,0,0,1
+Auditor,1,0,0,0,0,0,0,1
+Admin,1,0,0,0,0,0,1,1
