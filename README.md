@@ -92,19 +92,19 @@ The final V2 architecture keeps current behaviour in core PD and trajectory in t
 
 ## Current governed validation
 The latest chronological-data workflow should be treated as the current V2 baseline. On the 3,000-borrower holdout:
-- governed Logistic Regression AUC: **0.7511**, Gini: **0.5022**;
+- governed Logistic Regression AUC: **0.7673**, Gini: **0.5346**;
 - holdout observed default rate: **3.33%**;
-- mean predicted PD: **3.26%**;
-- Stage 1: **2,764 borrowers**, observed future default **2.9%**;
-- Stage 2: **221 borrowers**, observed future default **8.1%**;
-- Stage 3: **15 borrowers**; sample too small for inference;
-- total holdout EAD: approximately **EUR 2.390bn**;
-- mean PIT-oriented 12-month PD: **3.26%**;
-- mean probability-weighted forward-looking PD: **3.45%**;
-- upside / baseline / downside mean scenario PD: **2.78% / 3.26% / 4.70%**;
-- PIT diagnostic 12-month ECL: approximately **EUR 26.90m**;
-- forward-looking diagnostic 12-month ECL: approximately **EUR 28.46m**;
-- simplified forward-looking staged ECL: approximately **EUR 41.72m**.
+- mean predicted PD: **3.33%**;
+- Stage 1: **2,760 borrowers**, observed future default **2.8%**;
+- Stage 2: **231 borrowers**, observed future default **9.5%**;
+- Stage 3: **9 borrowers**; no holdout defaults were observed and the sample is far too small for inference;
+- total holdout EAD: approximately **EUR 2.394bn**;
+- mean PIT-oriented 12-month PD: **3.33%**;
+- mean probability-weighted forward-looking PD: **3.53%**;
+- upside / baseline / downside mean scenario PD: **2.84% / 3.33% / 4.82%**;
+- PIT diagnostic 12-month ECL: approximately **EUR 25.97m**;
+- forward-looking diagnostic 12-month ECL: approximately **EUR 27.53m**;
+- simplified forward-looking staged ECL: approximately **EUR 37.75m**.
 
 The fixed 9-month EWS policy is retained without post-holdout threshold optimization. Its results are interpreted as synthetic policy diagnostics rather than evidence of a universal SICR timing rule.
 
