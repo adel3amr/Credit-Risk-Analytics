@@ -2,17 +2,17 @@
 import pandas as pd
 import streamlit as st
 from pathlib import Path
-from src.governance import has_permission, validate_macro_scenarios
+from src.governance import has_permission, validate_macro_scenarios, OverrideRequest, approve_override, append_audit_event
 
 ROOT = Path(__file__).resolve().parent
 AUDIT = ROOT / "outputs" / "borrower_audit_trace.csv"
-MACRO = ROOT / "config" / "macro_scenarios.csv"
+MACRO = ROOT / "config" / "macro_scenarios.csv"\nAUDIT_LOG = ROOT / "outputs" / "governance_audit.jsonl"
 
 st.set_page_config(page_title="SME Credit Risk Platform", layout="wide")
 st.title("SME Credit Risk Platform")
 st.caption("PD • EWS • IFRS 9-style staging • ECL • governed interventions")
 
-role = st.sidebar.selectbox("Demo role", ["Credit Analyst","Risk Manager","Model Validation","Auditor","Admin"])
+user = st.sidebar.text_input("User", value="demo.user")\nrole = st.sidebar.selectbox("Role", ["Credit Analyst","Risk Manager","Model Validation","Auditor","Admin"])
 st.sidebar.info("Portfolio demo RBAC — not production authentication.")
 
 if not AUDIT.exists():
@@ -54,11 +54,35 @@ with tabs[2]:
         proposed=st.text_input("Proposed value")
         reason=st.selectbox("Reason",["Qualitative risk","New information","Data correction","Credit committee judgement","Other"])
         rationale=st.text_area("Rationale")
-        st.button("Submit for approval", disabled=not(proposed and rationale))
+        if st.button("Submit for approval", disabled=not(proposed and rationale)):
+            req = OverrideRequest(str(cid), typ, str(x.predicted_pd if typ=="PD" else x.risk_band), proposed, reason.upper().replace(" ","_"), rationale, user, role)
+            try:
+                req.validate()
+                st.session_state["pending_override"] = req
+                append_audit_event(AUDIT_LOG, {"actor":user,"role":role,"action":"PROPOSE_OVERRIDE","customer_id":str(cid),"override_type":typ,"proposed_value":proposed,"reason":reason})
+                st.success("Submitted for Risk Manager approval.")
+            except (ValueError, PermissionError) as e:
+                st.error(str(e))
     else:
         st.info("Your role is read-only for overrides.")
     if has_permission(role,"approve_override"):
-        st.caption("Risk Manager: approval queue enabled (maker-checker control).")
+        st.caption("Risk Manager approval queue")
+        req = st.session_state.get("pending_override")
+        if req:
+            st.write(f"**{req.customer_id}** · {req.override_type}: {req.model_value} → **{req.proposed_value}**")
+            st.caption(f"{req.reason_code} — {req.rationale}")
+            if st.button("Approve override"):
+                try:
+                    approved = approve_override(req, user, role)
+                    append_audit_event(AUDIT_LOG, {"actor":user,"role":role,"action":"APPROVE_OVERRIDE","customer_id":req.customer_id,"override_type":req.override_type,"proposed_value":req.proposed_value})
+                    st.session_state["last_approved_override"] = approved
+                    del st.session_state["pending_override"]
+                    st.success("Override approved and audit event recorded.")
+                    st.rerun()
+                except PermissionError as e:
+                    st.error(str(e))
+        else:
+            st.info("No override waiting for approval.")
 
 with tabs[3]:
     scenarios=pd.read_csv(MACRO)
@@ -70,6 +94,7 @@ with tabs[3]:
             try:
                 validate_macro_scenarios(edited)
                 st.success("Valid: scenario weights sum to 100%.")
+                st.session_state["validated_macro"] = edited.copy()
             except ValueError as e:
                 st.error(str(e))
     else:
@@ -80,4 +105,10 @@ with tabs[4]:
     st.write(f"Current demo role: **{role}**")
     perms=["view_borrower","run_assessment","propose_override","approve_override","manage_policy","manage_macro","manage_users","view_audit"]
     st.dataframe(pd.DataFrame({"Permission":perms,"Allowed":[has_permission(role,p) for p in perms]}),hide_index=True)
+    if has_permission(role,"view_audit") and AUDIT_LOG.exists():
+        st.subheader("Recent audit activity")
+        import json
+        events=[json.loads(line) for line in AUDIT_LOG.read_text(encoding="utf-8").splitlines() if line.strip()]
+        if events:
+            st.dataframe(pd.DataFrame(events).tail(20).iloc[::-1], hide_index=True, use_container_width=True)
     st.caption("Production deployment would connect this layer to enterprise IAM and a transactional audit store.")
