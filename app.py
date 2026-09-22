@@ -35,7 +35,21 @@ with tabs[0]:
     b.metric("Mean PD", f"{df.predicted_pd.mean():.2%}")
     c.metric("Total EAD", f"€{df.ead.sum()/1e6:,.1f}m")
     d.metric("Total ECL", f"€{df.ecl.sum()/1e6:,.1f}m")
-    st.dataframe(df.groupby("stage").agg(customers=("customer_id","count"),EAD=("ead","sum"),ECL=("ecl","sum")), use_container_width=True)
+    stage_view=df.groupby("stage").agg(customers=("customer_id","count"),EAD=("ead","sum"),ECL=("ecl","sum")).reset_index()
+    stage_view["EAD"]=stage_view["EAD"].map(lambda v:f"€{v/1e6:,.2f}m")
+    stage_view["ECL"]=stage_view["ECL"].map(lambda v:f"€{v/1e6:,.2f}m")
+    st.dataframe(stage_view,hide_index=True,use_container_width=True)
+    st.markdown("#### Highest-priority cases")
+    priority=df.copy()
+    priority["_priority"]=priority["ecl"].rank(pct=True)+priority["predicted_pd"].rank(pct=True)
+    if "risk_direction" in priority.columns:
+        priority["_priority"]+=priority["risk_direction"].eq("Deteriorating").astype(int)
+    case_cols=[x for x in ["customer_id","industry","predicted_pd","credit_score","risk_band","risk_direction","stage","days_past_due","ead","ecl"] if x in priority.columns]
+    cases=priority.nlargest(12,"_priority")[case_cols].copy()
+    if "predicted_pd" in cases: cases["predicted_pd"]=cases["predicted_pd"].map(lambda v:f"{v:.2%}")
+    for money in ["ead","ecl"]:
+        if money in cases: cases[money]=cases[money].map(lambda v:f"€{v:,.0f}")
+    st.dataframe(cases,hide_index=True,use_container_width=True)
 
 with tabs[1]:
     st.subheader("Borrower Credit File")
@@ -48,6 +62,10 @@ with tabs[1]:
     c.metric("Risk band", str(x.risk_band))
     d.metric("Stage", str(x.stage))
     e.metric("ECL", f"€{x.ecl:,.0f}")
+    st.markdown("#### Decision summary")
+    ews=str(x["risk_direction"]) if "risk_direction" in df.columns else "—"
+    st.write(f"**{x.risk_band}** model risk · **{ews}** EWS · **{x.stage}** accounting classification. "
+             f"Exposure is **€{x.ead:,.0f}** with expected loss of **€{x.ecl:,.0f}**.")
     st.subheader("Exposure & recovery")
     st.dataframe(pd.DataFrame({"Metric":["Loan EAD","OVD EAD","Trade EAD","Total EAD","Collateral","LGD"],
                                "Value":[x.loan_ead,x.ovd_ead,x.trade_ead,x.ead,x.collateral_value,x.lgd]}), hide_index=True)
