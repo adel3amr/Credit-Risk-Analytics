@@ -28,8 +28,6 @@ if not AUDIT.exists():
     st.stop()
 df = pd.read_csv(AUDIT)
 
-page = st.sidebar.radio("Workspace", ["Portfolio Cockpit","Borrower Credit File","Risk Management"])
-
 # Three task-oriented workspaces keep the demo focused.
 tabs = st.tabs(["Portfolio Cockpit","Borrower Credit File","Risk Management"])
 
