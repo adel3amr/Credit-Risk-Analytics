@@ -12,7 +12,7 @@ from sklearn.metrics import roc_auc_score, classification_report, roc_curve
 from data_preparation import load_data, prepare_data, pd_feature_columns
 from pd_model import logistic_model, random_forest_model, gradient_boosting_model
 from validation import validation_summary, calibration_table, threshold_diagnostics
-from scorecard import add_score
+from scorecard import add_score, add_risk_rating
 from ecl import calculate_ecl
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -51,6 +51,7 @@ out=df.iloc[Xte.index].copy()
 out["predicted_pd"]=primary_pd
 out=add_score(out)
 out=calculate_ecl(out)
+out=add_risk_rating(out)
 
 # Borrower-level audit trace: preserve the full reporting-date chain from raw
 # synthetic inputs through governed PD, score/EWS/stage and ECL. This is intended
@@ -67,7 +68,7 @@ audit_trace_cols = [
     "direct_limit", "direct_drawn", "indirect_limit", "total_credit_limit", "total_utilized_amount",
     "trade_type", "trade_ccf", "trade_ead", "ead", "lgd", "loan_term_months",
     "predicted_pd", "pit_pd_12m", "pd_12m_upside", "pd_12m_baseline",
-    "pd_12m_downside", "forward_looking_pd_12m", "credit_score", "risk_band",
+    "pd_12m_downside", "forward_looking_pd_12m", "credit_score", "risk_band", "risk_rating", "rating_status",
     "risk_direction", "ews_signal_count", "ews_sicr_flag", "stage", "sicr_flag",
     "ecl_12m", "lifetime_pd_upside", "lifetime_pd_baseline",
     "lifetime_pd_downside", "lifetime_pd", "ecl", "default",
@@ -88,6 +89,7 @@ audit_dictionary = pd.DataFrame([
     ("pd_12m_upside / baseline / downside", "Forward-looking PD", "Fixed scenario shifts to PIT default odds; synthetic assumptions"),
     ("forward_looking_pd_12m", "Forward-looking PD", "Probability-weighted 12-month scenario PD used in ECL"),
     ("credit_score / risk_band", "Risk segmentation", "Transformations of predicted PD; not accounting stages"),
+    ("risk_rating / rating_status", "Operational rating", "1-6 performing PD grades; 7 watchlist; 8-10 Stage 3 severity. Full cash coverage sets non-Stage-3 borrowers to Rating 1."),
     ("risk_direction / ews_signal_count", "EWS", "Monitoring status; separate from PD grade"),
     ("stage", "Accounting proxy", "Simplified Stage 1/2/3 assignment using reporting-date triggers"),
     ("loan_ead", "EAD", "100% of synthetic current term-loan outstanding"),
@@ -191,7 +193,7 @@ audit.to_csv(ROOT/"outputs/stage2_trigger_audit.csv", index=False)
 monitor_cols = [
     "customer_id", "industry", "predicted_pd", "pit_pd_12m", "forward_looking_pd_12m",
     "pd_12m_upside", "pd_12m_baseline", "pd_12m_downside",
-    "risk_band", "credit_score", "stage",
+    "risk_band", "risk_rating", "rating_status", "credit_score", "stage",
     "risk_direction", "ews_signal_count", "consecutive_ews_months", "ews_monitoring_flag", "days_past_due", "delinquencies_12m",
     "previous_defaults", "credit_utilization", "utilization_6m_change",
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",

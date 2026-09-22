@@ -200,7 +200,7 @@ with tabs[0]:
     priority["_priority"]=priority["ecl"].rank(pct=True)+priority["predicted_pd"].rank(pct=True)
     if "risk_direction" in priority.columns:
         priority["_priority"]+=priority["risk_direction"].eq("Deteriorating").astype(int)
-    case_cols=[x for x in ["customer_id","industry","predicted_pd","credit_score","risk_band","risk_direction","stage","days_past_due","ead","ecl"] if x in priority.columns]
+    case_cols=[x for x in ["customer_id","industry","predicted_pd","risk_rating","rating_status","credit_score","risk_band","risk_direction","stage","days_past_due","ead","ecl"] if x in priority.columns]
     cases=priority.nlargest(12,"_priority")[case_cols].copy()
     if "predicted_pd" in cases: cases["predicted_pd"]=cases["predicted_pd"].map(pct)
     for money_col in ["ead","ecl"]:
@@ -212,17 +212,20 @@ with tabs[1]:
     st.caption("One place to understand model risk, behaviour, exposure, staging and expected loss.")
     cid = st.selectbox("Customer", df.customer_id.astype(str).tolist())
     x = df[df.customer_id.astype(str).eq(cid)].iloc[0]
-    a,b,c = st.columns(3)
+    a,b,c,d = st.columns(4)
     a.metric("PD", pct(x.predicted_pd))
-    b.metric("Score", f"{x.credit_score:.0f}")
-    c.metric("Risk band", str(x.risk_band))
-    d,e,f = st.columns(3)
-    d.metric("Stage", str(x.stage))
-    e.metric("LGD", pct(x.lgd))
-    f.metric("ECL", format_money(x.ecl))
+    b.metric("Risk Rating", f"{int(x.risk_rating)}/10")
+    c.metric("Rating status", str(x.rating_status))
+    d.metric("Credit Score", f"{x.credit_score:.0f}")
+    e,f,g,h = st.columns(4)
+    e.metric("Risk band", str(x.risk_band))
+    f.metric("Stage", str(x.stage))
+    g.metric("LGD", pct(x.lgd))
+    h.metric("ECL", format_money(x.ecl))
     st.markdown("#### Decision summary")
     ews=str(x["risk_direction"]) if "risk_direction" in df.columns else "—"
     st.write(f"**{x.risk_band}** model risk · **{ews}** EWS · **{x.stage}** accounting classification. "
+             f"Internal Risk Rating is **{int(x.risk_rating)}/10 ({x.rating_status})**. "
              f"Exposure is **{format_money(x.ead)}** with LGD of **{pct(x.lgd)}** and expected loss of **{format_money(x.ecl)}**.")
     st.subheader("Exposure & recovery")
     recovery_rows = [
