@@ -16,7 +16,7 @@ st.caption("PD • LGD • EWS • IFRS 9-style staging • ECL • governed int
 def pct(v, decimals=2):
     return f"{float(v):.{decimals}%}"
 
-def format_format_money(v):
+def format_money(v):
     return f"€{float(v):,.2f}"
 
 user = st.sidebar.text_input("User", value="demo.user")
@@ -42,8 +42,8 @@ with tabs[0]:
     c.metric("Total EAD", format_money(df.ead.sum()))
     d.metric("Total ECL", format_money(df.ecl.sum()))
     stage_view=df.groupby("stage").agg(customers=("customer_id","count"),EAD=("ead","sum"),ECL=("ecl","sum")).reset_index()
-    stage_view["EAD"]=stage_view["EAD"].map(money)
-    stage_view["ECL"]=stage_view["ECL"].map(money)
+    stage_view["EAD"]=stage_view["EAD"].map(format_money)
+    stage_view["ECL"]=stage_view["ECL"].map(format_money)
     st.dataframe(stage_view,hide_index=True,use_container_width=True)
     st.markdown("#### Highest-priority cases")
     priority=df.copy()
