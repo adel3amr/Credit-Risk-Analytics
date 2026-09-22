@@ -58,13 +58,13 @@ Validation includes ROC-AUC, Gini, KS, Brier score, log loss, calibration-in-the
 ## Operational Risk Rating
 The continuous PD-derived credit score is retained as a model-risk measure, while the workbench also exposes a bank-style **1-10 internal Risk Rating**:
 
-- **1-6:** performing grades, ordered from strongest to weakest using transparent PD bands.
+- **1:** reserved for non-Stage-3 borrowers with full eligible cash coverage (recognized cash collateral coverage at least 99.9% of EAD).
+- **2-6:** performing grades, ordered from strongest to weakest using transparent PD bands.
 - **7:** Watchlist / enhanced monitoring. This is an operational monitoring grade and is not synonymous with IFRS 9 Stage 2.
 - **8-10:** non-performing grades available only to Stage 3 borrowers; severity is differentiated using reporting-date delinquency.
-- A non-Stage-3 borrower with **full eligible cash coverage** (recognized cash collateral coverage at least 99.9% of EAD) is assigned **Risk Rating 1**.
-- Full cash security does **not** cure a Stage 3/non-performing exposure; staging remains governed separately.
+ - Full cash security does **not** cure a Stage 3/non-performing exposure; staging remains governed separately.
 
-The PD grade cut points are transparent synthetic policy assumptions and are not optimized on the holdout.
+Risk Rating 1 is therefore not a low-PD grade: a low-PD borrower without full cash coverage starts at Rating 2. The PD grade cut points are transparent synthetic policy assumptions and are not optimized on the holdout.
 
 ## Early-warning system
 The EWS is a separate monitoring layer using:
