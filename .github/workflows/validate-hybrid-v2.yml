@@ -1,0 +1,101 @@
+name: Validate Hybrid SME PD V2
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Compile Python
+        run: python -m compileall -q src notebooks scripts
+      - name: Generate calibrated synthetic portfolio
+        run: python scripts/generate_sme_portfolio.py
+      - name: Basic generated-data smoke test
+        run: |
+          python - <<'PY'
+          import pandas as pd
+          df = pd.read_csv("data/raw/sme_credit_portfolio.csv")
+          required = {"customer_id", "default", "pd_true", "ead", "lgd",
+                      "loans", "ovd", "trade", "days_past_due"}
+          missing = required.difference(df.columns)
+          assert not missing, f"Missing required columns: {sorted(missing)}"
+          assert len(df) > 0
+          print(f"Generated {len(df):,} borrowers; default rate={df['default'].mean():.2%}")
+          PY
+      - name: Run original pipeline
+        run: python notebooks/credit_risk_pipeline.py
+      - name: Audit accounting identities
+        run: |
+          python - <<'PY'
+          import numpy as np
+          import pandas as pd
+          x = pd.read_csv("outputs/borrower_audit_trace.csv")
+          assert np.allclose(x["ead"], x["loan_ead"] + x["ovd_ead"] + x["trade_ead"], atol=.02)
+          assert np.allclose(x["pit_pd_12m"], x["predicted_pd"], atol=1e-12)
+          assert np.allclose(x["pd_12m_baseline"], x["pit_pd_12m"], atol=1e-12)
+          expected_12m = x["forward_looking_pd_12m"] * x["lgd"] * x["ead"]
+          assert np.allclose(x["ecl_12m"], expected_12m, rtol=1e-10, atol=.02)
+          s1 = x["stage"].eq("Stage 1")
+          s2 = x["stage"].eq("Stage 2")
+          s3 = x["stage"].eq("Stage 3")
+          assert np.allclose(x.loc[s1, "ecl"], expected_12m.loc[s1], rtol=1e-10, atol=.02)
+          assert np.allclose(x.loc[s2, "ecl"], (x["lifetime_pd"]*x["lgd"]*x["ead"]).loc[s2], rtol=1e-10, atol=.02)
+          expected_s3_recovery = np.minimum(
+              x["collateral_value"] * (1-.25) * (1-.10) / ((1+.05)**2),
+              x["ead"],
+          )
+          assert np.allclose(
+              x.loc[s3, "ecl"],
+              np.maximum(x["ead"]-expected_s3_recovery, 0.0).loc[s3],
+              rtol=1e-10,
+              atol=.02,
+          )
+          assert (x.loc[s1, "days_past_due"] < 30).all()
+          assert not ((x["stage"] != "Stage 3") & (x["current_credit_impaired"] == 1)).any()
+          print("Borrower audit identities: PASS")
+          PY
+      - name: Show calibration diagnostics
+        run: cat outputs/calibration_deciles.csv
+      - name: Run hybrid V2 experiment
+        run: python notebooks/hybrid_pd_experiment.py
+      - name: Show information-set results
+        run: |
+          cat outputs/information_set_comparison.csv
+          cat outputs/auc_difference_bootstrap.csv
+          cat outputs/trajectory_signal_provenance.csv
+          cat outputs/trajectory_signal_audit.csv
+      - name: Upload validation outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: hybrid-pd-v2-results
+          path: |
+            outputs/model_validation.csv
+            outputs/stage2_trigger_audit.csv
+            outputs/portfolio_monitoring.csv
+            outputs/stage2_customer_review.csv
+            outputs/ews_watchlist_review.csv
+            outputs/ews_9m_policy_validation.csv
+            outputs/borrower_audit_trace.csv
+            outputs/borrower_audit_trace_dictionary.csv
+            outputs/macro_scenario_diagnostics.csv
+            outputs/calibration_deciles.csv
+            outputs/calibration_plot.png
+            outputs/information_set_comparison.csv
+            outputs/auc_difference_bootstrap.csv
+            outputs/trajectory_signal_provenance.csv
+            outputs/trajectory_signal_audit.csv
+            outputs/train_test_validation.csv
+            outputs/train_test_calibration_deciles.csv
+            outputs/confusion_matrices.csv
+            outputs/borrower_pd_comparison.csv
+            outputs/information_set_auc.png
+            outputs/utilization_trend_pd_uplift.png
