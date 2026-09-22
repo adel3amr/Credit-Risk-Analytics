@@ -155,12 +155,28 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
     s2 = out["stage"] == "Stage 2"
     s3 = out["stage"] == "Stage 3"
     out.loc[s2, "ecl"] = (out["lifetime_pd"] * lgd * ead)[s2]
-    # Explicit simplified Stage 3 recovery policy: recognize the unsecured shortfall
-    # after nominal borrower-level collateral. Collateral is capped at EAD, so
-    # over-collateralization cannot create negative ECL. This is an internal project
-    # assumption, not a full IFRS 9 discounted cash-shortfall calculation; collateral
-    # haircuts, realization costs/timing and enforceability are outside V2 scope.
+    # Simplified Stage 3 collateral-recovery workout.
+    # Generic V2 assumptions (not regulatory prescriptions):
+    # - 25% collateral haircut for stressed liquidation / valuation uncertainty;
+    # - 10% realization cost applied to the post-haircut proceeds;
+    # - 2-year recovery horizon discounted at 5% p.a.
+    # The resulting discounted net recovery is capped at EAD. Stage 3 ECL is the
+    # remaining cash shortfall. A production implementation would use collateral-
+    # specific haircuts, enforceability, workout costs, expected timing and the
+    # instrument's effective interest rate.
     collateral = out["collateral_value"].fillna(0).clip(lower=0)
-    out.loc[s3, "ecl"] = np.maximum(ead - collateral, 0.0)[s3]
+    stage3_collateral_haircut = 0.25
+    stage3_realization_cost_rate = 0.10
+    stage3_recovery_years = 2.0
+    stage3_discount_rate = 0.05
+    stressed_collateral = collateral * (1.0 - stage3_collateral_haircut)
+    net_recovery_before_discount = stressed_collateral * (1.0 - stage3_realization_cost_rate)
+    discounted_recovery = net_recovery_before_discount / (
+        (1.0 + stage3_discount_rate) ** stage3_recovery_years
+    )
+    out["stage3_discounted_collateral_recovery"] = np.minimum(discounted_recovery, ead)
+    out.loc[s3, "ecl"] = np.maximum(
+        ead - out["stage3_discounted_collateral_recovery"], 0.0
+    )[s3]
     out["lifetime_ecl"] = out["ecl"]
     return out
