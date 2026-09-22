@@ -75,16 +75,27 @@ with tabs[0]:
     })
     st.dataframe(product_view, hide_index=True, use_container_width=True)
 
-    # OVD is the facility for which the synthetic data contains both an approved limit
-    # and a current utilization ratio. We therefore report OVD utilization explicitly
-    # rather than inventing a portfolio-wide approved-limit denominator for term loans.
-    ovd_limit = df["ovd"].sum()
-    ovd_drawn_proxy = (df["ovd"] * df["credit_utilization"]).sum()
-    util_cols = st.columns(3)
-    util_cols[0].metric("OVD approved limits", format_money(ovd_limit))
-    util_cols[1].metric("OVD utilized", format_money(ovd_drawn_proxy))
-    util_cols[2].metric("OVD utilization", pct(ovd_drawn_proxy / max(ovd_limit, 1)))
-    st.caption("A true total-portfolio utilization ratio is not shown because the current synthetic schema does not store a separate approved limit for term loans. Trade nominal amount and CCF-adjusted EAD are shown separately.")
+    st.markdown("#### Facility utilization")
+    direct_limit = df["direct_limit"].sum()
+    direct_drawn = df["direct_drawn"].sum()
+    indirect_limit = df["indirect_limit"].sum()
+    total_limit = df["total_credit_limit"].sum()
+    total_utilized = df["total_utilized_amount"].sum()
+    u1,u2,u3,u4 = st.columns(4)
+    u1.metric("Total credit limits", format_money(total_limit))
+    u2.metric("Direct utilization", pct(direct_drawn / max(direct_limit, 1)))
+    u3.metric("Indirect utilization", pct(indirect_nominal / max(indirect_limit, 1)))
+    u4.metric("Total portfolio utilization", pct(total_utilized / max(total_limit, 1)))
+    util_view = pd.DataFrame([
+        ["Direct — term loan + OVD", direct_limit, direct_drawn, direct_drawn / max(direct_limit,1)],
+        ["Indirect — trade", indirect_limit, indirect_nominal, indirect_nominal / max(indirect_limit,1)],
+        ["Total", total_limit, total_utilized, total_utilized / max(total_limit,1)],
+    ], columns=["Facility class","Approved limit","Utilized / issued amount","Utilization"])
+    util_view["Approved limit"]=util_view["Approved limit"].map(format_money)
+    util_view["Utilized / issued amount"]=util_view["Utilized / issued amount"].map(format_money)
+    util_view["Utilization"]=util_view["Utilization"].map(pct)
+    st.dataframe(util_view, hide_index=True, use_container_width=True)
+    st.caption("Direct utilization uses current term-loan outstanding plus OVD drawn amount against approved direct limits. Trade utilization is issued nominal trade facilities against approved indirect limits; CCF-adjusted trade EAD remains a separate credit-risk exposure measure.")
 
     st.markdown("#### Industry assessment")
     industry = (
