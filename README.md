@@ -175,3 +175,10 @@ Generate the synthetic data before running the analytics so the raw schema and g
 
 ## Disclaimer
 Educational synthetic portfolio project only. It is not a production credit model and does not constitute accounting, regulatory, lending or investment advice.
+
+
+### Experimental PCA challenger
+
+A separate **PCA + Logistic Regression** challenger is included as a learning and stability experiment. PCA is fitted inside the training pipeline after median imputation and standardization, retaining 95% of training-set variance. It is evaluated on the same untouched holdout and exports diagnostics to `outputs/pca_logistic_challenger.csv`.
+
+This experiment does **not** replace, recalibrate, or influence the governed Logistic Regression PD model, borrower PDs, staging, ratings, or ECL. Its purpose is to test whether dimensionality reduction provides useful out-of-sample evidence despite the loss of direct feature-level interpretability.
