@@ -8,6 +8,8 @@ ROOT = Path(__file__).resolve().parent
 AUDIT = ROOT / "outputs" / "borrower_audit_trace.csv"
 MACRO = ROOT / "config" / "macro_scenarios.csv"
 AUDIT_LOG = ROOT / "outputs" / "governance_audit.jsonl"
+MODEL_VALIDATION = ROOT / "outputs" / "model_validation.csv"
+CALIBRATION = ROOT / "outputs" / "calibration_deciles.csv"
 
 st.set_page_config(page_title="SME Credit Risk Platform", layout="wide")
 st.title("SME Credit Risk Platform")
@@ -29,7 +31,10 @@ if not AUDIT.exists():
 df = pd.read_csv(AUDIT)
 
 # Three task-oriented workspaces keep the demo focused.
-tabs = st.tabs(["Portfolio Cockpit","Borrower Credit File","Risk Management"])
+tab_names = ["Portfolio Cockpit","Borrower Credit File","Risk Management"]
+if role == "Model Validation":
+    tab_names.append("Model Validation")
+tabs = st.tabs(tab_names)
 
 with tabs[0]:
     st.subheader("Portfolio Intelligence & Assessment")
@@ -292,3 +297,53 @@ with tabs[2]:
     st.info("Validated model coefficients are read-only. Policy, macro assumptions and human overrides are governed separately.")
     perms=["view_borrower","run_assessment","propose_override","approve_override","manage_policy","manage_macro","manage_users","view_audit"]
     st.dataframe(pd.DataFrame({"Permission":perms,"Allowed":[has_permission(role,p) for p in perms]}),hide_index=True)
+
+
+if role == "Model Validation":
+    with tabs[3]:
+        st.subheader("Model Validation")
+        st.caption("Independent validation view — hidden from Credit Analyst, Risk Manager, Auditor and Admin roles.")
+
+        if not MODEL_VALIDATION.exists() or not CALIBRATION.exists():
+            st.error("Run the credit-risk pipeline first to generate validation outputs.")
+        else:
+            validation = pd.read_csv(MODEL_VALIDATION)
+            calibration = pd.read_csv(CALIBRATION)
+            governed = validation.loc[validation["Model"].eq("Logistic Regression")].iloc[0]
+
+            st.markdown("#### Governed PD performance")
+            m1,m2,m3,m4,m5 = st.columns(5)
+            m1.metric("ROC-AUC", f"{governed['ROC_AUC']:.4f}")
+            m2.metric("Gini / AR", f"{governed['Gini']:.4f}")
+            m3.metric("KS", f"{governed['KS']:.4f}")
+            m4.metric("Brier", f"{governed['Brier']:.4f}")
+            m5.metric("Log Loss", f"{governed['LogLoss']:.4f}")
+
+            c1,c2,c3 = st.columns(3)
+            c1.metric("Mean predicted PD", pct(governed["Mean_PD"]))
+            c2.metric("Observed default rate", pct(governed["Observed_DR"]))
+            c3.metric("Calibration-in-the-large", f"{governed['Calibration_in_the_large']*100:+.2f} pp")
+
+            st.markdown("#### Calibration curve")
+            st.caption("A credible PD model should not only rank borrowers; predicted probabilities should align reasonably with observed default frequencies out of sample.")
+            chart = calibration.rename(columns={"mean_predicted_pd":"Predicted PD","observed_default_rate":"Observed default rate"})
+            st.line_chart(chart.set_index("Predicted PD")["Observed default rate"], x_label="Mean predicted PD", y_label="Observed default rate")
+
+            st.markdown("#### PD buckets — predicted vs observed")
+            bucket_view = calibration.copy()
+            rename = {
+                "bucket":"PD bucket",
+                "decile":"PD bucket",
+                "n":"Borrowers",
+                "count":"Borrowers",
+                "mean_predicted_pd":"Mean predicted PD",
+                "observed_default_rate":"Observed DR",
+            }
+            bucket_view = bucket_view.rename(columns={k:v for k,v in rename.items() if k in bucket_view.columns})
+            for col in ["Mean predicted PD","Observed DR"]:
+                if col in bucket_view.columns:
+                    bucket_view[col] = bucket_view[col].map(pct)
+            st.dataframe(bucket_view, hide_index=True, use_container_width=True)
+
+            st.markdown("#### Validation interpretation")
+            st.info("Discrimination (AUC/Gini/KS) evaluates rank ordering. Brier, Log Loss, calibration-in-the-large and bucket-level predicted-vs-observed default rates evaluate probability quality. Fixed classification thresholds are operational diagnostics and are not optimized on the holdout.")
