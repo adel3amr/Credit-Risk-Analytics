@@ -32,6 +32,8 @@ def add_risk_rating(df, pd_col="predicted_pd"):
     """
     out = df.copy()
     pdv = out[pd_col].clip(0, 1)
+    if pdv.isna().any():
+        raise ValueError("Risk rating requires non-null predicted PD values")
     # Broad, transparent performing-grade cut points; not fitted on the holdout.
     rating = pd.cut(
         pdv,
