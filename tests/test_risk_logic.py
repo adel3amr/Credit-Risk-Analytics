@@ -40,15 +40,16 @@ def test_stage2_ecl_is_at_least_12m_for_two_year_term():
     assert out.loc[0, "ecl"] >= out.loc[0, "ecl_12m"]
 
 
-def test_stage3_matches_existing_discounted_recovery_policy():
+def test_stage3_uses_governed_lgd_and_keeps_direct_workout_diagnostic():
     out = calculate_ecl(pd.DataFrame([_base_ecl_row(
         days_past_due=90,
         current_credit_impaired=1,
     )]))
     discounted_recovery = 20_000 * (1 - 0.10) / ((1 + 0.05) ** 2)
-    expected = 100_000 - discounted_recovery
+    direct_workout = 100_000 - discounted_recovery
     assert out.loc[0, "stage"] == "Stage 3"
-    assert out.loc[0, "ecl"] == pytest.approx(expected)
+    assert out.loc[0, "ecl"] == pytest.approx(50_000.0)
+    assert out.loc[0, "stage3_direct_workout_ecl"] == pytest.approx(direct_workout)
 
 
 def test_duplicate_role_index_fails_closed():
