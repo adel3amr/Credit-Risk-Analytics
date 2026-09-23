@@ -25,15 +25,20 @@ jobs:
           import pandas as pd
           df = pd.read_csv("data/raw/sme_credit_portfolio.csv")
           required = {"customer_id", "default", "pd_true", "ead", "lgd",
-                      "loans", "ovd", "trade", "days_past_due"}
+                      "loans", "ovd", "trade", "days_past_due",
+                      "loan_remaining_months", "ovd_remaining_months",
+                      "trade_remaining_months"}
           missing = required.difference(df.columns)
           assert not missing, f"Missing required columns: {sorted(missing)}"
           assert len(df) > 0
           assert "consecutive_ews_months" in df.columns
           assert "months_on_ews_watchlist" not in df.columns
           assert df["consecutive_ews_months"].between(0, 30).all()
+          assert df["days_past_due"].between(0, 240).all()
           print(f"Generated {len(df):,} borrowers; default rate={df['default'].mean():.2%}")
           PY
+      - name: Run independent unit tests
+        run: pytest -q
       - name: Run original pipeline
         run: python notebooks/credit_risk_pipeline.py
       - name: Audit accounting identities
@@ -51,14 +56,18 @@ jobs:
           s2 = x["stage"].eq("Stage 2")
           s3 = x["stage"].eq("Stage 3")
           assert np.allclose(x.loc[s1, "ecl"], expected_12m.loc[s1], rtol=1e-10, atol=.02)
-          assert np.allclose(x.loc[s2, "ecl"], (x["lifetime_pd"]*x["lgd"]*x["ead"]).loc[s2], rtol=1e-10, atol=.02)
+          assert np.allclose(x.loc[s2, "ecl"], x.loc[s2, "full_lifetime_ecl"], rtol=1e-10, atol=.02)
           expected_s3_recovery = np.minimum(
               x["recognized_collateral"] * (1-.10) / ((1+.05)**2),
               x["ead"],
           )
+          expected_s3 = (
+              np.maximum(x["recognized_collateral"] - expected_s3_recovery, 0.0)
+              + x["unsecured_ead"] * x["unsecured_lgd"]
+          ).clip(upper=x["ead"])
           assert np.allclose(
               x.loc[s3, "ecl"],
-              np.maximum(x["ead"]-expected_s3_recovery, 0.0).loc[s3],
+              expected_s3.loc[s3],
               rtol=1e-10,
               atol=.02,
           )
