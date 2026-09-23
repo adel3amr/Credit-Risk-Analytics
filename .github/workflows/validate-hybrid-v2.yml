@@ -113,6 +113,8 @@ jobs:
             outputs/lgd_model_validation.csv
             outputs/lgd_calibration_deciles.csv
             outputs/lgd_holdout_predictions.csv
+            outputs/lgd_segment_validation.csv
+            outputs/lgd_tail_validation.csv
             outputs/lgd_permutation_importance.csv
             outputs/cash_lgd_deep_dive.csv
             outputs/lgd_industry_comparison.csv
