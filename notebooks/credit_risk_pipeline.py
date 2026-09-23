@@ -16,6 +16,8 @@ from scorecard import add_score, add_risk_rating
 from ecl import calculate_ecl
 
 ROOT=Path(__file__).resolve().parents[1]
+(ROOT/"outputs").mkdir(parents=True, exist_ok=True)
+(ROOT/"data/processed").mkdir(parents=True, exist_ok=True)
 df=load_data(ROOT/"data/raw/sme_credit_portfolio.csv")
 model_df=prepare_data(df)
 X=model_df[pd_feature_columns(model_df)]
@@ -47,10 +49,16 @@ threshold_diag = threshold_diagnostics(yte, primary_pd, thresholds=(0.05, 0.10))
 threshold_diag.to_csv(ROOT/"outputs/pd_threshold_diagnostics.csv", index=False)
 print("\nREFERENCE THRESHOLD DIAGNOSTICS (not optimized)\n", threshold_diag.round(4))
 
-out=df.iloc[Xte.index].copy()
+out=df.loc[Xte.index].copy()
 out["predicted_pd"]=primary_pd
 out=add_score(out)
 out=calculate_ecl(out)
+# Make the existing operational monitoring flag available before rating.
+# This does not change the existing rating policy because add_risk_rating
+# still preserves its original risk_direction fallback/union logic.
+out["ews_monitoring_flag"] = (
+    (out["risk_direction"] == "Deteriorating") & (out["stage"] == "Stage 1")
+).astype(int)
 out=add_risk_rating(out)
 
 # Borrower-level audit trace: preserve the full reporting-date chain from raw
@@ -137,10 +145,7 @@ audit = pd.DataFrame({
 audit["share_of_stage2"] = audit["stage2_customers"] / max(len(stage2), 1)
 
 # Separate monitoring population: deterioration can exist while an exposure remains
-# Stage 1. This makes risk direction visible without mechanically forcing SICR.
-out["ews_monitoring_flag"] = (
-    (out["risk_direction"] == "Deteriorating") & (out["stage"] == "Stage 1")
-).astype(int)
+# Stage 1. The flag is created before rating and reused here for reporting.
 ews_monitoring = out[out["ews_monitoring_flag"] == 1].copy()
 # Refresh Stage 2 subset after the monitoring flag is added to the master output.
 stage2 = out[out["stage"] == "Stage 2"].copy()
