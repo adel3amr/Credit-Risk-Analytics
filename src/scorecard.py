@@ -32,6 +32,8 @@ def add_risk_rating(df, pd_col="predicted_pd"):
     """
     out = df.copy()
     pdv = out[pd_col].clip(0, 1)
+    if pdv.isna().any():
+        raise ValueError("Risk rating requires non-null predicted PD values")
     # Broad, transparent performing-grade cut points; not fitted on the holdout.
     rating = pd.cut(
         pdv,
@@ -39,9 +41,12 @@ def add_risk_rating(df, pd_col="predicted_pd"):
         labels=[2, 3, 4, 5, 6],
     ).astype(int)
 
-    watch = out.get("ews_monitoring_flag", pd.Series(0, index=out.index)).fillna(0).astype(bool)
-    if "risk_direction" in out.columns:
-        watch = watch | out["risk_direction"].eq("Deteriorating")
+    # Rating 7 is an explicit operational watchlist grade. The calling pipeline
+    # must create ews_monitoring_flag after staging; do not silently broaden this
+    # to every deteriorating borrower (including Stage 2).
+    watch = out.get(
+        "ews_monitoring_flag", pd.Series(False, index=out.index)
+    ).fillna(False).astype(bool)
     rating = pd.Series(np.where(watch, 7, rating), index=out.index, dtype=int)
 
     if "stage" in out.columns:
