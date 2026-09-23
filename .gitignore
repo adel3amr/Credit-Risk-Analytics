@@ -7,3 +7,6 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .streamlit/
+
+# Generated/deployed model binaries
+models/*.joblib
