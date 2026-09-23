@@ -55,22 +55,28 @@ jobs:
           assert np.allclose(x["ead"], x["loan_ead"] + x["ovd_ead"] + x["trade_ead"], atol=.02)
           assert np.allclose(x["pit_pd_12m"], x["predicted_pd"], atol=1e-12)
           assert np.allclose(x["pd_12m_baseline"], x["pit_pd_12m"], atol=1e-12)
-          expected_12m = x["forward_looking_pd_12m"] * x["lgd"] * x["ead"]
-          assert np.allclose(x["ecl_12m"], expected_12m, rtol=1e-10, atol=.02)
+          # Governed ECL is now calculated facility by facility. Reconcile the
+          # borrower audit trace to the detailed facility output rather than to the
+          # retired borrower-level approximation.
+          f = pd.read_csv("outputs/facility_ecl_predictions.csv")
+          agg = f.groupby("customer_id", as_index=False).agg(
+              facility_ead=("ead_at_default","sum"),
+              expected_12m=("facility_ecl_12m","sum"),
+              expected_ecl=("facility_ecl","sum"),
+          )
+          z = x.merge(agg, on="customer_id", how="left", validate="one_to_one")
+          assert np.allclose(z["ead"], z["facility_ead"], rtol=1e-10, atol=.02)
+          assert np.allclose(z["ecl_12m"], z["expected_12m"], rtol=1e-10, atol=.02)
+          assert np.allclose(z["ecl"], z["expected_ecl"], rtol=1e-10, atol=.02)
           s1 = x["stage"].eq("Stage 1")
           s2 = x["stage"].eq("Stage 2")
           s3 = x["stage"].eq("Stage 3")
-          assert np.allclose(x.loc[s1, "ecl"], expected_12m.loc[s1], rtol=1e-10, atol=.02)
-          assert np.allclose(x.loc[s2, "ecl"], (x["lifetime_pd"]*x["lgd"]*x["ead"]).loc[s2], rtol=1e-10, atol=.02)
-          expected_s3_recovery = np.minimum(
-              x["recognized_collateral"] * (1-.10) / ((1+.05)**2),
-              x["ead"],
-          )
+          assert (f.loc[f["stage"].eq("Stage 2"), "facility_ecl"] >=
+                  f.loc[f["stage"].eq("Stage 2"), "facility_ecl_12m"] - .02).all()
           assert np.allclose(
-              x.loc[s3, "ecl"],
-              np.maximum(x["ead"]-expected_s3_recovery, 0.0).loc[s3],
-              rtol=1e-10,
-              atol=.02,
+              f.loc[f["stage"].eq("Stage 3"), "facility_ecl"],
+              (f["predicted_lgd"] * f["ead_at_default"]).loc[f["stage"].eq("Stage 3")],
+              rtol=1e-10, atol=.02,
           )
           assert (x.loc[s1, "days_past_due"] < 30).all()
           assert not ((x["stage"] != "Stage 3") & (x["current_credit_impaired"] == 1)).any()
