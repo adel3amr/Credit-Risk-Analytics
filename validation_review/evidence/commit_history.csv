@@ -1,0 +1,300 @@
+commit,parents,date,subject
+4d91d1e8946fda5cfc35072a45e702c85099a337,,2026-09-07T15:43:24+02:00,Add files via upload
+b0b997a2b7a16081c23ef5fae0471cefc3f8b21d,4d91d1e8946fda5cfc35072a45e702c85099a337,2026-09-18T10:34:27+02:00,Add hybrid SME behavioural and qualitative feature engineering
+c40866abb937de69d672bbb39db34d10f7abc66b,b0b997a2b7a16081c23ef5fae0471cefc3f8b21d,2026-09-18T10:34:40+02:00,Add nested information-set PD experiment
+b702b4e5fdc0f3ba23e161f90dae73b1cd5efc94,c40866abb937de69d672bbb39db34d10f7abc66b,2026-09-18T10:34:52+02:00,Document hybrid SME PD V2 methodology and limitations
+3f46edd2959f3b5ac99155f1ce6ffc5ab6a116ce,b702b4e5fdc0f3ba23e161f90dae73b1cd5efc94,2026-09-18T10:36:15+02:00,Add CI validation for hybrid SME PD V2
+ea8ffeabfd4af483be912f53c6f3ae97b220d748,3f46edd2959f3b5ac99155f1ce6ffc5ab6a116ce,2026-09-18T10:39:25+02:00,Fix behavioral delinquency field to match portfolio schema
+59eafaa25c6ca54b79296803adfeee8eb542d6d9,ea8ffeabfd4af483be912f53c6f3ae97b220d748,2026-09-18T10:58:26+02:00,Diagnose raw schema and avoid duplicate CI runs
+5d11e07b603294c7c4327f69c82a94d6f5584aa5,59eafaa25c6ca54b79296803adfeee8eb542d6d9,2026-09-18T11:06:04+02:00,Use probability-calibrated baseline for PD information-set comparison
+bd0d7f8dce0a05d889d83079621fc9e504e35d23,5d11e07b603294c7c4327f69c82a94d6f5584aa5,2026-09-18T11:08:14+02:00,Fix newline syntax in hybrid PD experiment
+066dd13994dcb22f03193e21b463a5c29aad94b3,bd0d7f8dce0a05d889d83079621fc9e504e35d23,2026-09-18T11:10:18+02:00,Correct escaped import newlines in hybrid experiment
+ce72343f7ff60cda5512141fc64d47f05d30ef68,066dd13994dcb22f03193e21b463a5c29aad94b3,2026-09-18T11:13:41+02:00,Rewrite sklearn import block with valid Python newlines
+6d66727fc3ee35517a22ffd32af160d6007e5178,ce72343f7ff60cda5512141fc64d47f05d30ef68,2026-09-18T11:17:24+02:00,Rewrite hybrid PD experiment cleanly and remove escaped artifacts
+6d688785ab644e59c1905fdc6e30b34ad87f3ec0,6d66727fc3ee35517a22ffd32af160d6007e5178,2026-09-18T11:25:05+02:00,Add calibrated synthetic SME portfolio generator
+3a3cf582ff47b3893b331aca950e137c5a4a0785,6d688785ab644e59c1905fdc6e30b34ad87f3ec0,2026-09-18T11:25:14+02:00,Validate calibrated SME portfolio before model runs
+fda0edb2e07c63249cc77cb43818ce0fa181d277,3a3cf582ff47b3893b331aca950e137c5a4a0785,2026-09-18T11:28:08+02:00,Use probability-consistent PD model specifications
+9bf4d309694a5db5ac5cd080d6dcde67ee535691,fda0edb2e07c63249cc77cb43818ce0fa181d277,2026-09-18T11:33:42+02:00,Replace PD cutoffs with SICR-based IFRS 9-style staging
+d59f462877d6f7de171e9f1e6b4de85edc38efb9,9bf4d309694a5db5ac5cd080d6dcde67ee535691,2026-09-18T11:33:50+02:00,Report calibrated PD and staged ECL diagnostics
+2edd1871225cf71d4770fc69265a3fe5d274a2be,d59f462877d6f7de171e9f1e6b4de85edc38efb9,2026-09-18T13:54:43+02:00,Add explicit PD calibration diagnostics
+617c7b94c636e607405fd43206c595f74c37e837,2edd1871225cf71d4770fc69265a3fe5d274a2be,2026-09-18T13:54:49+02:00,Export PD reliability deciles for manual review
+3afc4db1094c635b56b460fa174c479324f01d0b,617c7b94c636e607405fd43206c595f74c37e837,2026-09-18T14:01:15+02:00,Upload PD calibration deciles in validation artifact
+d50e13b7793981e16b6d7eb04a1c5dc47a2d1697,3afc4db1094c635b56b460fa174c479324f01d0b,2026-09-18T14:01:25+02:00,Add paired bootstrap uncertainty for incremental AUC
+10c0e3d3b1d20d5d0f26c76bc33d82b01926ac0e,d50e13b7793981e16b6d7eb04a1c5dc47a2d1697,2026-09-18T14:01:31+02:00,Publish bootstrap uncertainty with CI validation artifacts
+38a708d95084fc7d532d61f1984a095d1d644052,10c0e3d3b1d20d5d0f26c76bc33d82b01926ac0e,2026-09-19T10:06:17+02:00,Separate PD predictors from EAD and LGD risk parameters
+71b98ade2d1f6f7034394c402cb01ce62802afdf,38a708d95084fc7d532d61f1984a095d1d644052,2026-09-19T10:06:21+02:00,Use explicit leakage-safe PD feature set
+38c15d29db866f5844337a8d20fb7382a8886320,71b98ade2d1f6f7034394c402cb01ce62802afdf,2026-09-19T10:06:28+02:00,Enforce PD leakage and data invariants in CI
+64f5870f32a034d41153ae3cde6a747ed87d4bbe,38c15d29db866f5844337a8d20fb7382a8886320,2026-09-20T13:08:45+02:00,Separate reporting-date credit impairment from future default target
+4c9c159ee65564698089e2784b0b1bc352160468,64f5870f32a034d41153ae3cde6a747ed87d4bbe,2026-09-20T13:08:49+02:00,Exclude reporting-date impairment state from prospective PD predictors
+d9a37ddd661d240dedf0bffab37d8ec9bebcd840,4c9c159ee65564698089e2784b0b1bc352160468,2026-09-20T13:08:59+02:00,Remove future-target leakage from staging and use term-based lifetime PD
+6614514fcc40d5f43099d8adc9b4723719d7d167,d9a37ddd661d240dedf0bffab37d8ec9bebcd840,2026-09-20T13:09:04+02:00,Guard impairment state from PD leakage in CI
+2af15e65c28784db71b157c17f41066079974e98,6614514fcc40d5f43099d8adc9b4723719d7d167,2026-09-21T11:38:01+02:00,Generate genuine synthetic six-month behavioural history
+dd65913e7b0e080ceb21c2c5cff6adc728fd033f,2af15e65c28784db71b157c17f41066079974e98,2026-09-21T11:38:08+02:00,Use observed synthetic history instead of reconstructing behavioral trend
+d4921c789cdbe55105fd2400df70ce1e84998906,dd65913e7b0e080ceb21c2c5cff6adc728fd033f,2026-09-21T11:38:13+02:00,Validate longitudinal behavioral feature invariants
+d1b88671770c5c160295524e5e86b6631b70e6b6,d4921c789cdbe55105fd2400df70ce1e84998906,2026-09-21T14:37:24+02:00,Add log loss to PD validation diagnostics
+1039ad353d17572a23c18dd5cd2e4d8362c651a0,d1b88671770c5c160295524e5e86b6631b70e6b6,2026-09-21T14:37:27+02:00,Export and display PD calibration reliability plot
+aae9f2be5ae9a2362da440e796dfa20f0a1c985c,1039ad353d17572a23c18dd5cd2e4d8362c651a0,2026-09-21T14:37:36+02:00,Add score ECL and calibration validation checks
+e33f91d914dacaa0026a3f42a8c206e5473cf6fd,aae9f2be5ae9a2362da440e796dfa20f0a1c985c,2026-09-21T14:39:03+02:00,Fix row-wise Stage 3 precedence invariant
+af612ed19a3a20ddaf31816203aba069882bd831,e33f91d914dacaa0026a3f42a8c206e5473cf6fd,2026-09-21T14:40:29+02:00,Align staging invariant tests with Stage 3 precedence rule
+62a204203b2ef317fb72de3e7dc5cf3429165da6,af612ed19a3a20ddaf31816203aba069882bd831,2026-09-21T14:47:10+02:00,Add loan OVD and trade product exposure structure
+56faebbfbccbf4cbddc564e8e9ed7606d1541ccb,62a204203b2ef317fb72de3e7dc5cf3429165da6,2026-09-21T14:47:20+02:00,Keep product EAD and trade CCF fields out of PD model
+ee53ccd9296f009baa79a0f904c1565507599ed0,56faebbfbccbf4cbddc564e8e9ed7606d1541ccb,2026-09-21T14:47:24+02:00,Validate three-product exposure and trade CCF mechanics
+4833e84ebebfa75c6364daba3ee1b83d9b0ac2cf,ee53ccd9296f009baa79a0f904c1565507599ed0,2026-09-21T15:13:29+02:00,Simplify CI to stable core validation checks
+03c1db0c69593423ab35c446a4a9a3c53cab074f,4833e84ebebfa75c6364daba3ee1b83d9b0ac2cf,2026-09-21T15:15:54+02:00,Reduce CI gate to basic smoke test before model runs
+8d125e016c852f41bbc2761c57497fff3a496fe1,03c1db0c69593423ab35c446a4a9a3c53cab074f,2026-09-21T15:22:41+02:00,Separate current behavior from risk trajectory feature sets
+8bd690aa3c4932d1c26b7c8c6921d76a23292fa5,8d125e016c852f41bbc2761c57497fff3a496fe1,2026-09-21T15:23:01+02:00,Isolate trajectory uplift and add train-test PD diagnostics
+18239b6cdbca215b7f354979a75514a23b1d05df,8bd690aa3c4932d1c26b7c8c6921d76a23292fa5,2026-09-21T15:23:07+02:00,Upload train-test validation diagnostics
+1ff07e7a8c1198976e837ed3daa93654472067d2,18239b6cdbca215b7f354979a75514a23b1d05df,2026-09-21T15:39:40+02:00,Govern PD features with explicit approved borrower inputs
+9c36ecedc7be45b1f40c80cf8fc0630749d5c109,1ff07e7a8c1198976e837ed3daa93654472067d2,2026-09-21T15:39:50+02:00,Add separate behavioral early-warning risk-direction layer
+dc3acf898465a4016eadc37be39e66a467f16869,9c36ecedc7be45b1f40c80cf8fc0630749d5c109,2026-09-21T15:39:58+02:00,Use separate EWS deterioration flag in simplified SICR staging
+e1873cc3c7b86629f7ddeb3ea785c3b2f7440c92,dc3acf898465a4016eadc37be39e66a467f16869,2026-09-21T15:56:01+02:00,Add customer-level monitoring and Stage 2 trigger audit
+9d8533a8ecc75e85c7d0b14040ea8566515410a8,e1873cc3c7b86629f7ddeb3ea785c3b2f7440c92,2026-09-21T15:56:08+02:00,Upload portfolio monitoring and Stage 2 audit outputs
+60f782de82ccb2b172f19da873038a5aafdc624a,9d8533a8ecc75e85c7d0b14040ea8566515410a8,2026-09-21T16:05:07+02:00,Separate EWS watchlist from IFRS 9 staging
+813e3367c295d7f773a9e123f3bf3ba6e8d0700c,60f782de82ccb2b172f19da873038a5aafdc624a,2026-09-21T16:05:17+02:00,Report EWS as separate Stage 1 watchlist
+079447c9814f2a9807af6ebc5719bde4a24a2a2a,813e3367c295d7f773a9e123f3bf3ba6e8d0700c,2026-09-21T16:05:21+02:00,Upload separate EWS watchlist review
+fc2b5c420ae7af545e37461fe1c8171b1b07db2e,079447c9814f2a9807af6ebc5719bde4a24a2a2a,2026-09-21T16:09:11+02:00,Fix watchlist flag in Stage 2 review export
+c72f9d5fca3fbbdcea02fd95f6f4702240f5c1c3,fc2b5c420ae7af545e37461fe1c8171b1b07db2e,2026-09-21T16:10:31+02:00,Refresh Stage 2 subset after watchlist flag
+176a90dd43afd7551fc5d0fac9c64fa9f5713918,c72f9d5fca3fbbdcea02fd95f6f4702240f5c1c3,2026-09-21T16:15:46+02:00,Add synthetic EWS watchlist tenure
+41417a983e295dd502bb136e8d740e06926f5308,176a90dd43afd7551fc5d0fac9c64fa9f5713918,2026-09-21T16:15:49+02:00,Stage persistent nine-month EWS cases
+d81fa9ca0bce58b9be368e4e3dece306755cdfad,41417a983e295dd502bb136e8d740e06926f5308,2026-09-21T16:15:52+02:00,Audit nine-month EWS staging trigger
+fb7918732adcd5c62614980dc505e7b92c08861a,d81fa9ca0bce58b9be368e4e3dece306755cdfad,2026-09-21T16:19:42+02:00,Generate 36-month SME behavioural history
+af8b29d2a08a2781da8ea4da21187bd044c66d94,fb7918732adcd5c62614980dc505e7b92c08861a,2026-09-21T16:23:43+02:00,Validate fixed nine-month EWS policy incrementally
+4f8081d5198efcb8631ccb0ef2a90f1420f69415,af8b29d2a08a2781da8ea4da21187bd044c66d94,2026-09-21T16:23:48+02:00,Upload nine-month EWS policy validation
+ca6b72dc242b1d6d30a89359e4f0feb92c5a9a40,4f8081d5198efcb8631ccb0ef2a90f1420f69415,2026-09-21T16:32:29+02:00,Fix EWS validation artifact indentation
+cb4b3e57a566a581f33e40105cc6d1e1965887bf,ca6b72dc242b1d6d30a89359e4f0feb92c5a9a40,2026-09-21T16:40:35+02:00,Checkpoint V2 methodology before governance audit
+2b805b50ada7f6e6f12fa1cef77704240ebe9d8d,cb4b3e57a566a581f33e40105cc6d1e1965887bf,2026-09-21T16:40:50+02:00,Expose governed collateral coverage feature
+7a85169f15996ba48dedcfbe13237c59bf14f330,2b805b50ada7f6e6f12fa1cef77704240ebe9d8d,2026-09-21T16:41:18+02:00,Fail fast on missing governed PD features
+b1994a21ccc2f450f711c09e1349c80ee6080d88,7a85169f15996ba48dedcfbe13237c59bf14f330,2026-09-21T16:41:26+02:00,Lock Logistic Regression as governed primary PD model
+104dc39044a7c66af782563f59a8bb401d9290b8,b1994a21ccc2f450f711c09e1349c80ee6080d88,2026-09-21T16:45:18+02:00,Clarify lifetime ECL contractual-term approximation
+173df88cdfdc39d63ca73481464b8a802862644e,104dc39044a7c66af782563f59a8bb401d9290b8,2026-09-21T16:45:25+02:00,Export governed credit score in monitoring files
+c584867fb2d524d06dd43929a69126f12d79a33f,173df88cdfdc39d63ca73481464b8a802862644e,2026-09-21T16:49:38+02:00,Document borrower-level collateral and LGD approximation
+552e12258c94315afc43635539f0c6a5daf4f4ba,c584867fb2d524d06dd43929a69126f12d79a33f,2026-09-21T16:54:06+02:00,Align loan and OVD EAD with internal policy
+0eddbd921dfe67df4a47e6f29b536e2202d92f3f,552e12258c94315afc43635539f0c6a5daf4f4ba,2026-09-21T19:03:40+02:00,Generate behavioural history chronologically
+85824ab0aaa4b2f8a04150b8026f44d12ac3d08b,0eddbd921dfe67df4a47e6f29b536e2202d92f3f,2026-09-21T19:13:59+02:00,Add default counts to EWS policy validation
+9a84ac690b1ecbcfbcfd07a97d85a4517c5c36ab,85824ab0aaa4b2f8a04150b8026f44d12ac3d08b,2026-09-21T19:14:23+02:00,Rewrite README for governed V2 architecture
+22bf8d8d3b56d7286f63b1be4a4e106005cc6ad7,9a84ac690b1ecbcfbcfd07a97d85a4517c5c36ab,2026-09-21T19:15:25+02:00,Add borrower-level end-to-end audit trace
+c6e149751104ea273cd20f7b43d383fc3022d3c3,22bf8d8d3b56d7286f63b1be4a4e106005cc6ad7,2026-09-21T19:15:32+02:00,Upload borrower audit trace artifacts
+9709fb26935d4f4f0944ece00525d48500e27425,c6e149751104ea273cd20f7b43d383fc3022d3c3,2026-09-21T19:18:41+02:00,Add forward-looking PD scenario overlay
+7cf9f7adf18b02aadbee68f8be682f7becf96840,9709fb26935d4f4f0944ece00525d48500e27425,2026-09-21T19:18:54+02:00,Expose PIT and forward-looking PD in audit outputs
+0246b2678650194401eb4d360d5ebef3cf7887a7,7cf9f7adf18b02aadbee68f8be682f7becf96840,2026-09-21T19:20:14+02:00,Add explicit forward-looking macro scenarios
+ea8c0e195e1158d8d4799bae751ca920bc7ea906,0246b2678650194401eb4d360d5ebef3cf7887a7,2026-09-21T19:20:27+02:00,Drive forward-looking PD from macro scenario table
+3b1f8de802435328d0ca459c32beec69414496f8,ea8c0e195e1158d8d4799bae751ca920bc7ea906,2026-09-21T19:21:23+02:00,Separate macro scenarios from PD sensitivity mapping
+3902107c541ef157f86f310be89b8ff5db6addbf,3b1f8de802435328d0ca459c32beec69414496f8,2026-09-21T19:21:33+02:00,Map explicit macro shocks to scenario PD odds
+906134bd651fd1ab2dd8c39a57f07136d9f47dd7,3902107c541ef157f86f310be89b8ff5db6addbf,2026-09-21T19:25:27+02:00,Add macro scenario impact diagnostics
+02e3f5048e6cd7f507c66a04d9e07583e669d978,906134bd651fd1ab2dd8c39a57f07136d9f47dd7,2026-09-21T19:25:36+02:00,Upload macro scenario diagnostics
+3336cb0b19f3bdc6abef860954f2fe8204960a4d,02e3f5048e6cd7f507c66a04d9e07583e669d978,2026-09-21T19:28:59+02:00,Audit provenance of trajectory PD signal
+7b07efde736605f73ff2bb520eec407535032794,3336cb0b19f3bdc6abef860954f2fe8204960a4d,2026-09-21T19:29:05+02:00,Upload trajectory provenance audit
+fea04082919b6f2c1caf416c4f0eadb145b39088,7b07efde736605f73ff2bb520eec407535032794,2026-09-21T19:31:06+02:00,Finalize V2 documentation and freeze methodology
+dd9479a53a8e28fdae18011fde492fa848684fd1,fea04082919b6f2c1caf416c4f0eadb145b39088,2026-09-22T08:32:27+02:00,Audit provenance of trajectory PD signal
+dae28fbd46d2b89f1ee495c5773b7775a746448a,dd9479a53a8e28fdae18011fde492fa848684fd1,2026-09-22T08:34:53+02:00,Isolate synthetic component RNG streams
+12a7ad5bec2293f128b13344a2ebf975966e9617,dae28fbd46d2b89f1ee495c5773b7775a746448a,2026-09-22T08:34:58+02:00,Fail closed on borrower audit trace schema
+c65e23a79748ff369cee0b1718d1bf054ef20930,12a7ad5bec2293f128b13344a2ebf975966e9617,2026-09-22T08:35:06+02:00,Validate and upload trajectory audit outputs
+fee4de32a2463e4c5327f63c45de8c7dcd70a830,c65e23a79748ff369cee0b1718d1bf054ef20930,2026-09-22T08:36:13+02:00,Enforce borrower-level ECL audit identities in CI
+7581bb2665cabb5960ca2f65589490f0c841c8b8,fee4de32a2463e4c5327f63c45de8c7dcd70a830,2026-09-22T08:36:40+02:00,Document final V2 validation and manual review gate
+51d19b503c32398b0166bb93b3ce37a04100e3ef,7581bb2665cabb5960ca2f65589490f0c841c8b8,2026-09-22T10:14:13+02:00,Align README with final audited V2 run
+b36879b3d862f7ae7b8b514d0de515b29c5fe944,51d19b503c32398b0166bb93b3ce37a04100e3ef,2026-09-22T10:14:21+02:00,Record final artifact-level V2 review
+1eb26a4db406e15adbb975c7207dff3928418666,b36879b3d862f7ae7b8b514d0de515b29c5fe944,2026-09-22T10:38:36+02:00,Use collateral shortfall policy for Stage 3 ECL
+aa560e20b482c5a0cdf8bf3c5dec41b06ada0941,1eb26a4db406e15adbb975c7207dff3928418666,2026-09-22T10:38:42+02:00,Validate Stage 3 collateral shortfall ECL
+62bc998bd1f9d0862bc8f55142e7128641122c55,aa560e20b482c5a0cdf8bf3c5dec41b06ada0941,2026-09-22T10:40:11+02:00,Apply stressed collateral recovery assumptions to Stage 3 ECL
+a1a800cd90051c6003c3f53494094267ba2661bd,62bc998bd1f9d0862bc8f55142e7128641122c55,2026-09-22T10:40:21+02:00,Validate stressed Stage 3 recovery calculation
+e184dd57e58c908cbc5e60f646b32736bc8c7a4f,a1a800cd90051c6003c3f53494094267ba2661bd,2026-09-22T10:47:35+02:00,Document Stage 3 workout recovery assumptions
+29ede62210a9ace628e92dea50654f9ad164d4ca,e184dd57e58c908cbc5e60f646b32736bc8c7a4f,2026-09-22T10:48:41+02:00,Fix Stage 3 CI audit block indentation
+b6db5b2bfc25942aedf1c74534ab633e8f65d1a7,4d91d1e8946fda5cfc35072a45e702c85099a337,2026-09-22T11:33:02+02:00,V2: Hybrid SME PD and risk-direction experiment
+db22272f0d79343c653a6bd6e2df6d6536c01293,b6db5b2bfc25942aedf1c74534ab633e8f65d1a7,2026-09-22T11:37:47+02:00,V3 governance: add config/access_roles.csv
+e5d77031f47171c54ce9030d9799cad221062689,db22272f0d79343c653a6bd6e2df6d6536c01293,2026-09-22T11:37:49+02:00,V3 governance: add src/governance.py
+ce0de110488c3bfa1f9a2d0a33c744c1905ea9a0,e5d77031f47171c54ce9030d9799cad221062689,2026-09-22T11:37:51+02:00,V3 governance: add docs/V3_GOVERNANCE_INTERFACE.md
+7c308c0bfe7dd1621a787b952461fd8f2be43ccc,ce0de110488c3bfa1f9a2d0a33c744c1905ea9a0,2026-09-22T11:38:00+02:00,Test V3 governance controls
+84a190a8007326b228feba7988d5b4976adeb936,7c308c0bfe7dd1621a787b952461fd8f2be43ccc,2026-09-22T11:47:22+02:00,Add simple governed Streamlit interface
+8644dd86e67fe0fc8e0834946428984c82175f94,84a190a8007326b228feba7988d5b4976adeb936,2026-09-22T11:48:09+02:00,Make V3 interface workflows functional
+480ee53e9ca48045705a36f05fe7f00ac1e0c074,8644dd86e67fe0fc8e0834946428984c82175f94,2026-09-22T11:48:16+02:00,Add V3 interface validation workflow
+998b968a15c1b55fca5d600b5e085f0a50be63a5,480ee53e9ca48045705a36f05fe7f00ac1e0c074,2026-09-22T11:50:10+02:00,Fix V3 test import path in CI
+2a42fc386b14687aff09fa110fa56c8cb59483d3,998b968a15c1b55fca5d600b5e085f0a50be63a5,2026-09-22T11:54:44+02:00,Fix V3 app audit-log declaration syntax
+a78bfe9f51adb339943c5400957de6d70d56b8f1,2a42fc386b14687aff09fa110fa56c8cb59483d3,2026-09-22T11:56:43+02:00,Normalize accidental escaped newlines in V3 app
+8272b4b6ab79981dd538ad83fd5ea51d476b6623,b6db5b2bfc25942aedf1c74534ab633e8f65d1a7,2026-09-22T12:00:08+02:00,V3: Governance and credit decisioning interface
+a39356351aabfb8242c6070976806be41bf7558b,8272b4b6ab79981dd538ad83fd5ea51d476b6623,2026-09-22T12:19:44+02:00,Refocus V3 interface on credit decision workflow
+8f7f16652dd70f77bdbcc77c5a5e8f2521f7b862,a39356351aabfb8242c6070976806be41bf7558b,2026-09-22T12:19:57+02:00,Normalize workbench source formatting
+4a6bac7efc7b27ea9a2608294c95b56347ea94ec,8f7f16652dd70f77bdbcc77c5a5e8f2521f7b862,2026-09-22T12:23:06+02:00,Add portfolio case prioritization and decision summary
+49180e9a4efd5804984347c0a76ebfaa4b869c28,8272b4b6ab79981dd538ad83fd5ea51d476b6623,2026-09-22T12:24:49+02:00,V3.1: Credit-risk decision workbench
+692cae437ed02d6a7db9f425024f3cd41fd9671f,49180e9a4efd5804984347c0a76ebfaa4b869c28,2026-09-22T12:34:48+02:00,Clarify EWS persistence versus watchlist semantics
+ed08c1b9ee10d95f805cf37f46ee17e891057541,692cae437ed02d6a7db9f425024f3cd41fd9671f,2026-09-22T12:34:52+02:00,Clarify EWS persistence versus watchlist semantics
+84bca26da78a095219f4080687c1b7d46d2a0bd5,ed08c1b9ee10d95f805cf37f46ee17e891057541,2026-09-22T12:35:03+02:00,Rename EWS duration as consecutive trigger months
+4e07b2b20739c0507a16a579b432f8e584f85c40,84bca26da78a095219f4080687c1b7d46d2a0bd5,2026-09-22T12:35:10+02:00,Use EWS persistence terminology in pipeline and UI
+f9dfdac52ca33bd96bb8ae204ee75c5553a84f8f,4e07b2b20739c0507a16a579b432f8e584f85c40,2026-09-22T12:35:14+02:00,Use EWS persistence terminology in pipeline and UI
+f32b2bd33dee7403c0d334ac9c067fc43e3bb8f4,f9dfdac52ca33bd96bb8ae204ee75c5553a84f8f,2026-09-22T12:40:02+02:00,Separate EWS persistence from operational watchlist semantics
+ce658ec4d8650f6734c08b022a6a0486107f9d9f,f32b2bd33dee7403c0d334ac9c067fc43e3bb8f4,2026-09-22T12:40:08+02:00,Separate EWS persistence from operational watchlist semantics
+3e1278c91b578848cb633b7d1cc9c9d3150a7f8c,ce658ec4d8650f6734c08b022a6a0486107f9d9f,2026-09-22T12:40:12+02:00,Separate EWS persistence from operational watchlist semantics
+9f622c6dcaa78a59170b509904d32a7f40da6f27,3e1278c91b578848cb633b7d1cc9c9d3150a7f8c,2026-09-22T12:40:19+02:00,Add EWS persistence semantic smoke checks
+96bce531340e4a6154f906f49ff5b93b46420bee,9f622c6dcaa78a59170b509904d32a7f40da6f27,2026-09-22T12:40:28+02:00,Document EWS persistence and operational watchlist distinction
+dbe0669ac815048f683247925bf9baf2d4041be3,96bce531340e4a6154f906f49ff5b93b46420bee,2026-09-22T12:40:31+02:00,Document EWS persistence and operational watchlist distinction
+3da4eca03bdf5cc63c63813a67b8bdb6e0df0988,dbe0669ac815048f683247925bf9baf2d4041be3,2026-09-22T12:40:34+02:00,Document EWS persistence and operational watchlist distinction
+17e8d2b740f5c0b1647f923850617e81d86eb543,3da4eca03bdf5cc63c63813a67b8bdb6e0df0988,2026-09-22T12:41:03+02:00,Fix EWS validation references
+e34126396167620027cee64aa4c744e6db862bf4,17e8d2b740f5c0b1647f923850617e81d86eb543,2026-09-22T12:41:06+02:00,Fix EWS validation references
+787663bd29cfa0c8f621114ff39ee40f77f31f78,e34126396167620027cee64aa4c744e6db862bf4,2026-09-22T12:45:18+02:00,Fix multiline EWS smoke-test syntax
+d3661534758768b04721ff67a4f57d962472abb5,787663bd29cfa0c8f621114ff39ee40f77f31f78,2026-09-22T12:45:36+02:00,Repair EWS smoke test line breaks
+969df72efaac84c2866d7a9eb93b22e8458bb7b0,d3661534758768b04721ff67a4f57d962472abb5,2026-09-22T12:47:32+02:00,Fix stale monitoring variable reference
+bdfae7b12c77547729c3e42eeee2e25faecc543b,49180e9a4efd5804984347c0a76ebfaa4b869c28,2026-09-22T12:52:10+02:00,Clarify EWS persistence semantics
+6289d598b234fa80d3e6545bf57ff2ce0dc4981c,bdfae7b12c77547729c3e42eeee2e25faecc543b,2026-09-22T12:59:39+02:00,Add stage-level ECL coverage diagnostics
+407bec7f87c5b74336c7be81069806b8241e9399,6289d598b234fa80d3e6545bf57ff2ce0dc4981c,2026-09-22T12:59:45+02:00,Publish ECL coverage diagnostics in validation artifact
+cff7c0725129947907e7cb33b0afc15ac6fcab29,407bec7f87c5b74336c7be81069806b8241e9399,2026-09-22T13:10:12+02:00,Align LGD with discounted collateral recovery mechanics
+08f5adc492626150d5271d172ffe8d8113bfd022,cff7c0725129947907e7cb33b0afc15ac6fcab29,2026-09-22T13:10:22+02:00,Expose recoverable collateral inputs for LGD audit
+24f3e9e0a45ea73a3644b3ca6f89279600d243aa,08f5adc492626150d5271d172ffe8d8113bfd022,2026-09-22T13:10:29+02:00,Trace recoverable collateral through ECL diagnostics
+6558e8ef8e68d93516f389180b0261ef891e504d,24f3e9e0a45ea73a3644b3ca6f89279600d243aa,2026-09-22T13:19:34+02:00,Differentiate cash and non-cash collateral in LGD
+4eb0df580c1b4aa011d764bc04d8b10ca00c7e79,6558e8ef8e68d93516f389180b0261ef891e504d,2026-09-22T13:19:45+02:00,Export collateral type and residual unsecured exposure
+cc04990978fbd8429ff60267ef095078c7fd9d4f,4eb0df580c1b4aa011d764bc04d8b10ca00c7e79,2026-09-22T13:19:53+02:00,Update ECL audit for collateral-type LGD architecture
+1019c59f9ad99d8210a522363909fd9c944a91c3,cc04990978fbd8429ff60267ef095078c7fd9d4f,2026-09-22T13:25:37+02:00,Rebuild collateral DGP from security type and exposure
+19602b4050eacb886b671f0698836e44150f507f,1019c59f9ad99d8210a522363909fd9c944a91c3,2026-09-22T13:25:51+02:00,Add collateral-type LGD diagnostics
+70d927a2488cafcd42b79e2d6b19caae4cca7fab,19602b4050eacb886b671f0698836e44150f507f,2026-09-22T13:25:58+02:00,Publish collateral LGD diagnostic artifact
+e2a11a7cbfe9ed5758cfa3c648cd75864e3999ac,70d927a2488cafcd42b79e2d6b19caae4cca7fab,2026-09-22T13:39:39+02:00,Document collateral and LGD methodology assumptions
+a3c46b47e7603cd20f977663c3572179ba51dee1,e2a11a7cbfe9ed5758cfa3c648cd75864e3999ac,2026-09-22T13:39:52+02:00,Freeze revised recovery architecture
+fcba0783626462c5dc75a499e35c3faa67d0dd1a,bdfae7b12c77547729c3e42eeee2e25faecc543b,2026-09-22T13:44:33+02:00,Rebuild collateral and LGD recovery architecture
+a79eb7194660168cf4ac4314f511d24871d52a20,fcba0783626462c5dc75a499e35c3faa67d0dd1a,2026-09-22T13:51:41+02:00,Format PD LGD ECL and exposures explicitly
+89c1fc6a64095fee30076b62b39bedb119a17987,fcba0783626462c5dc75a499e35c3faa67d0dd1a,2026-09-22T14:00:26+02:00,Improve interface financial formatting
+b1d52813dc443866bb7f84f8da56aff25dc26205,89c1fc6a64095fee30076b62b39bedb119a17987,2026-09-22T14:06:58+02:00,Fix money formatter name collision
+6f296cc9cd9d713baf9c4403fc198edb4fbe1101,89c1fc6a64095fee30076b62b39bedb119a17987,2026-09-22T14:12:59+02:00,Fix interface money formatter crash
+e7bca23b034b7618f0188da1a60b006907cb9571,6f296cc9cd9d713baf9c4403fc198edb4fbe1101,2026-09-22T14:27:25+02:00,Fix accounting formatter references at root
+4c2bfb46246e18af898767f83c74e3a274570427,6f296cc9cd9d713baf9c4403fc198edb4fbe1101,2026-09-22T14:33:45+02:00,Fix accounting formatter at root
+10c48fc7cd21e86cbf7ff82f23ad284154a579c2,4c2bfb46246e18af898767f83c74e3a274570427,2026-09-22T14:45:03+02:00,Build portfolio intelligence and assessment cockpit
+e44030f46fa1cc8761999d1a743c34f11909ee48,4c2bfb46246e18af898767f83c74e3a274570427,2026-09-22T14:46:45+02:00,Build portfolio intelligence and assessment cockpit
+65e298d543e3455bcaeed68d071d63fff7ce0547,e44030f46fa1cc8761999d1a743c34f11909ee48,2026-09-22T14:50:54+02:00,Add explicit facility limit and utilization architecture
+e1a9cc16efd12555b2ee068c1c8654b7448de37e,65e298d543e3455bcaeed68d071d63fff7ce0547,2026-09-22T14:51:11+02:00,Expose facility limits in borrower audit trace
+d2acb51ecec8f636d9662cad78581fd9795e0ffc,e1a9cc16efd12555b2ee068c1c8654b7448de37e,2026-09-22T14:51:24+02:00,Add direct indirect and total portfolio utilization
+f526939253c9a249ad2577783a2f543a14c360f3,d2acb51ecec8f636d9662cad78581fd9795e0ffc,2026-09-22T14:53:48+02:00,Derive facility utilization after reporting-date behavior
+b2dab0951606219082fd828fa9bfac3d8ad82450,e44030f46fa1cc8761999d1a743c34f11909ee48,2026-09-22T15:14:33+02:00,Add facility limit and portfolio utilization architecture
+e3a7fdc79db96a2fe3f996a4ee952300b179e18d,b2dab0951606219082fd828fa9bfac3d8ad82450,2026-09-22T15:14:59+02:00,Add governed reference-threshold diagnostics
+2e91e2dd517ebe7e009b1bb5882a84102f103783,e3a7fdc79db96a2fe3f996a4ee952300b179e18d,2026-09-22T15:15:15+02:00,Export fixed-threshold PD classification diagnostics
+661b9e51a23937f2ffe23f3cc8c1ee6471a34a94,b2dab0951606219082fd828fa9bfac3d8ad82450,2026-09-22T15:17:27+02:00,Add governed PD classification diagnostics
+4858f44c37300d4542bb8eb44b2e00a0b100c7f6,661b9e51a23937f2ffe23f3cc8c1ee6471a34a94,2026-09-22T15:24:33+02:00,Align Stage 3 workout with collateral recovery architecture
+4a7c27090a7672e06f9425c30bbdf56d67dd9831,4858f44c37300d4542bb8eb44b2e00a0b100c7f6,2026-09-22T15:24:42+02:00,Add Streamlit runtime smoke test to CI
+0ac809e62d51a56484522256f8838bb666d1f1a9,4a7c27090a7672e06f9425c30bbdf56d67dd9831,2026-09-22T15:35:53+02:00,Update Stage 3 audit identity for recognized collateral
+93c8146ba39acf46ad786a3318dc74604402280a,661b9e51a23937f2ffe23f3cc8c1ee6471a34a94,2026-09-22T15:39:09+02:00,Harden Stage 3 recovery and interface runtime validation
+ad21899d6b6eaf2f5f9697eaf1b4fd66804863fc,93c8146ba39acf46ad786a3318dc74604402280a,2026-09-22T15:42:48+02:00,Remove redundant workspace navigation
+f37bbd18aa27810e7cf2ad6913dbdc1438a74a16,ad21899d6b6eaf2f5f9697eaf1b4fd66804863fc,2026-09-22T15:48:29+02:00,Refresh README to final governed validation baseline
+53901628e5fc2065edc54526c0d2ef7ea164f192,f37bbd18aa27810e7cf2ad6913dbdc1438a74a16,2026-09-22T15:48:56+02:00,Add final governed project release checkpoint
+c6079d79cf85fa0d23b10eca92f44aceb938add7,53901628e5fc2065edc54526c0d2ef7ea164f192,2026-09-22T16:03:45+02:00,Add validator-only PD calibration workspace
+d7fdb537bceab5221603fc9d3a76fc71b4f4d29d,93c8146ba39acf46ad786a3318dc74604402280a,2026-09-22T16:05:46+02:00,Finalize governed credit risk project release
+09dc4e8943763885af394e520d2b3fe3d719bedd,d7fdb537bceab5221603fc9d3a76fc71b4f4d29d,2026-09-22T16:14:41+02:00,Polish portfolio KPI formatting and dashboard ordering
+9a7a0e12b1887ad3bca3342db20da25c8af56b6f,d7fdb537bceab5221603fc9d3a76fc71b4f4d29d,2026-09-22T16:19:56+02:00,Polish final portfolio interface
+b4969772634701adea101c0b0a7c1c50d2bca6d4,9a7a0e12b1887ad3bca3342db20da25c8af56b6f,2026-09-22T16:27:03+02:00,Add governed 1-10 operational risk rating
+0eb032e80d65e711c4f4448ee016216634fc48df,b4969772634701adea101c0b0a7c1c50d2bca6d4,2026-09-22T16:27:12+02:00,Apply operational risk rating after staging
+d8bc4dbed673c0dbd28923ef9d2d634a9360a63a,0eb032e80d65e711c4f4448ee016216634fc48df,2026-09-22T16:27:22+02:00,Expose bank-style risk rating in credit workbench
+35842878ce825cb63f7dc7f45f55959786417cf2,d8bc4dbed673c0dbd28923ef9d2d634a9360a63a,2026-09-22T16:27:33+02:00,Document 1-10 risk rating policy
+c2461fb519599d8377d042cceac74e5cac148363,9a7a0e12b1887ad3bca3342db20da25c8af56b6f,2026-09-22T16:35:04+02:00,Add bank-style 1-10 internal risk rating
+2af11f094f9110e85c3325e19289b07363bacab3,c2461fb519599d8377d042cceac74e5cac148363,2026-09-22T16:47:08+02:00,Reserve Risk Rating 1 for full cash coverage
+c09774021d1ced8ba37cbfdc8e7cd6cf585efb9d,2af11f094f9110e85c3325e19289b07363bacab3,2026-09-22T16:47:20+02:00,Clarify cash-only Rating 1 policy
+cd9e200f6fbf99e1c197a95e823678c2c65d69b5,c2461fb519599d8377d042cceac74e5cac148363,2026-09-22T16:49:14+02:00,Reserve Risk Rating 1 for full cash coverage
+300b3959576451534023ad6c3cce584e631834f4,cd9e200f6fbf99e1c197a95e823678c2c65d69b5,2026-09-22T16:58:54+02:00,Simplify clean borrower interpretation message
+cad78a0cce6a063bf02bee417d583a78fa849408,300b3959576451534023ad6c3cce584e631834f4,2026-09-22T17:01:22+02:00,Add borrower filters and portfolio CSV download
+b93a4590fbfac9c4351eee66f26473602745c8a3,cd9e200f6fbf99e1c197a95e823678c2c65d69b5,2026-09-22T17:05:50+02:00,Polish borrower search and portfolio export
+e1d70e36cfd6f0db688db1a97a883d25f62cb63c,b93a4590fbfac9c4351eee66f26473602745c8a3,2026-09-22T17:17:02+02:00,Add isolated PCA logistic challenger
+13cf4a1fe7b25d84bee46f9f539da4266fb8970a,e1d70e36cfd6f0db688db1a97a883d25f62cb63c,2026-09-22T17:17:07+02:00,Evaluate PCA challenger separately from governed PD
+c74d5dc6cc52b46bb55fce861744a4c6c91304d1,13cf4a1fe7b25d84bee46f9f539da4266fb8970a,2026-09-22T17:17:19+02:00,Document separate PCA challenger experiment
+b115459f28336827b7bf7a7f879369e32ecced54,b93a4590fbfac9c4351eee66f26473602745c8a3,2026-09-22T17:32:02+02:00,Add isolated bootstrap confidence interval experiment
+ad608272120d129702d8097dac6b693e0237ad27,b115459f28336827b7bf7a7f879369e32ecced54,2026-09-22T17:32:06+02:00,Run bootstrap experiment in isolated branch CI
+0bf890d37ebca6bd8482d39fa8cdc18beb52388c,ad608272120d129702d8097dac6b693e0237ad27,2026-09-22T17:34:16+02:00,Generate frozen synthetic portfolio before experiment
+746cab1ecabec50e9f17410e934777ffe33f9b65,b93a4590fbfac9c4351eee66f26473602745c8a3,2026-09-22T17:32:46+02:00,Add isolated WOE credit scorecard experiment
+56c44b967c80ba62bf6f47404a0394317574bf64,746cab1ecabec50e9f17410e934777ffe33f9b65,2026-09-22T17:32:48+02:00,Run WOE scorecard experiment in isolated branch CI
+06379267de86dc026c3e51510a1e74d50815509b,56c44b967c80ba62bf6f47404a0394317574bf64,2026-09-22T17:34:20+02:00,Generate frozen synthetic portfolio before experiment
+8bc107deaecd15b358a3256f7d24183bbe762901,b93a4590fbfac9c4351eee66f26473602745c8a3,2026-09-22T17:33:27+02:00,Add isolated stress and sensitivity experiment
+19ff2c11f3808d660ded92a8c508b88e910452cd,8bc107deaecd15b358a3256f7d24183bbe762901,2026-09-22T17:33:30+02:00,Run stress experiment in isolated branch CI
+519df2bea2d9b5df37df18f45293f430220413b4,19ff2c11f3808d660ded92a8c508b88e910452cd,2026-09-22T17:34:24+02:00,Generate frozen synthetic portfolio before experiment
+ae897ed8f47ee30619e6057dd8dcc68428ef8bf5,b93a4590fbfac9c4351eee66f26473602745c8a3,2026-09-23T10:35:46+02:00,Fix facility remaining-life and DPD generation
+9efb8e21928cbbf4e1f14c1f2937acc9337f49be,ae897ed8f47ee30619e6057dd8dcc68428ef8bf5,2026-09-23T10:36:21+02:00,Fix facility lifetime ECL and Stage 3 severity
+0f6f577a76e610005af56d768f0d3c8934d3f5ed,9efb8e21928cbbf4e1f14c1f2937acc9337f49be,2026-09-23T10:36:35+02:00,Make watchlist rating explicit and fail on null PD
+321831fbd758d0bcdb4d2d1a57ee8e24b5f2dc0b,0f6f577a76e610005af56d768f0d3c8934d3f5ed,2026-09-23T10:37:01+02:00,"Fix pipeline ordering, indexing and facility lifetime audit"
+5d1b70de5b802a4322ea28b88267f0ae46adc45e,321831fbd758d0bcdb4d2d1a57ee8e24b5f2dc0b,2026-09-23T10:37:24+02:00,Remove circular qualitative feature construction
+050511720b17dd71b11a80cc0f5af27ba8794ad5,5d1b70de5b802a4322ea28b88267f0ae46adc45e,2026-09-23T10:37:29+02:00,Keep information-set experiment free of holdout-derived features
+82635f8cbb3285f48a18d5a3c8550a0c588ce728,050511720b17dd71b11a80cc0f5af27ba8794ad5,2026-09-23T10:37:45+02:00,Fail closed on invalid role configuration
+db57cadf54a96462d68f74773a7d3eba587afd0d,82635f8cbb3285f48a18d5a3c8550a0c588ce728,2026-09-23T10:38:19+02:00,Make demo identity and borrower selection robust
+0dbb34dcac47ed9e6a46fd8d62720c8298947c28,db57cadf54a96462d68f74773a7d3eba587afd0d,2026-09-23T10:38:54+02:00,Fix override targeting and audit baselines
+5e0afa7620e07ff03eeaa93b877797c5403c25e5,0dbb34dcac47ed9e6a46fd8d62720c8298947c28,2026-09-23T10:39:52+02:00,Add independent risk-logic tests
+45ff97deb13545723bd156a49ca21b9b7451112c,5e0afa7620e07ff03eeaa93b877797c5403c25e5,2026-09-23T10:39:56+02:00,Strengthen CI with independent risk-logic tests
+f77cfdc34b6d53556fc3ec79b17fe98415b925d6,45ff97deb13545723bd156a49ca21b9b7451112c,2026-09-23T10:40:21+02:00,Add pytest for risk-logic CI
+afcf28160b28e6378ea862fcfecf46cdc80d88c3,f77cfdc34b6d53556fc3ec79b17fe98415b925d6,2026-09-23T10:40:25+02:00,Remove stale generated artifact data/raw/sme_credit_portfolio.csv
+2f87276e6628f5c31b121d268de028b7a6c0d6b2,afcf28160b28e6378ea862fcfecf46cdc80d88c3,2026-09-23T10:40:29+02:00,Remove stale generated artifact data/processed/scored_portfolio.csv
+27694a418a3c4a146a9053635ac5c811246bbb28,2f87276e6628f5c31b121d268de028b7a6c0d6b2,2026-09-23T10:40:32+02:00,Remove stale generated artifact outputs/model_validation.csv
+39f72e345f737d2c803b0d45791a42d51b2d1b4c,27694a418a3c4a146a9053635ac5c811246bbb28,2026-09-23T10:40:47+02:00,Remove stale generated ROC artifact
+7f55f7080be09d27ab68eecc4b86023899f6e069,39f72e345f737d2c803b0d45791a42d51b2d1b4c,2026-09-23T10:40:49+02:00,Remove superseded duplicate Streamlit app
+60b258928ba45191386a480c62cd8cf865a6620b,7f55f7080be09d27ab68eecc4b86023899f6e069,2026-09-23T10:40:52+02:00,Ignore generated synthetic data and outputs
+f50114aaabb56830c91e8166dade586874f61e37,60b258928ba45191386a480c62cd8cf865a6620b,2026-09-23T10:42:53+02:00,Create generated output directories explicitly
+73f6da286a128b4daebc47e9ccd51fce4e210cab,f50114aaabb56830c91e8166dade586874f61e37,2026-09-23T10:42:56+02:00,Run full risk-logic test suite in interface CI
+44619440ab7d6a1abe51fc563aa462c7c0d958ee,73f6da286a128b4daebc47e9ccd51fce4e210cab,2026-09-23T10:44:29+02:00,Make repository imports explicit in pytest
+8fe51437d5f41a03302a14dac27634227d3072a7,44619440ab7d6a1abe51fc563aa462c7c0d958ee,2026-09-23T10:45:19+02:00,Isolate maturity RNG from frozen borrower and facility streams
+9fd2d282e32d649c357ac8e885e22ddce4c77ecf,8fe51437d5f41a03302a14dac27634227d3072a7,2026-09-23T10:48:23+02:00,Clarify sample split and reconcile reviewed methodology
+28d246a2aadf89e3c19b34dd84021b76c815c0d9,9fd2d282e32d649c357ac8e885e22ddce4c77ecf,2026-09-23T10:49:02+02:00,Update final release after independent review remediation
+d8c01b852d3b11ddf61a91ac785b44dc9adf2b3e,28d246a2aadf89e3c19b34dd84021b76c815c0d9,2026-09-23T10:49:20+02:00,Mark V2_FINAL_VALIDATION_2026-09-22.md as superseded historical checkpoint
+b508ded1cfaf0b18794c483078444b4cd82f5069,d8c01b852d3b11ddf61a91ac785b44dc9adf2b3e,2026-09-23T10:49:23+02:00,Mark V2_METHODOLOGY_CHECKPOINT_2026-09-21.md as superseded historical checkpoint
+cfce69ae23958e3226c178b70100fa5bb5bc8925,b508ded1cfaf0b18794c483078444b4cd82f5069,2026-09-23T10:49:26+02:00,Mark V2_RECOVERY_ARCHITECTURE_FREEZE_2026-09-22.md as superseded historical checkpoint
+af2157f502a1ade9ab64fe74366701f579dd5770,b93a4590fbfac9c4351eee66f26473602745c8a3,2026-09-23T11:17:04+02:00,Harden pipeline execution without changing risk methodology
+717dc96e76ec0203dbe545198644952b04fea47d,af2157f502a1ade9ab64fe74366701f579dd5770,2026-09-23T11:17:09+02:00,Fail clearly on missing PD before rating
+dc5050d8f73afd9ee2fda3c4028ad443baf8ec00,717dc96e76ec0203dbe545198644952b04fea47d,2026-09-23T11:17:14+02:00,Remove pandas alias shadowing without changing ECL logic
+7bfddd3bbd8bb60223afb58c66574c9b42c6f608,dc5050d8f73afd9ee2fda3c4028ad443baf8ec00,2026-09-23T11:17:28+02:00,Fail closed on invalid duplicate role configuration
+ca7e3b398222ccfccbd256afdc333ce092a1da0b,7bfddd3bbd8bb60223afb58c66574c9b42c6f608,2026-09-23T11:18:01+02:00,Fix app state and override audit bugs without changing risk logic
+5961b791ee5aae936d5a3cdb297b58bfe90218ff,ca7e3b398222ccfccbd256afdc333ce092a1da0b,2026-09-23T11:18:26+02:00,Remove stale generated artifact data/raw/sme_credit_portfolio.csv
+d792dadd3151b02c18d54174b906bb1c3d6b6406,5961b791ee5aae936d5a3cdb297b58bfe90218ff,2026-09-23T11:18:30+02:00,Remove stale generated artifact data/processed/scored_portfolio.csv
+6986efccf3623af8117c240189bcf2dc6cc10d5a,d792dadd3151b02c18d54174b906bb1c3d6b6406,2026-09-23T11:18:34+02:00,Remove stale generated artifact outputs/model_validation.csv
+65801987fd17d1b9c46b612c4bb5256fc0fca348,6986efccf3623af8117c240189bcf2dc6cc10d5a,2026-09-23T11:18:39+02:00,Remove stale generated artifact dashboard/app.py
+15a6a16ea57019aae64b9f193fc1d1944a4bc090,65801987fd17d1b9c46b612c4bb5256fc0fca348,2026-09-23T11:18:46+02:00,Remove stale generated ROC artifact
+b6b4b3421c369d9a2c88dcadce12df2f8dd76a32,15a6a16ea57019aae64b9f193fc1d1944a4bc090,2026-09-23T11:18:48+02:00,Ignore reproducible generated data and outputs
+bfa51d78ec161c17c45589c7306fe55c155875c7,b6b4b3421c369d9a2c88dcadce12df2f8dd76a32,2026-09-23T11:18:52+02:00,Make repository imports explicit in pytest
+298c1e68c02d0c2cde9f0d93ac31b569082f35a9,bfa51d78ec161c17c45589c7306fe55c155875c7,2026-09-23T11:18:55+02:00,Add regression tests for existing risk logic
+53bdc02e8c6567ffea5ef2e0392a03a842793d6f,298c1e68c02d0c2cde9f0d93ac31b569082f35a9,2026-09-23T11:24:11+02:00,Remove misleading lifetime ECL alias without changing calculations
+3e9bec5c36a38a1c4fd06152f075f2ae89fab0e7,53bdc02e8c6567ffea5ef2e0392a03a842793d6f,2026-09-23T11:24:16+02:00,Harden demo maker-checker identity handling
+a7f2827b1640dcf7db27a80a28cb9850064e5f5f,3e9bec5c36a38a1c4fd06152f075f2ae89fab0e7,2026-09-23T11:24:21+02:00,Run full regression test suite in CI
+50118053fcbea8a16bfc993ef21bda99110fe74e,a7f2827b1640dcf7db27a80a28cb9850064e5f5f,2026-09-23T11:24:29+02:00,Run full regression test suite in CI
+a90db851f5f383b9a02fff864358f0f5ccad4ba3,50118053fcbea8a16bfc993ef21bda99110fe74e,2026-09-23T11:24:45+02:00,Clarify train-holdout split and generated artifacts
+cc54ec4f8915a7d80b40a906a0265dbb9ddb251d,a90db851f5f383b9a02fff864358f0f5ccad4ba3,2026-09-23T11:44:56+02:00,Add independent qualitative underwriting data and write-off status
+593e0b3970dd087faf408125b3ea9ae3bfd3bc73,cc54ec4f8915a7d80b40a906a0265dbb9ddb251d,2026-09-23T11:45:22+02:00,Govern genuinely independent qualitative PD information
+91eb66581773e8ba1ee4b94a283b1ecde5beb827,593e0b3970dd087faf408125b3ea9ae3bfd3bc73,2026-09-23T11:45:27+02:00,Use independent qualitative information in hybrid PD experiment
+fde5ebd23d534b9f132c89c7ecfca0d362850aa1,91eb66581773e8ba1ee4b94a283b1ecde5beb827,2026-09-23T11:45:40+02:00,Update hybrid experiment for independent qualitative layer
+c4fb9f2ce606245633d6581151c5f433fbbc3912,fde5ebd23d534b9f132c89c7ecfca0d362850aa1,2026-09-23T11:47:23+02:00,Add synthetic facility workout history generator
+557854f292bbec23340d4b41b8a41a99314ed7bc,c4fb9f2ce606245633d6581151c5f433fbbc3912,2026-09-23T11:47:28+02:00,Add facility-level workout LGD modelling module
+2f09e57bb3205a72cd31265d3c9cc2c9913c2f6a,557854f292bbec23340d4b41b8a41a99314ed7bc,2026-09-23T11:47:49+02:00,Add governed LGD training and validation pipeline
+df154e1f8aa3300dd9507049be4f4e6aa98a14c6,2f09e57bb3205a72cd31265d3c9cc2c9913c2f6a,2026-09-23T11:48:26+02:00,Align internal ratings with watchlist and write-off policy
+4aef6493f705dfc86b80dcf754bd79b85c417109,df154e1f8aa3300dd9507049be4f4e6aa98a14c6,2026-09-23T11:48:31+02:00,Align portfolio LGD inputs with workout-history definitions
+1ccd44703aea1819d80d8051d989ab026520efcf,4aef6493f705dfc86b80dcf754bd79b85c417109,2026-09-23T11:48:35+02:00,Integrate governed workout LGD into Stage 3 ECL
+c898aa388c187c5b1b03569772696f92dad66613,1ccd44703aea1819d80d8051d989ab026520efcf,2026-09-23T11:48:59+02:00,Integrate facility-level workout LGD into borrower ECL pipeline
+d5528a8c650fc88d3fb610015eaf3c0bb2513b37,c898aa388c187c5b1b03569772696f92dad66613,2026-09-23T11:49:25+02:00,Ignore generated model binaries
+8aeee4b028f4a563fa33a827277263e0badb2ec5,d5528a8c650fc88d3fb610015eaf3c0bb2513b37,2026-09-23T11:49:30+02:00,Declare LGD model serialization dependency
+3220b5b507c5d531b2d233ea3008b815b75a9129,8aeee4b028f4a563fa33a827277263e0badb2ec5,2026-09-23T11:49:34+02:00,Run LGD model pipeline before credit-risk integration
+5ce0e18073bf8b490b33ccc311850d923021b557,3220b5b507c5d531b2d233ea3008b815b75a9129,2026-09-23T11:49:38+02:00,Run LGD model pipeline before credit-risk integration
+902ffea7ef2cf7bd753b148df95a94632b9b7eee,5ce0e18073bf8b490b33ccc311850d923021b557,2026-09-23T11:50:00+02:00,Add regression tests for watchlist and write-off ratings
+5ba17e512ffe2c82126b7ff8229433785cdb8e04,902ffea7ef2cf7bd753b148df95a94632b9b7eee,2026-09-23T11:50:03+02:00,Add workout LGD aggregation and validation tests
+7bafd2843401ad963ba10895ecab7bc89afe2851,5ba17e512ffe2c82126b7ff8229433785cdb8e04,2026-09-23T11:50:40+02:00,Run validation workflows on V4 development branch
+8ab84d41cd27c810473cdd0f5b4e415515de179a,7bafd2843401ad963ba10895ecab7bc89afe2851,2026-09-23T11:50:44+02:00,Run validation workflows on V4 development branch
+95c53baf734c1ba75fba556076e19bf7630c0ce4,8ab84d41cd27c810473cdd0f5b4e415515de179a,2026-09-23T11:51:41+02:00,Expose qualitative underwriting and facility LGD in risk workbench
+a8af2f9324500e85b348d40ae38a4b31a3ede637,95c53baf734c1ba75fba556076e19bf7630c0ce4,2026-09-23T11:52:27+02:00,Add reporting-date facility remaining maturities
+811e95eb0a43a77a1a1a22b3a76b1df828df6978,a8af2f9324500e85b348d40ae38a4b31a3ede637,2026-09-23T11:52:40+02:00,Carry facility remaining maturity into portfolio LGD application
+ee3fc6bd01b7955f75a910eefd85a62aa4166c13,811e95eb0a43a77a1a1a22b3a76b1df828df6978,2026-09-23T11:53:03+02:00,Add facility-level lifetime ECL engine
+e1e260bed9cb14fe4303a7178c9e98a00b50441f,ee3fc6bd01b7955f75a910eefd85a62aa4166c13,2026-09-23T11:53:22+02:00,Move governed ECL calculation to facility level
+93a6d80da08b694559af9fe603e60c410e18d334,e1e260bed9cb14fe4303a7178c9e98a00b50441f,2026-09-23T11:53:47+02:00,Add facility-level ECL reconciliation tests
+c85cdab5362af39f6cd9f948222127321700215d,93a6d80da08b694559af9fe603e60c410e18d334,2026-09-23T11:54:38+02:00,"Document V4 qualitative PD, workout LGD and facility ECL architecture"
+a1c062c726a9be35b8cdc48e4ef0486d27d9dd64,c85cdab5362af39f6cd9f948222127321700215d,2026-09-23T11:55:27+02:00,Align Stage 3 regression test with governed workout LGD
+f2880cc32f03e4ce701193aa92995eced2547ba7,a1c062c726a9be35b8cdc48e4ef0486d27d9dd64,2026-09-23T12:00:45+02:00,Reconcile CI accounting audit to facility-level ECL
+5a2c8aa6df5d0ee99c44a5ea540ddec361fa7bf8,f2880cc32f03e4ce701193aa92995eced2547ba7,2026-09-23T12:11:42+02:00,Correct Stage 2 facility ECL audit for sub-12m maturities
+bd30d624bb90b3e0e812bc63047b54f214920af2,5a2c8aa6df5d0ee99c44a5ea540ddec361fa7bf8,2026-09-23T12:38:49+02:00,"Add LGD cash, importance and methodology diagnostics"
+f971862bd8fd973f0cfd96509e57301b8445e57d,bd30d624bb90b3e0e812bc63047b54f214920af2,2026-09-23T12:39:14+02:00,Run and retain LGD governance diagnostics
+c3ad5ea83f3c805e7ddb441690052da7453fbf97,f971862bd8fd973f0cfd96509e57301b8445e57d,2026-09-23T12:39:24+02:00,Execute LGD governance diagnostics in CI
+e6fdfdaa1aff133315be7034600eb339fe0d8606,c3ad5ea83f3c805e7ddb441690052da7453fbf97,2026-09-23T12:42:06+02:00,Model cash collateral with low-friction recovery mechanics
+0130cf37cb39507af1c6b8ce29bb9a4d1116a972,e6fdfdaa1aff133315be7034600eb339fe0d8606,2026-09-23T12:42:19+02:00,Fix cash workout generator formatting
+20f2bb36eb73ae98df40422bda4e14b7874ec05f,0130cf37cb39507af1c6b8ce29bb9a4d1116a972,2026-09-23T13:11:50+02:00,Add LGD bias and weighted RMSE diagnostics
+61207b18e22bb682579120253d7d561beb255006,20f2bb36eb73ae98df40422bda4e14b7874ec05f,2026-09-23T13:11:58+02:00,Print complete LGD validation metrics
+d4a8d5d12610df9c3529851cfa749d37e2c2697b,61207b18e22bb682579120253d7d561beb255006,2026-09-23T13:16:41+02:00,Fix LGD validation metric formatting syntax
+5a812e43d8fc84627de751d6b30a88f9fc83aec7,d4a8d5d12610df9c3529851cfa749d37e2c2697b,2026-09-23T13:26:10+02:00,Add LGD segment and severe-tail bias validation
+16ec4c3bcb41f8ef85658f8e1803a91388a5bfbd,5a812e43d8fc84627de751d6b30a88f9fc83aec7,2026-09-23T13:26:29+02:00,Retain LGD segment validation artifacts
+6fb821fb8149824de808b80280f3e4187fbf2339,16ec4c3bcb41f8ef85658f8e1803a91388a5bfbd,2026-09-23T15:15:43+02:00,Add LGD tail challenger models
+03e8f43981efac00b4ecb1a5b9f752cd019fca32,6fb821fb8149824de808b80280f3e4187fbf2339,2026-09-23T15:15:56+02:00,Benchmark LGD challengers on overall and tail validation
+d66545f3dea38618f777aa26a44f128a9073a859,03e8f43981efac00b4ecb1a5b9f752cd019fca32,2026-09-23T15:16:02+02:00,Retain LGD challenger validation artifact
+eabddc4c44db7a45d5969a488249ed0bab9e4f67,d66545f3dea38618f777aa26a44f128a9073a859,2026-09-23T15:23:35+02:00,Benchmark LGD challengers on fixed holdout
+382285d9d94a4d1bf695a1119d97e0250ed6a9ed,eabddc4c44db7a45d5969a488249ed0bab9e4f67,2026-09-23T15:28:40+02:00,Clean duplicate LGD challenger definitions
+526f85d5c036cbc2c3828eb7449423510b9e3ebe,382285d9d94a4d1bf695a1119d97e0250ed6a9ed,2026-09-23T15:34:13+02:00,Run final LGD challenger benchmark without retuning champion
+1f2c393f7c538729ed61f463bbdf12afeb6b5bde,526f85d5c036cbc2c3828eb7449423510b9e3ebe,2026-09-23T15:59:42+02:00,Clean final LGD challenger benchmark
+01a2b7b91001dc81507e39bc704b2e675ea70641,1f2c393f7c538729ed61f463bbdf12afeb6b5bde,2026-09-23T15:59:46+02:00,Defragment diagnostics frame before derived columns
+92a217f0d77d30496371829fd8d39f17fcb9460a,01a2b7b91001dc81507e39bc704b2e675ea70641,2026-09-23T15:59:49+02:00,Strengthen LGD validation metric tests
+b9a055be953f7ebb6d09deef203ff5e2e0a5900b,92a217f0d77d30496371829fd8d39f17fcb9460a,2026-09-23T16:00:17+02:00,Freeze V4 validation results and governance narrative
+d575c21e3ff43ae68955f0c0f02d37b86cd51fe9,b9a055be953f7ebb6d09deef203ff5e2e0a5900b,2026-09-23T16:00:42+02:00,Document final V4 limitations and mitigations
+3ced2247b89b90d91c4e6acceb7bc9afc8456cff,d575c21e3ff43ae68955f0c0f02d37b86cd51fe9,2026-09-23T16:01:01+02:00,Align LGD challenger documentation with final benchmark
+2bdd6d51fae1a78aec8c25bfaa5c7ea071c7ae88,3ced2247b89b90d91c4e6acceb7bc9afc8456cff,2026-09-23T16:16:58+02:00,V5: add LGD challenger stability diagnostics
+33c60eefb29204388865507f8ee1242313fbe576,2bdd6d51fae1a78aec8c25bfaa5c7ea071c7ae88,2026-09-23T16:17:05+02:00,V5: retain LGD challenger validation artifacts
+99cd0ce31a24ec8ffbe5f33092c9cc0d4f645dff,3ced2247b89b90d91c4e6acceb7bc9afc8456cff,2026-09-23T16:21:44+02:00,Run V5 LGD challenger suite on fixed holdout
+4f87d21f59b81ed2ab2f245bd54625d8a86daaf3,99cd0ce31a24ec8ffbe5f33092c9cc0d4f645dff,2026-09-23T16:39:07+02:00,Run final LGD challenger benchmark
+0dfe4c883a8314704394c49fa096dfb45525096c,33c60eefb29204388865507f8ee1242313fbe576 4f87d21f59b81ed2ab2f245bd54625d8a86daaf3,2026-09-23T17:13:17+02:00,"Finalize V5: preserve frozen methodology, validate LGD tails and reconcile risk engine"

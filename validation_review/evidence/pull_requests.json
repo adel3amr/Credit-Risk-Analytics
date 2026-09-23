@@ -1,0 +1,252 @@
+[
+  {
+    "number": 25,
+    "title": "Credit Risk Analytics & IFRS 9 Decisioning System — V5 finalization",
+    "state": "open",
+    "merged_at": null,
+    "head": "feature/v5-lgd-validation-hardening",
+    "head_sha": "0dfe4c883a8314704394c49fa096dfb45525096c",
+    "base": "feature/v4-bank-grade-risk-engine",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/25"
+  },
+  {
+    "number": 24,
+    "title": "V4 bank-grade qualitative PD and facility workout LGD engine",
+    "state": "open",
+    "merged_at": null,
+    "head": "feature/v4-bank-grade-risk-engine",
+    "head_sha": "4f87d21f59b81ed2ab2f245bd54625d8a86daaf3",
+    "base": "fix/reviewer-code-only",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/24"
+  },
+  {
+    "number": 23,
+    "title": "Fix reviewer software issues without changing credit methodology",
+    "state": "open",
+    "merged_at": null,
+    "head": "fix/reviewer-code-only",
+    "head_sha": "a90db851f5f383b9a02fff864358f0f5ccad4ba3",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/23"
+  },
+  {
+    "number": 22,
+    "title": "Remediate independent code review findings",
+    "state": "closed",
+    "merged_at": null,
+    "head": "review/remediate-code-review",
+    "head_sha": "cfce69ae23958e3226c178b70100fa5bb5bc8925",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/22"
+  },
+  {
+    "number": 21,
+    "title": "Experiment: portfolio stress and sensitivity testing",
+    "state": "open",
+    "merged_at": null,
+    "head": "experiment/stress-sensitivity-testing",
+    "head_sha": "519df2bea2d9b5df37df18f45293f430220413b4",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/21"
+  },
+  {
+    "number": 20,
+    "title": "Experiment: traditional WOE credit scorecard",
+    "state": "open",
+    "merged_at": null,
+    "head": "experiment/woe-credit-scorecard",
+    "head_sha": "06379267de86dc026c3e51510a1e74d50815509b",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/20"
+  },
+  {
+    "number": 19,
+    "title": "Experiment: bootstrap stability and confidence intervals",
+    "state": "open",
+    "merged_at": null,
+    "head": "experiment/bootstrap-confidence-intervals",
+    "head_sha": "0bf890d37ebca6bd8482d39fa8cdc18beb52388c",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/19"
+  },
+  {
+    "number": 18,
+    "title": "Add separate PCA logistic challenger experiment",
+    "state": "open",
+    "merged_at": null,
+    "head": "experiment/pca-logistic-challenger",
+    "head_sha": "c74d5dc6cc52b46bb55fce861744a4c6c91304d1",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/18"
+  },
+  {
+    "number": 17,
+    "title": "Simplify clean credit interpretation message",
+    "state": "closed",
+    "merged_at": "2026-09-22T15:05:51Z",
+    "head": "fix/clean-credit-interpretation",
+    "head_sha": "cad78a0cce6a063bf02bee417d583a78fa849408",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/17"
+  },
+  {
+    "number": 16,
+    "title": "Reserve Risk Rating 1 for full cash coverage",
+    "state": "closed",
+    "merged_at": "2026-09-22T14:49:14Z",
+    "head": "fix/risk-rating-1-cash-only",
+    "head_sha": "c09774021d1ced8ba37cbfdc8e7cd6cf585efb9d",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/16"
+  },
+  {
+    "number": 15,
+    "title": "Add bank-style 1-10 internal risk rating",
+    "state": "closed",
+    "merged_at": "2026-09-22T14:35:05Z",
+    "head": "feature/risk-rating-scale",
+    "head_sha": "35842878ce825cb63f7dc7f45f55959786417cf2",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/15"
+  },
+  {
+    "number": 14,
+    "title": "Polish final portfolio interface",
+    "state": "closed",
+    "merged_at": "2026-09-22T14:19:57Z",
+    "head": "feature/final-ui-polish",
+    "head_sha": "09dc4e8943763885af394e520d2b3fe3d719bedd",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/14"
+  },
+  {
+    "number": 13,
+    "title": "Finalize project release documentation and UI",
+    "state": "closed",
+    "merged_at": "2026-09-22T14:05:47Z",
+    "head": "feature/final-project-release",
+    "head_sha": "c6079d79cf85fa0d23b10eca92f44aceb938add7",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/13"
+  },
+  {
+    "number": 12,
+    "title": "Harden Stage 3 recovery and interface runtime validation",
+    "state": "closed",
+    "merged_at": "2026-09-22T13:39:09Z",
+    "head": "feature/final-hardening",
+    "head_sha": "0ac809e62d51a56484522256f8838bb666d1f1a9",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/12"
+  },
+  {
+    "number": 11,
+    "title": "Add governed PD classification diagnostics",
+    "state": "closed",
+    "merged_at": "2026-09-22T13:17:27Z",
+    "head": "feature/classification-diagnostics",
+    "head_sha": "2e91e2dd517ebe7e009b1bb5882a84102f103783",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/11"
+  },
+  {
+    "number": 10,
+    "title": "Add facility limit and portfolio utilization architecture",
+    "state": "closed",
+    "merged_at": "2026-09-22T13:14:34Z",
+    "head": "feature/facility-limit-architecture",
+    "head_sha": "f526939253c9a249ad2577783a2f543a14c360f3",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/10"
+  },
+  {
+    "number": 9,
+    "title": "Build portfolio intelligence and assessment cockpit",
+    "state": "closed",
+    "merged_at": "2026-09-22T12:46:45Z",
+    "head": "feature/portfolio-intelligence",
+    "head_sha": "10c48fc7cd21e86cbf7ff82f23ad284154a579c2",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/9"
+  },
+  {
+    "number": 8,
+    "title": "Fix accounting formatter at root",
+    "state": "closed",
+    "merged_at": "2026-09-22T12:33:45Z",
+    "head": "fix/interface-money-format-root",
+    "head_sha": "e7bca23b034b7618f0188da1a60b006907cb9571",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/8"
+  },
+  {
+    "number": 7,
+    "title": "Fix interface money formatter crash",
+    "state": "closed",
+    "merged_at": "2026-09-22T12:12:59Z",
+    "head": "fix/interface-money-shadowing",
+    "head_sha": "b1d52813dc443866bb7f84f8da56aff25dc26205",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/7"
+  },
+  {
+    "number": 6,
+    "title": "Improve interface financial formatting",
+    "state": "closed",
+    "merged_at": "2026-09-22T12:00:26Z",
+    "head": "fix/interface-financial-formatting",
+    "head_sha": "a79eb7194660168cf4ac4314f511d24871d52a20",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/6"
+  },
+  {
+    "number": 5,
+    "title": "Audit Stage 2 ECL coverage and recovery mechanics",
+    "state": "closed",
+    "merged_at": "2026-09-22T11:44:33Z",
+    "head": "feature/ecl-recovery-audit",
+    "head_sha": "a3c46b47e7603cd20f977663c3572179ba51dee1",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/5"
+  },
+  {
+    "number": 4,
+    "title": "Clarify EWS persistence semantics",
+    "state": "closed",
+    "merged_at": "2026-09-22T10:52:10Z",
+    "head": "fix/ews-persistence-semantics",
+    "head_sha": "969df72efaac84c2866d7a9eb93b22e8458bb7b0",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/4"
+  },
+  {
+    "number": 3,
+    "title": "V3.1: Credit-risk decision workbench",
+    "state": "closed",
+    "merged_at": "2026-09-22T10:24:50Z",
+    "head": "feature/v3-credit-workbench",
+    "head_sha": "4a6bac7efc7b27ea9a2608294c95b56347ea94ec",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/3"
+  },
+  {
+    "number": 2,
+    "title": "V3: Governance and credit decisioning foundation",
+    "state": "closed",
+    "merged_at": "2026-09-22T10:00:09Z",
+    "head": "feature/v3-governance-interface",
+    "head_sha": "a78bfe9f51adb339943c5400957de6d70d56b8f1",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/2"
+  },
+  {
+    "number": 1,
+    "title": "V2: Hybrid SME PD and risk-direction experiment",
+    "state": "closed",
+    "merged_at": "2026-09-22T09:33:03Z",
+    "head": "feature/hybrid-sme-pd-v2",
+    "head_sha": "29ede62210a9ace628e92dea50654f9ad164d4ca",
+    "base": "main",
+    "url": "https://github.com/adel3amr/Credit-Risk-Analytics/pull/1"
+  }
+]

@@ -1,0 +1,22 @@
+file,test,assertions,source_review_required,scope
+tests/test_facility_ecl.py,test_stage2_uses_facility_remaining_maturity,2,True,Inspect source; assertion count alone is not assurance
+tests/test_facility_ecl.py,test_stage3_facility_ecl_is_lgd_times_ead,1,True,Inspect source; assertion count alone is not assurance
+tests/test_facility_ecl.py,test_facility_ecl_aggregation_reconciles,3,True,Inspect source; assertion count alone is not assurance
+tests/test_governance.py,test_rbac_and_maker_checker,6,True,Inspect source; assertion count alone is not assurance
+tests/test_governance.py,test_macro_weights,1,True,Inspect source; assertion count alone is not assurance
+tests/test_governance.py,test_append_only_audit,1,True,Inspect source; assertion count alone is not assurance
+tests/test_lgd_model.py,test_borrower_lgd_is_ead_weighted,2,True,Inspect source; assertion count alone is not assurance
+tests/test_lgd_model.py,test_lgd_validation_reports_calibration,4,True,Inspect source; assertion count alone is not assurance
+tests/test_risk_logic.py,test_pd_to_score_is_strictly_decreasing_in_pd,1,True,Inspect source; assertion count alone is not assurance
+tests/test_risk_logic.py,test_stage2_ecl_is_at_least_12m_for_two_year_term,2,True,Inspect source; assertion count alone is not assurance
+tests/test_risk_logic.py,test_stage3_uses_governed_lgd_and_keeps_direct_workout_diagnostic,3,True,Inspect source; assertion count alone is not assurance
+tests/test_risk_logic.py,test_duplicate_role_index_fails_closed,1,True,Inspect source; assertion count alone is not assurance
+tests/test_risk_logic.py,test_null_pd_is_rejected_for_rating,0,True,Inspect source; assertion count alone is not assurance
+tests/test_risk_logic.py,test_stage2_defaults_to_rating7_without_forcing_stage,2,True,Inspect source; assertion count alone is not assurance
+tests/test_risk_logic.py,test_rating10_requires_explicit_writeoff,2,True,Inspect source; assertion count alone is not assurance
+tests/test_v5_integrity.py,test_invalid_stage_cannot_silently_get_stage1_ecl,0,True,Inspect source; assertion count alone is not assurance
+tests/test_v5_integrity.py,test_invalid_facility_values_are_rejected,0,True,Inspect source; assertion count alone is not assurance
+tests/test_v5_integrity.py,test_orphan_and_duplicate_facilities_rejected,0,True,Inspect source; assertion count alone is not assurance
+tests/test_v5_integrity.py,test_existing_missing_maturity_default_and_zero_exposure,2,True,Inspect source; assertion count alone is not assurance
+tests/test_v5_integrity.py,test_9_month_policy_boundary_and_stage3_precedence,1,True,Inspect source; assertion count alone is not assurance
+tests/test_v5_integrity.py,test_lgd_outcomes_cannot_leak_through_extra_columns,1,True,Inspect source; assertion count alone is not assurance

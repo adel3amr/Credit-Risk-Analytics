@@ -1,0 +1,22 @@
+phase,commit,portfolio,PD,WOE,calibration,staging,EWS,LGD,EAD,ECL,dashboard,tests,workflows
+Initial upload,4d91d1e,supplied CSV,present,absent,aggregate only,PD cutoffs,absent,borrower proxy,borrower/products,borrower calculation,dashboard/app.py,0,0
+Hybrid and calibrated DGP,fda0edb,supplied + generator,present,absent,aggregate only,PD cutoffs,absent,borrower proxy,borrower/products,borrower calculation,dashboard/app.py,0,1
+Predictor and target separation,d9a37dd,supplied + generator,present,absent,deciles,reporting-date rules,absent,borrower proxy,borrower/products,borrower calculation,dashboard/app.py,0,1
+CI reduction,03c1db0,supplied + generator,present,absent,deciles,reporting-date rules,absent,borrower proxy,borrower/products,borrower calculation,dashboard/app.py,0,1
+EWS persistence and macro V2,29ede62,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,dashboard/app.py,0,1
+Governance interface,a78bfe9,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,1,2
+Credit workbench,4a6bac7,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,1,2
+EWS terminology correction,969df72,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,1,2
+Collateral recovery rebuild,a3c46b4,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,1,2
+Limits and portfolio intelligence,f526939,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,1,2
+Ratings and main checkpoint,b93a459,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,1,2
+PCA experiment,c74d5dc,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,1,2
+Bootstrap experiment,0bf890d,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,1,3
+WOE experiment,0637926,supplied + generator,present,experiment,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,1,3
+Stress experiment,519df2b,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,1,3
+Abandoned broader remediation,cfce69a,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,2,2
+Code-only remediation,a90db85,supplied + generator,present,absent,deciles,reporting-date rules,present,borrower proxy,borrower/products,borrower calculation,root app,2,2
+Facility workout LGD and ECL,c85cdab,supplied + generator,present,absent,deciles,reporting-date rules,present,facility workout,facility terms,facility aggregation,root app,4,2
+V4 recovery diagnostics and challengers,4f87d21,supplied + generator,present,absent,deciles,reporting-date rules,present,facility workout,facility terms,facility aggregation,root app,4,2
+V5 initial diagnostics,33c60ee,supplied + generator,present,absent,deciles,reporting-date rules,present,facility workout,facility terms,facility aggregation,root app,4,2
+Frozen V5 implementation release,0dfe4c8,supplied + generator,present,absent,deciles,reporting-date rules,present,facility workout,facility terms,facility aggregation,root app,5,2
