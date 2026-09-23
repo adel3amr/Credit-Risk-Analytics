@@ -291,22 +291,52 @@ with tabs[1]:
 with tabs[2]:
     st.subheader("Manual intervention")
     st.write("Model output is preserved. Overrides are separate governed decisions.")
+
+    override_cid = st.selectbox(
+        "Customer for intervention",
+        df.customer_id.astype(str).tolist(),
+        key="override_customer",
+    )
+    override_x = df[df.customer_id.astype(str).eq(override_cid)].iloc[0]
+
     if has_permission(role,"propose_override"):
         typ=st.selectbox("Override type",["PD","Risk band","Stage / SICR","Watchlist","Collateral / recovery"])
         proposed=st.text_input("Proposed value")
         reason=st.selectbox("Reason",["Qualitative risk","New information","Data correction","Credit committee judgement","Other"])
         rationale=st.text_area("Rationale")
+
+        baseline_values = {
+            "PD": f"{float(override_x.predicted_pd):.6f}",
+            "Risk band": str(override_x.risk_band),
+            "Stage / SICR": str(override_x.stage),
+            "Watchlist": str(override_x.risk_direction),
+            "Collateral / recovery": (
+                f"{override_x.collateral_type}; recognized coverage="
+                f"{float(override_x.recognized_collateral_coverage):.2%}"
+            ),
+        }
+        model_value = baseline_values[typ]
+        st.caption(f"Current governed value: {model_value}")
+
         if st.button("Submit for approval", disabled=not(proposed and rationale)):
-            req = OverrideRequest(str(cid), typ, str(x.predicted_pd if typ=="PD" else x.risk_band), proposed, reason.upper().replace(" ","_"), rationale, user, role)
+            req = OverrideRequest(
+                str(override_cid), typ, model_value, proposed,
+                reason.upper().replace(" ","_"), rationale, user, role
+            )
             try:
                 req.validate()
                 st.session_state["pending_override"] = req
-                append_audit_event(AUDIT_LOG, {"actor":user,"role":role,"action":"PROPOSE_OVERRIDE","customer_id":str(cid),"override_type":typ,"proposed_value":proposed,"reason":reason})
+                append_audit_event(AUDIT_LOG, {
+                    "actor":user, "role":role, "action":"PROPOSE_OVERRIDE",
+                    "customer_id":str(override_cid), "override_type":typ,
+                    "model_value":model_value, "proposed_value":proposed, "reason":reason,
+                })
                 st.success("Submitted for Risk Manager approval.")
-            except (ValueError, PermissionError) as e:
-                st.error(str(e))
+            except (ValueError, PermissionError) as ex:
+                st.error(str(ex))
     else:
         st.info("Your role is read-only for overrides.")
+
     if has_permission(role,"approve_override"):
         st.caption("Risk Manager approval queue")
         req = st.session_state.get("pending_override")
@@ -316,13 +346,17 @@ with tabs[2]:
             if st.button("Approve override"):
                 try:
                     approved = approve_override(req, user, role)
-                    append_audit_event(AUDIT_LOG, {"actor":user,"role":role,"action":"APPROVE_OVERRIDE","customer_id":req.customer_id,"override_type":req.override_type,"proposed_value":req.proposed_value})
+                    append_audit_event(AUDIT_LOG, {
+                        "actor":user, "role":role, "action":"APPROVE_OVERRIDE",
+                        "customer_id":req.customer_id, "override_type":req.override_type,
+                        "model_value":req.model_value, "proposed_value":req.proposed_value,
+                    })
                     st.session_state["last_approved_override"] = approved
                     del st.session_state["pending_override"]
                     st.success("Override approved and audit event recorded.")
                     st.rerun()
-                except PermissionError as e:
-                    st.error(str(e))
+                except PermissionError as ex:
+                    st.error(str(ex))
         else:
             st.info("No override waiting for approval.")
 
