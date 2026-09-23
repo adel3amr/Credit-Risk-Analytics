@@ -63,11 +63,15 @@ def lgd_validation_summary(y_true, y_pred, ead=None):
         "R2": r2_score(y,p),
         "Mean_Actual_LGD": float(y.mean()),
         "Mean_Predicted_LGD": float(p.mean()),
-        # Bias convention: prediction minus realization. Positive = overprediction / conservative bias.\n        "Mean_Error_Bias": float(np.mean(p-y)),\n        "Calibration_in_the_large": float(y.mean()-p.mean()),
+        # Bias convention: prediction minus realization. Positive = overprediction / conservative bias.
+        "Mean_Error_Bias": float(np.mean(p-y)),
+        "Calibration_in_the_large": float(y.mean()-p.mean()),
     }
     if ead is not None:
         w=np.asarray(ead,dtype=float)
-        out["EAD_Weighted_MAE"] = float(np.average(np.abs(y-p),weights=np.maximum(w,1)))\n        out["EAD_Weighted_RMSE"] = float(np.sqrt(np.average((y-p)**2,weights=np.maximum(w,1))))\n        out["EAD_Weighted_Mean_Error_Bias"] = float(np.average(p-y,weights=np.maximum(w,1)))
+        out["EAD_Weighted_MAE"] = float(np.average(np.abs(y-p),weights=np.maximum(w,1)))
+        out["EAD_Weighted_RMSE"] = float(np.sqrt(np.average((y-p)**2,weights=np.maximum(w,1))))
+        out["EAD_Weighted_Mean_Error_Bias"] = float(np.average(p-y,weights=np.maximum(w,1)))
         out["EAD_Weighted_Actual_LGD"] = float(np.average(y,weights=np.maximum(w,1)))
         out["EAD_Weighted_Predicted_LGD"] = float(np.average(p,weights=np.maximum(w,1)))
     return out
