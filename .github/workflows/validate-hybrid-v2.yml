@@ -19,6 +19,10 @@ jobs:
         run: python -m compileall -q src notebooks scripts
       - name: Generate calibrated synthetic portfolio
         run: python scripts/generate_sme_portfolio.py
+      - name: Generate resolved workout history
+        run: python scripts/generate_lgd_workout_history.py
+      - name: Train and validate workout LGD
+        run: python notebooks/lgd_model_pipeline.py
       - name: Basic generated-data smoke test
         run: |
           python - <<'PY'
@@ -84,6 +88,10 @@ jobs:
           name: hybrid-pd-v2-results
           path: |
             outputs/model_validation.csv
+            outputs/lgd_model_validation.csv
+            outputs/lgd_calibration_deciles.csv
+            outputs/lgd_holdout_predictions.csv
+            outputs/facility_lgd_predictions.csv
             outputs/stage2_trigger_audit.csv
             outputs/portfolio_monitoring.csv
             outputs/stage2_customer_review.csv
