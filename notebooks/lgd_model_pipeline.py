@@ -46,7 +46,7 @@ for name,m in models.items():
 
 validation=pd.DataFrame(rows).set_index("Model")
 validation.to_csv(OUT/"lgd_model_validation.csv")
-print("\nLGD MODEL VALIDATION\n",validation.round(4))
+print("\nLGD MODEL VALIDATION\n",validation.round(4).to_string())
 
 # Governance decision is fixed ex ante: gradient boosting is the production-style
 # champion for non-linear recovery interactions; Ridge remains an interpretable challenger.
