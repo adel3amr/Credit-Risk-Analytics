@@ -48,9 +48,9 @@ def macro_odds_multiplier(row, baseline):
     )
     return float(np.exp(log_odds_shift))
 
-def _shift_pd_odds(pd, multiplier):
+def _shift_pd_odds(pd_values, multiplier):
     """Apply a scenario multiplier to default odds while keeping PD in (0,1)."""
-    p = np.clip(pd, 1e-8, 1 - 1e-8)
+    p = np.clip(pd_values, 1e-8, 1 - 1e-8)
     odds = p / (1 - p)
     shifted_odds = odds * multiplier
     return shifted_odds / (1 + shifted_odds)
@@ -173,5 +173,4 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
     out.loc[s3, "ecl"] = np.maximum(
         ead - out["stage3_discounted_collateral_recovery"], 0.0
     )[s3]
-    out["lifetime_ecl"] = out["ecl"]
     return out

@@ -17,9 +17,14 @@ def load_roles(path=ROLE_FILE):
 
 def has_permission(role, permission, roles=None):
     roles = load_roles() if roles is None else roles
+    if not roles.index.is_unique:
+        return False
     if role not in roles.index or permission not in roles.columns:
         return False
-    return bool(int(roles.loc[role, permission]))
+    try:
+        return bool(int(roles.at[role, permission]))
+    except (TypeError, ValueError, KeyError):
+        return False
 
 @dataclass(frozen=True)
 class OverrideRequest:

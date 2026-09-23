@@ -1,0 +1,9 @@
+# Generated synthetic data and model outputs
+data/raw/*.csv
+data/processed/*.csv
+outputs/*
+
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.streamlit/
