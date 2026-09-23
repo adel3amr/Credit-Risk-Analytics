@@ -22,7 +22,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 from data_preparation import load_data, prepare_data
-from hybrid_features import add_hybrid_features, feature_sets
+from hybrid_features import feature_sets
 from validation import validation_summary, calibration_table, ks_statistic
 from sklearn.metrics import confusion_matrix
 
@@ -31,8 +31,9 @@ OUT = ROOT / "outputs"
 OUT.mkdir(exist_ok=True)
 
 raw = load_data(ROOT / "data/raw/sme_credit_portfolio.csv")
-hybrid_raw = add_hybrid_features(raw)
-model_df = prepare_data(hybrid_raw)
+# All engineered trajectory variables are generated upstream before the split.
+# This experiment does not derive any feature using full-sample statistics.
+model_df = prepare_data(raw)
 
 y = model_df["default"]
 train_idx, test_idx = train_test_split(
@@ -47,7 +48,6 @@ order = [
     "Financial only",
     "Financial + Current Behavior",
     "Financial + Current Behavior + Trajectory",
-    "Full Hybrid",
 ]
 results = []
 predictions = {}
@@ -136,13 +136,11 @@ for _ in range(1000):
     boot_rows.append({
         "current_behavior_minus_financial": aucs[order[1]] - aucs[order[0]],
         "trajectory_minus_current_behavior": aucs[order[2]] - aucs[order[1]],
-        "qualitative_minus_trajectory": aucs[order[3]] - aucs[order[2]],
     })
 boot = pd.DataFrame(boot_rows)
 pairs = [
     ("Current Behavior - Financial", "current_behavior_minus_financial"),
     ("Trajectory - Current Behavior", "trajectory_minus_current_behavior"),
-    ("Qualitative - Trajectory", "qualitative_minus_trajectory"),
 ]
 bootstrap_summary = pd.DataFrame([{
     "Comparison": label,
@@ -173,14 +171,14 @@ trajectory_provenance.to_csv(OUT / "trajectory_signal_provenance.csv", index=Fal
 trajectory_audit = []
 for col in ["utilization_6m_change", "avg_utilization_6m",
             "months_above_80_utilization", "limit_breach_count"]:
-    x = hybrid_raw.loc[test_idx, col].astype(float)
+    x = raw.loc[test_idx, col].astype(float)
     trajectory_audit.append({
         "feature": col,
         "mean_nondefault": x[y.loc[test_idx] == 0].mean(),
         "mean_default": x[y.loc[test_idx] == 1].mean(),
         "spearman_with_default": x.corr(y.loc[test_idx].astype(float), method="spearman"),
         "spearman_with_current_utilization": x.corr(
-            hybrid_raw.loc[test_idx, "credit_utilization"].astype(float), method="spearman"
+            raw.loc[test_idx, "credit_utilization"].astype(float), method="spearman"
         ),
     })
 pd.DataFrame(trajectory_audit).to_csv(OUT / "trajectory_signal_audit.csv", index=False)
@@ -194,7 +192,7 @@ print(pd.DataFrame(diagnostics).set_index(["Information_Set", "Sample"]).round(4
 print("\nCONFUSION MATRICES")
 print(pd.DataFrame(confusion_rows).round(4))
 
-borrower = hybrid_raw.loc[test_idx].copy()
+borrower = raw.loc[test_idx].copy()
 for name, prob in predictions.items():
     pd_col = "pd_" + name.lower().replace(" + ", "_").replace(" ", "_")
     borrower[pd_col] = prob
