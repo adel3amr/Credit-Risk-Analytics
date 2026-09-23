@@ -13,13 +13,21 @@ import pandas as pd
 ROLE_FILE = Path(__file__).resolve().parents[1] / "config" / "access_roles.csv"
 
 def load_roles(path=ROLE_FILE):
-    return pd.read_csv(path).set_index("role")
+    roles = pd.read_csv(path)
+    if "role" not in roles.columns or roles["role"].duplicated().any():
+        raise ValueError("Role configuration must contain unique role names")
+    return roles.set_index("role")
 
 def has_permission(role, permission, roles=None):
     roles = load_roles() if roles is None else roles
+    if not roles.index.is_unique:
+        return False
     if role not in roles.index or permission not in roles.columns:
         return False
-    return bool(int(roles.loc[role, permission]))
+    try:
+        return bool(int(roles.at[role, permission]))
+    except (TypeError, ValueError, KeyError):
+        return False
 
 @dataclass(frozen=True)
 class OverrideRequest:
