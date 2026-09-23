@@ -11,6 +11,8 @@ from lgd_model import (
     gradient_boosting_lgd_model, ridge_lgd_challenger,
     huber_gradient_boosting_lgd_challenger, random_forest_lgd_challenger,
     hist_gradient_lgd_challenger,
+    huber_gradient_boosting_lgd_challenger, random_forest_lgd_challenger,
+    hist_gradient_lgd_challenger,
     predict_lgd, lgd_validation_summary, calibration_table, save_model,
 )
 
