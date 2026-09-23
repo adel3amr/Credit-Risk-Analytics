@@ -41,10 +41,23 @@ models={
 }
 rows=[]
 preds={}
+stability_rows=[]
 for name,m in models.items():
     m.fit(df.loc[train_idx],df.loc[train_idx,TARGET])
     p=predict_lgd(m,df.loc[test_idx])
     preds[name]=p
+    train_p=predict_lgd(m,df.loc[train_idx])
+    train_s=lgd_validation_summary(df.loc[train_idx,TARGET],train_p,df.loc[train_idx,"ead_at_default"])
+    hold_s=lgd_validation_summary(df.loc[test_idx,TARGET],p,df.loc[test_idx,"ead_at_default"])
+    stability_rows.append({
+        "Model":name,
+        "Train_MAE":train_s["MAE"],"Holdout_MAE":hold_s["MAE"],
+        "MAE_Gap":hold_s["MAE"]-train_s["MAE"],
+        "Train_RMSE":train_s["RMSE"],"Holdout_RMSE":hold_s["RMSE"],
+        "RMSE_Gap":hold_s["RMSE"]-train_s["RMSE"],
+        "Train_R2":train_s["R2"],"Holdout_R2":hold_s["R2"],
+        "R2_Gap":train_s["R2"]-hold_s["R2"],
+    })
     s=lgd_validation_summary(
         df.loc[test_idx,TARGET],p,df.loc[test_idx,"ead_at_default"]
     )
@@ -54,6 +67,9 @@ for name,m in models.items():
 validation=pd.DataFrame(rows).set_index("Model")
 validation.to_csv(OUT/"lgd_model_validation.csv")
 print("\nLGD MODEL VALIDATION\n",validation.round(4).to_string())
+stability=pd.DataFrame(stability_rows).set_index("Model")
+stability.to_csv(OUT/"lgd_train_holdout_stability.csv")
+print("\nLGD TRAIN/HOLDOUT STABILITY\n",stability.round(4).to_string())
 
 # Challenger tail comparison. This is diagnostic only: the governed champion is
 # not replaced merely because a challenger looks better on an already-observed holdout.
@@ -77,6 +93,34 @@ tail_challenger=pd.DataFrame(tail_compare)
 tail_challenger.to_csv(OUT/"lgd_challenger_tail_comparison.csv",index=False)
 print("\nLGD CHALLENGER TAIL COMPARISON\n",tail_challenger.round(4).to_string(index=False))
 
+# Compare every challenger on exactly the same facilities. The original table
+# above selects a different top-prediction population for each model and must
+# not be read as a paired model comparison. Realized-loss tails are retrospective
+# diagnostics only: their membership is unknown at prediction time.
+fixed_tail_rows=[]
+y_arr=y_hold.to_numpy()
+w_arr=w_hold.to_numpy()
+base_pred=preds["Gradient Boosting"]
+for definition,rank in [("champion_predicted",base_pred),("realized_outcome",y_arr)]:
+    for q in [.90,.95]:
+        cutoff=float(pd.Series(rank).quantile(q))
+        mask=rank>=cutoff
+        actual=y_arr[mask]
+        weights=w_arr[mask]
+        for name,p in preds.items():
+            error=p[mask]-actual
+            fixed_tail_rows.append({
+                "cohort":definition,"tail_percentile":q,"Model":name,
+                "facilities":int(mask.sum()),"actual_lgd":float(actual.mean()),
+                "predicted_lgd":float(p[mask].mean()),
+                "mean_error_bias":float(error.mean()),
+                "ead_weighted_bias":float((error*weights).sum()/weights.sum()),
+                "rmse":float((error**2).mean()**.5),
+            })
+fixed_tail=pd.DataFrame(fixed_tail_rows)
+fixed_tail.to_csv(OUT/"lgd_fixed_cohort_tail_comparison.csv",index=False)
+print("\nLGD FIXED-COHORT TAIL COMPARISON\n",fixed_tail.round(4).to_string(index=False))
+
 # Governance decision remains fixed ex ante: the original Gradient Boosting model is the governed champion.
 # Additional models are diagnostic challengers only; the untouched holdout is not used to tune or silently replace the champion.
 champion_name="Gradient Boosting"
@@ -90,6 +134,7 @@ holdout=df.loc[test_idx,[
     "collateral_coverage","lien_rank","guarantee_coverage","economic_lgd"
 ]].copy()
 holdout["predicted_lgd"]=champion_pred
+holdout["raw_predicted_lgd"]=champion.predict(df.loc[test_idx])
 holdout.to_csv(OUT/"lgd_holdout_predictions.csv",index=False)
 
 # Segment-level validation: detect pockets of bias hidden by near-zero portfolio bias.

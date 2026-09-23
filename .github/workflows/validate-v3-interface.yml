@@ -1,10 +1,10 @@
-name: Validate V3 Interface
+name: Validate V5 Interface
 
 on:
   push:
-    branches: [feature/v3-governance-interface, feature/v4-bank-grade-risk-engine]
+    branches: [feature/v3-governance-interface, feature/v4-bank-grade-risk-engine, feature/v5-lgd-validation-hardening]
   pull_request:
-    branches: [main, fix/reviewer-code-only]
+    branches: [main, fix/reviewer-code-only, feature/v4-bank-grade-risk-engine]
 
 jobs:
   validate:
@@ -13,8 +13,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - run: pip install -r requirements.txt pytest
+          python-version: "3.12"
+      - run: pip install -r requirements-v5.txt
       - run: python -m pytest -q
       - run: python -m py_compile app.py src/governance.py
       - name: Generate app data
@@ -23,10 +23,7 @@ jobs:
           python scripts/generate_lgd_workout_history.py
           python notebooks/lgd_model_pipeline.py
           python notebooks/credit_risk_pipeline.py
+          python notebooks/lgd_governance_diagnostics.py
+          python scripts/validate_v5.py
       - name: Streamlit runtime smoke test
-        run: |
-          python - <<'PY'
-          from streamlit.testing.v1 import AppTest
-          at = AppTest.from_file("app.py").run(timeout=30)
-          assert not at.exception, [str(x) for x in at.exception]
-          PY
+        run: python scripts/test_dashboard.py

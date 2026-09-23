@@ -1,13 +1,15 @@
-name: Validate Hybrid SME PD V2
+name: Validate V5 Risk Engine
 
 on:
   push:
     branches:
       - feature/v4-bank-grade-risk-engine
+      - feature/v5-lgd-validation-hardening
   pull_request:
     branches:
       - main
       - fix/reviewer-code-only
+      - feature/v4-bank-grade-risk-engine
 
 jobs:
   validate:
@@ -16,9 +18,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Install dependencies
-        run: pip install -r requirements.txt pytest
+        run: pip install -r requirements-v5.txt
       - name: Compile Python
         run: python -m compileall -q src notebooks scripts
       - name: Generate calibrated synthetic portfolio
@@ -104,18 +106,24 @@ jobs:
           cat outputs/auc_difference_bootstrap.csv
           cat outputs/trajectory_signal_provenance.csv
           cat outputs/trajectory_signal_audit.csv
+      - name: V5 release reconciliation and LGD diagnostics
+        run: python scripts/validate_v5.py
       - name: Upload validation outputs
         uses: actions/upload-artifact@v4
         with:
-          name: hybrid-pd-v2-results
+          name: v5-risk-engine-results
           path: |
+            outputs/v5_*.csv
+            outputs/v5_run_manifest.json
             outputs/model_validation.csv
             outputs/lgd_model_validation.csv
             outputs/lgd_calibration_deciles.csv
             outputs/lgd_holdout_predictions.csv
             outputs/lgd_segment_validation.csv
             outputs/lgd_tail_validation.csv
+            outputs/lgd_train_holdout_stability.csv
             outputs/lgd_challenger_tail_comparison.csv
+            outputs/lgd_fixed_cohort_tail_comparison.csv
             outputs/lgd_permutation_importance.csv
             outputs/cash_lgd_deep_dive.csv
             outputs/lgd_industry_comparison.csv

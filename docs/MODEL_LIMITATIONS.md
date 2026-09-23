@@ -1,4 +1,15 @@
-# V4 Model Limitations and Mitigations
+# V5 Known Limitations / Future Methodological Enhancements
+
+V5 preserves the approved methodology. Recommendations are not implemented. See `reports/credit_risk_report.md` for measured evidence.
+
+## V5 LGD investigation
+- **Methodology/outcome uncertainty:** random cure, recovery realization, costs, timing and discount rates affect targets but are excluded from predictors as intended. Holdout cure bias is +27.45 pp and non-cure bias -5.63 pp, consistent with averaging uncertain outcomes. Realized-loss tails and predicted-risk tails are different populations.
+- **Sampling:** training includes 980 cases above 75% LGD and 102 at/above 97%; holdout has 327 and 25 respectively. Extreme cases are represented, but the smallest cohort remains imprecise. No favorable resampling or selected tail additions were made.
+- **Implementation:** net cash flows reconstruct targets within rounding precision. One negative raw prediction is floored to zero; no upper-tail clipping occurred. Transformations fit training only and the predictor allowlist excludes outcomes. No coding defect explaining the tail was established.
+- **Synthetic timing:** `months_to_resolution` controls a smooth allocation over fixed 1/6/12/24/36/60-month cash-flow buckets, not a hard final-payment cutoff. Even cash recoveries may extend into later buckets. Changing this established generator assumption requires future methodology review. Individual recovery components are not stored; the audit reconciles net cash flows and PV.
+- **Legacy comparison:** current portfolio exposures have no realized workout LGD. A separate diagnostic reapplies the original collateral proxy to the historical workout holdout, including a fixed-seed unsecured-severity residual. This transferred benchmark is not an original historical forecast; its poorer results do not prove real-bank superiority of the facility model.
+
+Future methodology work may examine recovery/cure architecture, tail-sensitive objectives, timing assumptions and genuine vintage validation. None is implemented in V5. Reserve new independent validation data before such development.
 
 This document records known limitations of the synthetic SME credit-risk engine. A limitation is not treated as a defect when it follows from the educational/synthetic scope; where practical, the repository exposes diagnostics or governance controls rather than hiding it.
 
