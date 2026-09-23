@@ -39,7 +39,7 @@ def main():
     imp.to_csv(OUT / "lgd_permutation_importance.csv", index=False)
 
     # 2) Same-population borrower comparison.
-    x = pd.read_csv(ROOT / "data/processed/scored_portfolio.csv")
+    x = pd.read_csv(ROOT / "data/processed/scored_portfolio.csv").copy()
     x["old_loss_amount"] = x["lgd_legacy_proxy"] * x["ead"]
     x["new_loss_amount"] = x["modelled_lgd"] * x["ead"]
 
