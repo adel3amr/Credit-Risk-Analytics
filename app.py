@@ -30,9 +30,17 @@ def compact_money(v):
         return f"€{value / 1_000_000:.2f}m"
     return format_money(value)
 
-user = st.sidebar.text_input("User", value="demo.user")
-role = st.sidebar.selectbox("Role", ["Credit Analyst","Risk Manager","Model Validation","Auditor","Admin"])
-st.sidebar.info("Portfolio demo RBAC — not production authentication.")
+DEMO_IDENTITIES = {
+    "analyst.demo": "Credit Analyst",
+    "risk.manager.demo": "Risk Manager",
+    "validator.demo": "Model Validation",
+    "auditor.demo": "Auditor",
+    "admin.demo": "Admin",
+}
+user = st.sidebar.selectbox("Demo identity", list(DEMO_IDENTITIES))
+role = DEMO_IDENTITIES[user]
+st.sidebar.caption(f"Role: {role}")
+st.sidebar.info("Demo RBAC with fixed identities — not production authentication.")
 
 if not AUDIT.exists():
     st.error("Run the credit-risk pipeline first to generate borrower_audit_trace.csv.")
@@ -236,49 +244,50 @@ with tabs[1]:
 
     if filtered_customers.empty:
         st.warning("No customers match the selected filter.")
-        st.stop()
-
-    cid = st.selectbox("Customer", filtered_customers.customer_id.astype(str).tolist())
-    x = df[df.customer_id.astype(str).eq(cid)].iloc[0]
-    a,b,c,d = st.columns(4)
-    a.metric("PD", pct(x.predicted_pd))
-    b.metric("Risk Rating", f"{int(x.risk_rating)}/10")
-    c.metric("Rating status", str(x.rating_status))
-    d.metric("Credit Score", f"{x.credit_score:.0f}")
-    e,f,g,h = st.columns(4)
-    e.metric("Risk band", str(x.risk_band))
-    f.metric("Stage", str(x.stage))
-    g.metric("LGD", pct(x.lgd))
-    h.metric("ECL", format_money(x.ecl))
-    st.markdown("#### Decision summary")
-    ews=str(x["risk_direction"]) if "risk_direction" in df.columns else "—"
-    st.write(f"**{x.risk_band}** model risk · **{ews}** EWS · **{x.stage}** accounting classification. "
-             f"Internal Risk Rating is **{int(x.risk_rating)}/10 ({x.rating_status})**. "
-             f"Exposure is **{format_money(x.ead)}** with LGD of **{pct(x.lgd)}** and expected loss of **{format_money(x.ecl)}**.")
-    st.subheader("Exposure & recovery")
-    recovery_rows = [
-        ("Loan EAD", format_money(x.loan_ead)), ("OVD EAD", format_money(x.ovd_ead)),
-        ("Trade EAD", format_money(x.trade_ead)), ("Total EAD", format_money(x.ead)),
-        ("Collateral", format_money(x.collateral_value)), ("LGD", pct(x.lgd)),
-    ]
-    for field, label in [("recognized_collateral", "Recognized collateral"), ("unsecured_ead", "Unsecured EAD")]:
-        if field in df.columns:
-            recovery_rows.insert(-1, (label, format_money(x[field])))
-    st.dataframe(pd.DataFrame(recovery_rows, columns=["Metric","Value"]), hide_index=True, use_container_width=True)
-    st.subheader("Credit interpretation")
-    adverse=[]
-    if "leverage_ratio" in df.columns and x.leverage_ratio >= 3: adverse.append(f"leverage {x.leverage_ratio:.1f}x")
-    if "credit_utilization" in df.columns and x.credit_utilization >= .8: adverse.append(f"utilization {x.credit_utilization:.1%}")
-    if "delinquencies_12m" in df.columns and x.delinquencies_12m > 0: adverse.append(f"{int(x.delinquencies_12m)} delinquency event(s)")
-    if "days_past_due" in df.columns and x.days_past_due > 0: adverse.append(f"{int(x.days_past_due)} DPD")
-    if adverse: st.warning("Key adverse indicators: " + ", ".join(adverse) + ".")
-    else: st.success("No significant adverse indicators.")
-    if "forward_looking_pd_12m" in df.columns:
-        st.write(f"Model PD **{pct(x.predicted_pd)}** → macro-adjusted 12M PD **{pct(x.forward_looking_pd_12m)}**. Accounting stage remains a separate decision dimension.")
-    st.subheader("Risk signals")
-    cols=[c for c in ["days_past_due","credit_utilization","delinquencies_12m","previous_defaults","consecutive_ews_months","risk_direction","current_credit_impaired"] if c in df.columns]
-    st.dataframe(pd.DataFrame({"Field":cols,"Value":[x[c] for c in cols]}), hide_index=True)
-
+        cid = None
+    else:
+        cid = st.selectbox("Customer", filtered_customers.customer_id.astype(str).tolist())
+        x = df[df.customer_id.astype(str).eq(cid)].iloc[0]
+    if cid is not None:
+        a,b,c,d = st.columns(4)
+        a.metric("PD", pct(x.predicted_pd))
+        b.metric("Risk Rating", f"{int(x.risk_rating)}/10")
+        c.metric("Rating status", str(x.rating_status))
+        d.metric("Credit Score", f"{x.credit_score:.0f}")
+        e,f,g,h = st.columns(4)
+        e.metric("Risk band", str(x.risk_band))
+        f.metric("Stage", str(x.stage))
+        g.metric("LGD", pct(x.lgd))
+        h.metric("ECL", format_money(x.ecl))
+        st.markdown("#### Decision summary")
+        ews=str(x["risk_direction"]) if "risk_direction" in df.columns else "—"
+        st.write(f"**{x.risk_band}** model risk · **{ews}** EWS · **{x.stage}** accounting classification. "
+                 f"Internal Risk Rating is **{int(x.risk_rating)}/10 ({x.rating_status})**. "
+                 f"Exposure is **{format_money(x.ead)}** with LGD of **{pct(x.lgd)}** and expected loss of **{format_money(x.ecl)}**.")
+        st.subheader("Exposure & recovery")
+        recovery_rows = [
+            ("Loan EAD", format_money(x.loan_ead)), ("OVD EAD", format_money(x.ovd_ead)),
+            ("Trade EAD", format_money(x.trade_ead)), ("Total EAD", format_money(x.ead)),
+            ("Collateral", format_money(x.collateral_value)), ("LGD", pct(x.lgd)),
+        ]
+        for field, label in [("recognized_collateral", "Recognized collateral"), ("unsecured_ead", "Unsecured EAD")]:
+            if field in df.columns:
+                recovery_rows.insert(-1, (label, format_money(x[field])))
+        st.dataframe(pd.DataFrame(recovery_rows, columns=["Metric","Value"]), hide_index=True, use_container_width=True)
+        st.subheader("Credit interpretation")
+        adverse=[]
+        if "leverage_ratio" in df.columns and x.leverage_ratio >= 3: adverse.append(f"leverage {x.leverage_ratio:.1f}x")
+        if "credit_utilization" in df.columns and x.credit_utilization >= .8: adverse.append(f"utilization {x.credit_utilization:.1%}")
+        if "delinquencies_12m" in df.columns and x.delinquencies_12m > 0: adverse.append(f"{int(x.delinquencies_12m)} delinquency event(s)")
+        if "days_past_due" in df.columns and x.days_past_due > 0: adverse.append(f"{int(x.days_past_due)} DPD")
+        if adverse: st.warning("Key adverse indicators: " + ", ".join(adverse) + ".")
+        else: st.success("No significant adverse indicators.")
+        if "forward_looking_pd_12m" in df.columns:
+            st.write(f"Model PD **{pct(x.predicted_pd)}** → macro-adjusted 12M PD **{pct(x.forward_looking_pd_12m)}**. Accounting stage remains a separate decision dimension.")
+        st.subheader("Risk signals")
+        cols=[c for c in ["days_past_due","credit_utilization","delinquencies_12m","previous_defaults","consecutive_ews_months","risk_direction","current_credit_impaired"] if c in df.columns]
+        st.dataframe(pd.DataFrame({"Field":cols,"Value":[x[c] for c in cols]}), hide_index=True)
+    
 with tabs[2]:
     st.subheader("Manual intervention")
     st.write("Model output is preserved. Overrides are separate governed decisions.")
