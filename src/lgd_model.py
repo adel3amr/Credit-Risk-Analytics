@@ -91,7 +91,7 @@ def portfolio_to_facilities(borrowers):
             "customer_id":str(x["customer_id"]),
             "industry":str(x["industry"]),
             "collateral_type":str(x["collateral_type"]),
-            "collateral_coverage":float(x["recognized_collateral_coverage"]),
+            "collateral_coverage":float(x["collateral_coverage"]),
             "leverage_at_default":float(x["leverage_ratio"]),
             "current_ratio_at_default":float(x["current_ratio"]),
             "management_quality":float(x.get("management_quality",3)),
