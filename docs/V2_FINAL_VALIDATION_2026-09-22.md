@@ -1,5 +1,7 @@
 # V2 Final Validation — 2026-09-22
 
+> **Historical checkpoint — superseded by the reviewed current methodology in README.md and FINAL_PROJECT_RELEASE_2026-09-22.md. Values and implementation details below are retained only as development history and must not be treated as the current release.**
+
 ## Decision
 V2 is frozen for manual review. No further tuning of the synthetic DGP, governed PD specification, EWS threshold, staging rules, or macro sensitivities should be made from holdout results.
 
