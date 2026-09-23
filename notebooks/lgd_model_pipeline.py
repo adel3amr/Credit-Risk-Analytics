@@ -63,6 +63,55 @@ holdout=df.loc[test_idx,[
 holdout["predicted_lgd"]=champion_pred
 holdout.to_csv(OUT/"lgd_holdout_predictions.csv",index=False)
 
+# Segment-level validation: detect pockets of bias hidden by near-zero portfolio bias.
+segment_rows=[]
+holdout_validation=df.loc[test_idx].copy()
+holdout_validation["predicted_lgd"]=champion_pred
+holdout_validation["error"]=holdout_validation["predicted_lgd"]-holdout_validation[TARGET]
+for dimension in ["collateral_type","lien_rank","product_type"]:
+    for segment,g in holdout_validation.groupby(dimension,dropna=False):
+        w=g["ead_at_default"].clip(lower=1)
+        segment_rows.append({
+            "dimension":dimension,
+            "segment":str(segment),
+            "facilities":len(g),
+            "ead":g["ead_at_default"].sum(),
+            "actual_lgd":g[TARGET].mean(),
+            "predicted_lgd":g["predicted_lgd"].mean(),
+            "mean_error_bias":g["error"].mean(),
+            "mae":g["error"].abs().mean(),
+            "rmse":float((g["error"].pow(2).mean())**.5),
+            "ead_weighted_actual_lgd":float((g[TARGET]*w).sum()/w.sum()),
+            "ead_weighted_predicted_lgd":float((g["predicted_lgd"]*w).sum()/w.sum()),
+            "ead_weighted_bias":float((g["error"]*w).sum()/w.sum()),
+            "ead_weighted_mae":float((g["error"].abs()*w).sum()/w.sum()),
+            "ead_weighted_rmse":float(((g["error"].pow(2)*w).sum()/w.sum())**.5),
+        })
+segment_validation=pd.DataFrame(segment_rows)
+segment_validation.to_csv(OUT/"lgd_segment_validation.csv",index=False)
+
+# Tail validation: the highest predicted-LGD facilities are particularly important
+# because aggregate near-zero bias can conceal underprediction in severe workouts.
+tail_rows=[]
+for q in [.75,.90,.95]:
+    cutoff=float(holdout_validation["predicted_lgd"].quantile(q))
+    g=holdout_validation.loc[holdout_validation["predicted_lgd"]>=cutoff]
+    w=g["ead_at_default"].clip(lower=1)
+    tail_rows.append({
+        "predicted_lgd_percentile":q,
+        "cutoff":cutoff,
+        "facilities":len(g),
+        "actual_lgd":g[TARGET].mean(),
+        "predicted_lgd":g["predicted_lgd"].mean(),
+        "mean_error_bias":g["error"].mean(),
+        "rmse":float((g["error"].pow(2).mean())**.5),
+        "ead_weighted_bias":float((g["error"]*w).sum()/w.sum()),
+    })
+tail_validation=pd.DataFrame(tail_rows)
+tail_validation.to_csv(OUT/"lgd_tail_validation.csv",index=False)
+print("\nLGD SEGMENT VALIDATION\n",segment_validation.round(4).to_string(index=False))
+print("\nLGD HIGH-LOSS TAIL VALIDATION\n",tail_validation.round(4).to_string(index=False))
+
 # Refit governed model on the full resolved-workout history after the independent
 # holdout validation has been produced. This deployed model is then applied to the
 # current synthetic portfolio; holdout metrics above remain the validation evidence.
