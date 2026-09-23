@@ -2,9 +2,9 @@ name: Validate V3 Interface
 
 on:
   push:
-    branches: [feature/v3-governance-interface]
+    branches: [feature/v3-governance-interface, feature/v4-bank-grade-risk-engine]
   pull_request:
-    branches: [main]
+    branches: [main, fix/reviewer-code-only]
 
 jobs:
   validate:
