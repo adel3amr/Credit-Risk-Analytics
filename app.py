@@ -294,11 +294,11 @@ with tabs[1]:
         "supplier_concentration","key_person_dependency","audit_quality"
     ] if c in df.columns]
     if qcols:
-        st.dataframe(pd.DataFrame({"Field":qcols,"Value":[x[c] for c in qcols]}), hide_index=True, width="stretch")
+        st.dataframe(pd.DataFrame({"Field":qcols,"Value":[str(x[c]) for c in qcols]}), hide_index=True, width="stretch")
 
     st.subheader("Risk signals")
     cols=[c for c in ["days_past_due","credit_utilization","delinquencies_12m","previous_defaults","consecutive_ews_months","risk_direction","current_credit_impaired","write_off_flag"] if c in df.columns]
-    st.dataframe(pd.DataFrame({"Field":cols,"Value":[x[c] for c in cols]}), hide_index=True)
+    st.dataframe(pd.DataFrame({"Field":cols,"Value":[str(x[c]) for c in cols]}), hide_index=True)
 
     if FACILITY_ECL.exists():
         fac = pd.read_csv(FACILITY_ECL)

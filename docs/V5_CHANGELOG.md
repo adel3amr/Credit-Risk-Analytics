@@ -7,6 +7,7 @@ Reviewed baselines: V4 `4f87d21`; remote V5 `33c60ee`. Prior local work from `90
 | --- | --- | --- |
 | BUG FIX | Reject invalid stages, duplicate/orphan facilities and non-finite/out-of-range ECL inputs | Prevent silent Stage 1 fallback, double counting and NaN totals. Missing maturity retains the 12-month default. Valid results unchanged. |
 | BUG FIX | Literal borrower search | Input such as `[` previously raised a regex error. |
+| BUG FIX | Normalize display-only mixed-value tables to text | Prevent Streamlit Arrow serialization fallback when numeric signals and risk labels share a column. |
 | CODE ENHANCEMENT | One-command build and tested direct dependency pins | Fail-fast execution order and consistent paths. pandas minimum 2.2 matches existing `include_groups` use. |
 | UI/UX ENHANCEMENT | V5 identity, facility ECL trace, LGD bias/tail/support/legacy tables and release checks | Exposes calculations and limitations; permissions unchanged. |
 | VALIDATION ENHANCEMENT | Common-cohort challengers and realized-loss thresholds | Same facilities for paired comparison; all 60/75/90/97% cuts reported. |
