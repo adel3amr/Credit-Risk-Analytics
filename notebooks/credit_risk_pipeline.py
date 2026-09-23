@@ -16,6 +16,8 @@ from scorecard import add_score, add_risk_rating
 from ecl import calculate_ecl
 
 ROOT=Path(__file__).resolve().parents[1]
+(ROOT/"outputs").mkdir(parents=True, exist_ok=True)
+(ROOT/"data/processed").mkdir(parents=True, exist_ok=True)
 df=load_data(ROOT/"data/raw/sme_credit_portfolio.csv")
 model_df=prepare_data(df)
 X=model_df[pd_feature_columns(model_df)]
