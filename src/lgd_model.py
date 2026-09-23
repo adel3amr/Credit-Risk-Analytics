@@ -4,7 +4,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor, HistGradientBoostingRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -41,6 +41,39 @@ def gradient_boosting_lgd_model():
         )),
     ])
 
+
+
+def huber_gradient_boosting_lgd_challenger():
+    """Robust-loss challenger: tests whether Huber loss improves severe-workout behavior."""
+    return Pipeline([
+        ("prep", _preprocessor()),
+        ("model", GradientBoostingRegressor(
+            loss="huber", alpha=.90, n_estimators=220, max_depth=3,
+            learning_rate=.035, min_samples_leaf=25, random_state=42,
+        )),
+    ])
+
+
+def random_forest_lgd_challenger():
+    """Bagged-tree challenger for non-linear recovery interactions."""
+    return Pipeline([
+        ("prep", _preprocessor()),
+        ("model", RandomForestRegressor(
+            n_estimators=350, max_depth=10, min_samples_leaf=15,
+            max_features=.75, random_state=42, n_jobs=-1,
+        )),
+    ])
+
+
+def hist_gradient_lgd_challenger():
+    """Histogram boosting challenger with explicit regularization."""
+    return Pipeline([
+        ("prep", _preprocessor()),
+        ("model", HistGradientBoostingRegressor(
+            max_iter=220, learning_rate=.05, max_leaf_nodes=15,
+            min_samples_leaf=25, l2_regularization=1.0, random_state=42,
+        )),
+    ])
 
 def ridge_lgd_challenger():
     return Pipeline([
