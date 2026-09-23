@@ -19,8 +19,12 @@ Forward-looking PD + stage + LGD + EAD -> simplified ECL
 Logistic Regression is the governed primary PD model because interpretability and probability calibration are central to the use case. Random Forest and Gradient Boosting are challengers; the primary model is not selected by whichever algorithm happens to achieve the highest holdout AUC.
 
 ## Synthetic portfolio
-- 12,000 SME borrowers.
+- **12,000 SME borrowers in total.**
+- **9,000 borrowers are used for model development/training.**
+- **3,000 borrowers (25%) are kept untouched for final out-of-sample validation.**
 - 36 monthly behavioural observations per borrower (432,000 borrower-months).
+
+The 3,000-borrower holdout is part of the 12,000-borrower portfolio; it is not an additional sample.
 - Term loans, overdrafts (OVD) and trade-finance facilities.
 - Chronological utilization history generated forward from M-35 to reporting date M0.
 - Future 12-month default is generated only after reporting-date borrower information is constructed.
@@ -163,6 +167,8 @@ python -m streamlit run app.py
 ```
 
 Generate the synthetic data before running the analytics so the raw schema and governed feature set stay synchronized.
+
+Generated raw/processed CSVs and model outputs are intentionally not version-controlled. The scripts and CI recreate them deterministically, preventing stale committed artifacts from contradicting the current code.
 
 ## Governance principles
 - No future-default target leakage into reporting-date staging.
