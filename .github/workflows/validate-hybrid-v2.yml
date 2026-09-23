@@ -1,9 +1,13 @@
 name: Validate Hybrid SME PD V2
 
 on:
+  push:
+    branches:
+      - feature/v4-bank-grade-risk-engine
   pull_request:
     branches:
       - main
+      - fix/reviewer-code-only
 
 jobs:
   validate:
