@@ -48,9 +48,9 @@ def macro_odds_multiplier(row, baseline):
     )
     return float(np.exp(log_odds_shift))
 
-def _shift_pd_odds(pd, multiplier):
+def _shift_pd_odds(pd_values, multiplier):
     """Apply a scenario multiplier to default odds while keeping PD in (0,1)."""
-    p = np.clip(pd, 1e-8, 1 - 1e-8)
+    p = np.clip(pd_values, 1e-8, 1 - 1e-8)
     odds = p / (1 - p)
     shifted_odds = odds * multiplier
     return shifted_odds / (1 + shifted_odds)
@@ -133,35 +133,51 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
     # across scenarios in V2 so the macro overlay is isolated to PD.
     out["ecl_12m"] = out["forward_looking_pd_12m"] * lgd * ead
 
-    # Approximate cumulative PD under a constant annual hazard over remaining
-    # contractual term. This replaces the previous arbitrary 2.5x multiplier.
-    # Portfolio-level approximation only: the current synthetic schema has one
-    # borrower-level term even when a borrower also has OVD/trade facilities.
-    # Cap at the contractual term generated for the borrower; do not impose a
-    # minimum one-year remaining life on shorter residual terms.
-    remaining_years = np.maximum(out["loan_term_months"].fillna(12) / 12.0, 0.0)
-    # Apply the same scenario logic over the simplified constant-hazard term
-    # structure, then probability-weight the scenario lifetime PDs.
+    # Facility-specific remaining-life treatment. Term-loan remaining life is
+    # generated explicitly; OVD uses the synthetic annual-review horizon; trade
+    # uses transparent instrument-specific remaining lives from the generator.
+    loan_years = np.maximum(out["loan_remaining_months"].fillna(0) / 12.0, 0.0)
+    ovd_years = np.maximum(out["ovd_remaining_months"].fillna(0) / 12.0, 0.0)
+    trade_years = np.maximum(out["trade_remaining_months"].fillna(0) / 12.0, 0.0)
+    loan_ead = out["loan_ead"].clip(lower=0)
+    ovd_ead = out["ovd_ead"].clip(lower=0)
+    trade_ead = out["trade_ead"].clip(lower=0)
+
     scenario_lifetime = {}
+    scenario_lifetime_ecl = {}
     for scenario, scenario_pd in scenario_pds.items():
-        lp = 1.0 - np.power(1.0 - scenario_pd, remaining_years)
-        out[f"lifetime_pd_{scenario}"] = lp.clip(0, 1)
+        loan_lp = 1.0 - np.power(1.0 - scenario_pd, loan_years)
+        ovd_lp = 1.0 - np.power(1.0 - scenario_pd, ovd_years)
+        trade_lp = 1.0 - np.power(1.0 - scenario_pd, trade_years)
+        weighted_lp = (
+            loan_lp * loan_ead + ovd_lp * ovd_ead + trade_lp * trade_ead
+        ) / np.maximum(ead, 1.0)
+        out[f"lifetime_pd_{scenario}"] = weighted_lp.clip(0, 1)
         scenario_lifetime[scenario] = out[f"lifetime_pd_{scenario}"]
+        scenario_lifetime_ecl[scenario] = (
+            loan_lp * loan_ead + ovd_lp * ovd_ead + trade_lp * trade_ead
+        ) * lgd
+
     out["lifetime_pd"] = sum(
         scenario_weights[s] * scenario_lifetime[s] for s in scenario_lifetime
     ).clip(0, 1)
+    out["full_lifetime_ecl"] = sum(
+        scenario_weights[s] * scenario_lifetime_ecl[s]
+        for s in scenario_lifetime_ecl
+    ).clip(lower=0)
 
     out["ecl"] = out["ecl_12m"]
     s2 = out["stage"] == "Stage 2"
     s3 = out["stage"] == "Stage 3"
-    out.loc[s2, "ecl"] = (out["lifetime_pd"] * lgd * ead)[s2]
-    # Simplified Stage 3 workout starts from the same collateral-type recognition
-    # architecture used by LGD (Cash 100%, Mortgage 80%, Other 65%, Unsecured 0%).
-    # We then apply explicit workout timing/cost assumptions to recognized proceeds.
-    # This avoids replacing collateral-specific recovery economics with a second,
-    # generic haircut. The 10% realization cost, 2-year horizon and 5% discount rate
-    # remain transparent synthetic assumptions, not IFRS 9 prescriptions.
+    out.loc[s2, "ecl"] = out.loc[s2, "full_lifetime_ecl"]
+
+    # Simplified Stage 3 workout keeps collateral timing/cost and unsecured loss
+    # severity conceptually separate. Recognized collateral suffers realization
+    # cost and discounting; residual unsecured exposure uses unsecured_lgd rather
+    # than an implicit 100% loss assumption.
     recognized_collateral = out["recognized_collateral"].fillna(0).clip(lower=0)
+    unsecured_ead = out["unsecured_ead"].fillna(0).clip(lower=0)
+    unsecured_lgd = out["unsecured_lgd"].fillna(lgd).clip(0, 1)
     stage3_realization_cost_rate = 0.10
     stage3_recovery_years = 2.0
     stage3_discount_rate = 0.05
@@ -170,8 +186,12 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
         (1.0 + stage3_discount_rate) ** stage3_recovery_years
     )
     out["stage3_discounted_collateral_recovery"] = np.minimum(discounted_recovery, ead)
-    out.loc[s3, "ecl"] = np.maximum(
-        ead - out["stage3_discounted_collateral_recovery"], 0.0
+    out["stage3_collateral_timing_cost_loss"] = np.maximum(
+        recognized_collateral - out["stage3_discounted_collateral_recovery"], 0.0
+    )
+    out["stage3_unsecured_loss"] = unsecured_ead * unsecured_lgd
+    out.loc[s3, "ecl"] = np.minimum(
+        out["stage3_collateral_timing_cost_loss"] + out["stage3_unsecured_loss"],
+        ead,
     )[s3]
-    out["lifetime_ecl"] = out["ecl"]
     return out
