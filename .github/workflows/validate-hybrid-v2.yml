@@ -71,11 +71,21 @@ jobs:
           s1 = x["stage"].eq("Stage 1")
           s2 = x["stage"].eq("Stage 2")
           s3 = x["stage"].eq("Stage 3")
-          assert (f.loc[f["stage"].eq("Stage 2"), "facility_ecl"] >=
-                  f.loc[f["stage"].eq("Stage 2"), "facility_ecl_12m"] - .02).all()
+          # Stage 2 uses lifetime PD over *remaining* facility maturity. For a
+          # facility with <12 months remaining, lifetime ECL can legitimately be
+          # below the annualized 12m diagnostic; therefore reconcile to the actual
+          # lifetime-PD identity rather than imposing ECL >= 12m ECL.
+          fs2 = f["stage"].eq("Stage 2")
+          expected_s2 = f["facility_lifetime_pd"] * f["predicted_lgd"] * f["ead_at_default"]
           assert np.allclose(
-              f.loc[f["stage"].eq("Stage 3"), "facility_ecl"],
-              (f["predicted_lgd"] * f["ead_at_default"]).loc[f["stage"].eq("Stage 3")],
+              f.loc[fs2, "facility_ecl"],
+              expected_s2.loc[fs2],
+              rtol=1e-10, atol=.02,
+          )
+          fs3 = f["stage"].eq("Stage 3")
+          assert np.allclose(
+              f.loc[fs3, "facility_ecl"],
+              (f["predicted_lgd"] * f["ead_at_default"]).loc[fs3],
               rtol=1e-10, atol=.02,
           )
           assert (x.loc[s1, "days_past_due"] < 30).all()
