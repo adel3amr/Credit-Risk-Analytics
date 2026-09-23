@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/v4-bank-grade-risk-engine
+      - feature/v5-lgd-validation-hardening
   pull_request:
     branches:
       - main
@@ -117,6 +118,7 @@ jobs:
             outputs/lgd_tail_validation.csv
             outputs/lgd_train_holdout_stability.csv
             outputs/lgd_challenger_tail_comparison.csv
+            outputs/lgd_fixed_cohort_tail_comparison.csv
             outputs/lgd_permutation_importance.csv
             outputs/cash_lgd_deep_dive.csv
             outputs/lgd_industry_comparison.csv
