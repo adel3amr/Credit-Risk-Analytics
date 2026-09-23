@@ -47,10 +47,15 @@ threshold_diag = threshold_diagnostics(yte, primary_pd, thresholds=(0.05, 0.10))
 threshold_diag.to_csv(ROOT/"outputs/pd_threshold_diagnostics.csv", index=False)
 print("\nREFERENCE THRESHOLD DIAGNOSTICS (not optimized)\n", threshold_diag.round(4))
 
-out=df.iloc[Xte.index].copy()
+out=df.loc[Xte.index].copy()
 out["predicted_pd"]=primary_pd
 out=add_score(out)
 out=calculate_ecl(out)
+# Operational watchlist is Stage-1 deterioration only. It is created after
+# staging so Stage 2 is not silently relabelled as Rating 7.
+out["ews_monitoring_flag"] = (
+    out["risk_direction"].eq("Deteriorating") & out["stage"].eq("Stage 1")
+).astype(int)
 out=add_risk_rating(out)
 
 # Borrower-level audit trace: preserve the full reporting-date chain from raw
@@ -66,12 +71,16 @@ audit_trace_cols = [
     "collateral_coverage", "collateral_type", "collateral_haircut", "recognized_collateral",
     "recognized_collateral_coverage", "unsecured_ead", "unsecured_lgd", "loan_limit", "loan_draw_ratio", "loans", "loan_ead", "ovd", "ovd_ead", "trade",
     "direct_limit", "direct_drawn", "indirect_limit", "total_credit_limit", "total_utilized_amount",
-    "trade_type", "trade_ccf", "trade_ead", "ead", "lgd", "loan_term_months",
+    "trade_type", "trade_ccf", "trade_ead", "trade_remaining_months",
+    "ead", "lgd", "loan_term_months", "loan_age_months", "loan_remaining_months",
+    "ovd_remaining_months",
     "predicted_pd", "pit_pd_12m", "pd_12m_upside", "pd_12m_baseline",
     "pd_12m_downside", "forward_looking_pd_12m", "credit_score", "risk_band", "risk_rating", "rating_status",
     "risk_direction", "ews_signal_count", "ews_sicr_flag", "stage", "sicr_flag",
     "ecl_12m", "lifetime_pd_upside", "lifetime_pd_baseline",
-    "lifetime_pd_downside", "lifetime_pd", "ecl", "default",
+    "lifetime_pd_downside", "lifetime_pd", "full_lifetime_ecl",
+    "stage3_discounted_collateral_recovery", "stage3_collateral_timing_cost_loss",
+    "stage3_unsecured_loss", "ecl", "default",
 ]
 missing_audit_cols = [col for col in audit_trace_cols if col not in out.columns]
 if missing_audit_cols:
@@ -89,7 +98,7 @@ audit_dictionary = pd.DataFrame([
     ("pd_12m_upside / baseline / downside", "Forward-looking PD", "Fixed scenario shifts to PIT default odds; synthetic assumptions"),
     ("forward_looking_pd_12m", "Forward-looking PD", "Probability-weighted 12-month scenario PD used in ECL"),
     ("credit_score / risk_band", "Risk segmentation", "Transformations of predicted PD; not accounting stages"),
-    ("risk_rating / rating_status", "Operational rating", "1-6 performing PD grades; 7 watchlist; 8-10 Stage 3 severity. Full cash coverage sets non-Stage-3 borrowers to Rating 1."),
+    ("risk_rating / rating_status", "Operational rating", "1 reserved for full eligible cash cover; 2-6 performing PD grades; 7 explicit Stage-1 operational watchlist; 8-10 Stage 3 severity."),
     ("risk_direction / ews_signal_count", "EWS", "Monitoring status; separate from PD grade"),
     ("stage", "Accounting proxy", "Simplified Stage 1/2/3 assignment using reporting-date triggers"),
     ("loan_ead", "EAD", "100% of synthetic current term-loan outstanding"),
@@ -98,7 +107,10 @@ audit_dictionary = pd.DataFrame([
     ("ead", "EAD", "Sum of loan, OVD and trade EAD"),
     ("collateral_coverage / lgd", "LGD", "Aggregate borrower-level synthetic recovery proxy"),
     ("ecl_12m", "ECL", "forward_looking_pd_12m x lgd x ead"),
-    ("lifetime_pd", "ECL", "Probability-weighted scenario lifetime PD using a simplified constant-hazard term structure"),
+    ("lifetime_pd", "ECL", "EAD-weighted probability-weighted lifetime PD using facility-specific synthetic remaining lives"),
+    ("full_lifetime_ecl", "ECL", "Probability-weighted full lifetime ECL across term-loan, OVD and trade EAD"),
+    ("stage3_discounted_collateral_recovery", "Stage 3 recovery", "Recognized collateral after synthetic realization cost and timing discount"),
+    ("stage3_unsecured_loss", "Stage 3 recovery", "Residual unsecured EAD multiplied by synthetic unsecured loss severity"),
     ("ecl", "ECL", "Stage-dependent simplified ECL"),
     ("default", "Validation outcome", "Future 12-month synthetic outcome; not a reporting-date input"),
 ], columns=["field_or_group", "layer", "interpretation"])
@@ -137,10 +149,7 @@ audit = pd.DataFrame({
 audit["share_of_stage2"] = audit["stage2_customers"] / max(len(stage2), 1)
 
 # Separate monitoring population: deterioration can exist while an exposure remains
-# Stage 1. This makes risk direction visible without mechanically forcing SICR.
-out["ews_monitoring_flag"] = (
-    (out["risk_direction"] == "Deteriorating") & (out["stage"] == "Stage 1")
-).astype(int)
+# Stage 1. The flag was created before risk rating so Rating 7 uses this exact scope.
 ews_monitoring = out[out["ews_monitoring_flag"] == 1].copy()
 # Refresh Stage 2 subset after the monitoring flag is added to the master output.
 stage2 = out[out["stage"] == "Stage 2"].copy()
@@ -198,7 +207,7 @@ monitor_cols = [
     "previous_defaults", "credit_utilization", "utilization_6m_change",
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
     "loans", "ovd", "trade", "trade_type", "ead", "lgd", "ecl_12m",
-    "lifetime_pd", "ecl", *trigger_cols, "stage2_trigger_count", "default",
+    "lifetime_pd", "full_lifetime_ecl", "ecl", *trigger_cols, "stage2_trigger_count", "default",
 ]
 monitor_cols = [col for col in monitor_cols if col in out.columns]
 out[monitor_cols].sort_values(["stage", "predicted_pd"], ascending=[False, False]).to_csv(
@@ -239,7 +248,7 @@ ecl_coverage = (
         mean_collateral_coverage=("collateral_coverage", "mean"),
         mean_recognized_collateral_coverage=("recognized_collateral_coverage", "mean"),
         median_recognized_collateral_coverage=("recognized_collateral_coverage", "median"),
-        mean_term_months=("loan_term_months", "mean"),
+        mean_loan_remaining_months=("loan_remaining_months", "mean"),
     )
     .reset_index()
 )
@@ -266,7 +275,8 @@ print("\nCOLLATERAL / LGD DIAGNOSTICS\n", collateral_diag.round(4).to_string(ind
 stage2_diag = out.loc[out["stage"] == "Stage 2", [
     "customer_id", "ead", "ecl", "forward_looking_pd_12m", "lifetime_pd",
     "lgd", "collateral_value", "collateral_coverage", "recognized_collateral",
-    "recognized_collateral_coverage", "loan_term_months",
+    "recognized_collateral_coverage", "loan_remaining_months",
+    "ovd_remaining_months", "trade_remaining_months",
     "risk_direction", "consecutive_ews_months", "days_past_due",
 ]].copy()
 stage2_diag["ecl_to_ead"] = stage2_diag["ecl"] / stage2_diag["ead"].clip(lower=1)
