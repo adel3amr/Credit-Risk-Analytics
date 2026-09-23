@@ -19,6 +19,18 @@ PD_BASE_FEATURES = [
     "days_past_due",
 ]
 
+PD_QUALITATIVE_FEATURES = [
+    "management_quality",
+    "governance_quality",
+    "financial_reporting_quality",
+    "market_position",
+    "sponsor_support",
+    "customer_concentration",
+    "supplier_concentration",
+    "key_person_dependency",
+    "audit_quality",
+]
+
 
 def load_data(path):
     return pd.read_csv(path)
@@ -32,10 +44,11 @@ def prepare_data(df):
 
 def pd_feature_columns(df):
     """Return the governed borrower-PD feature set; new columns are opt-in."""
-    missing = [c for c in PD_BASE_FEATURES if c not in df.columns]
+    required = PD_BASE_FEATURES + PD_QUALITATIVE_FEATURES
+    missing = [c for c in required if c not in df.columns]
     if missing:
         raise ValueError(f"Missing governed PD features: {missing}")
-    approved = list(PD_BASE_FEATURES)
+    approved = list(required)
     industry_cols = sorted(c for c in df.columns if c.startswith("industry_"))
     return approved + industry_cols
 
