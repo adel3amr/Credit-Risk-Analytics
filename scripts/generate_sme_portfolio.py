@@ -38,8 +38,8 @@ def main():
     seed_sequence = np.random.SeedSequence(SEED)
     (
         rng_borrower, rng_facility, rng_behavior, rng_credit,
-        rng_recovery, rng_default, rng_qualitative,
-    ) = [np.random.default_rng(s) for s in seed_sequence.spawn(7)]
+        rng_recovery, rng_default, rng_qualitative, rng_maturity,
+    ) = [np.random.default_rng(s) for s in seed_sequence.spawn(8)]
     rng = rng_borrower
     n = N
 
@@ -108,6 +108,14 @@ def main():
     indirect_limit = trade
     total_credit_limit = direct_limit + indirect_limit
     loan_term_months = rng.choice([12, 24, 36, 48, 60], n, p=[.15, .23, .30, .17, .15])
+    # Reporting-date remaining maturity is generated independently of credit risk.
+    loan_age_months = np.floor(
+        rng_maturity.random(n) * np.maximum(loan_term_months, 1)
+    ).astype(int)
+    loan_remaining_months = np.maximum(loan_term_months - loan_age_months, 1)
+    loan_age_months = np.where(has_loan, loan_age_months, 0)
+    loan_remaining_months = np.where(has_loan, loan_remaining_months, 0)
+    ovd_remaining_months = np.where(has_ovd, 12, 0)
     debt_to_income = np.clip(
         .12 + .075 * leverage_ratio + rng.normal(.08, .10, n), .03, .90
     )
@@ -244,6 +252,10 @@ def main():
     trade_ccf = np.where(has_trade, trade_ccf, 0.0)
     trade_type = np.where(has_trade, trade_type, "None")
     trade_ead = trade * trade_ccf
+    trade_remaining_months = np.array([
+        {"Import LC":6, "Performance Guarantee":18, "Financial Guarantee":24, "None":0}[x]
+        for x in trade_type
+    ], dtype=int)
 
     ead = loan_ead + ovd_ead + trade_ead
     # Collateral DGP: generate security type first, then nominal coverage conditional
@@ -380,7 +392,11 @@ def main():
         "trade_type": trade_type,
         "trade_ccf": trade_ccf.round(2),
         "trade_ead": trade_ead.round(2),
+        "trade_remaining_months": trade_remaining_months,
         "loan_term_months": loan_term_months,
+        "loan_age_months": loan_age_months,
+        "loan_remaining_months": loan_remaining_months,
+        "ovd_remaining_months": ovd_remaining_months,
         "interest_rate": interest_rate.round(4),
         "debt_to_income": debt_to_income.round(4),
         "credit_utilization": credit_utilization.round(4),
