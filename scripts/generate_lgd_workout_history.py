@@ -65,7 +65,18 @@ def main():
         [.995, .70, .45], default=0.0
     )
     lien_factor = np.select([lien_rank=="First", lien_rank=="Second"], [1.0,.72], default=0.0)
-    # Cash collateral is operationally distinct from physical collateral: where the\n    # bank has enforceable control, value volatility and liquidation friction should\n    # be much lower. Keep a small residual haircut rather than hard-coding zero LGD.\n    realization_multiplier = np.where(\n        collateral_type=="Cash",\n        np.clip(rng.normal(1.0, .01, n), .97, 1.01),\n        np.clip(rng.normal(1.0, .14, n), .55, 1.25),\n    )\n    collateral_recovery = np.minimum(\n        collateral_value * secured_quality * lien_factor * realization_multiplier,\n        ead_at_default\n    )
+    # Cash collateral is operationally distinct from physical collateral: where the
+    # bank has enforceable control, value volatility and liquidation friction should
+    # be much lower. Keep a small residual haircut rather than hard-coding zero LGD.
+    realization_multiplier = np.where(
+        collateral_type=="Cash",
+        np.clip(rng.normal(1.0, .01, n), .97, 1.01),
+        np.clip(rng.normal(1.0, .14, n), .55, 1.25),
+    )
+    collateral_recovery = np.minimum(
+        collateral_value * secured_quality * lien_factor * realization_multiplier,
+        ead_at_default
+    )
 
     guarantee_recovery = np.minimum(
         ead_at_default * guarantee_coverage
@@ -112,7 +123,21 @@ def main():
         ead_at_default
     )
 
-    standard_resolution = np.clip(\n        np.rint(\n            9 + 18*(collateral_type=="Mortgage") + 8*(lien_rank=="Second")\n            + 7*(1-cure_flag) + rng.gamma(2.0,5.0,n)\n        ),\n        3, 60\n    ).astype(int)\n    cash_resolution = rng.integers(1, 4, n)\n    months_to_resolution = np.where(collateral_type=="Cash", cash_resolution, standard_resolution)\n    standard_cost_rate = np.clip(\n        .035 + .015*(collateral_type=="Mortgage") + .012*(lien_rank=="Second")\n        + rng.normal(0,.012,n), .01, .12\n    )\n    cash_cost_rate = np.clip(rng.normal(.005, .002, n), .001, .012)\n    workout_cost_rate = np.where(collateral_type=="Cash", cash_cost_rate, standard_cost_rate)
+    standard_resolution = np.clip(
+        np.rint(
+            9 + 18*(collateral_type=="Mortgage") + 8*(lien_rank=="Second")
+            + 7*(1-cure_flag) + rng.gamma(2.0,5.0,n)
+        ),
+        3, 60
+    ).astype(int)
+    cash_resolution = rng.integers(1, 4, n)
+    months_to_resolution = np.where(collateral_type=="Cash", cash_resolution, standard_resolution)
+    standard_cost_rate = np.clip(
+        .035 + .015*(collateral_type=="Mortgage") + .012*(lien_rank=="Second")
+        + rng.normal(0,.012,n), .01, .12
+    )
+    cash_cost_rate = np.clip(rng.normal(.005, .002, n), .001, .012)
+    workout_cost_rate = np.where(collateral_type=="Cash", cash_cost_rate, standard_cost_rate)
     workout_cost = ead_at_default * workout_cost_rate
 
     # Allocate recoveries across standard workout time buckets according to resolution speed.
@@ -123,7 +148,12 @@ def main():
     weights = weights / weights.sum(axis=1, keepdims=True)
     recovery_cfs = gross_recovery[:,None] * weights
 
-    # Workout costs are treated as negative recovery cash flows. Cash costs are\n    # incurred near-immediately; other workout costs are placed at 12 months.\n    net_cfs = recovery_cfs.copy()\n    cash_mask = collateral_type=="Cash"\n    net_cfs[cash_mask,0] = net_cfs[cash_mask,0] - workout_cost[cash_mask]\n    net_cfs[~cash_mask,2] = net_cfs[~cash_mask,2] - workout_cost[~cash_mask]
+    # Workout costs are treated as negative recovery cash flows. Cash costs are
+    # incurred near-immediately; other workout costs are placed at 12 months.
+    net_cfs = recovery_cfs.copy()
+    cash_mask = collateral_type=="Cash"
+    net_cfs[cash_mask,0] = net_cfs[cash_mask,0] - workout_cost[cash_mask]
+    net_cfs[~cash_mask,2] = net_cfs[~cash_mask,2] - workout_cost[~cash_mask]
 
     discount_rate = np.clip(rng.normal(.07,.012,n), .035, .12)
     pv_net_recovery = np.zeros(n)
@@ -150,7 +180,12 @@ def main():
         "months_to_resolution": months_to_resolution,
         "workout_cost": workout_cost.round(2),
         "discount_rate": discount_rate.round(5),
-        "recovery_cf_1m": net_cfs[:,0].round(2),\n        "recovery_cf_6m": net_cfs[:,1].round(2),\n        "recovery_cf_12m": net_cfs[:,2].round(2),\n        "recovery_cf_24m": net_cfs[:,3].round(2),\n        "recovery_cf_36m": net_cfs[:,4].round(2),\n        "recovery_cf_60m": net_cfs[:,5].round(2),
+        "recovery_cf_1m": net_cfs[:,0].round(2),
+        "recovery_cf_6m": net_cfs[:,1].round(2),
+        "recovery_cf_12m": net_cfs[:,2].round(2),
+        "recovery_cf_24m": net_cfs[:,3].round(2),
+        "recovery_cf_36m": net_cfs[:,4].round(2),
+        "recovery_cf_60m": net_cfs[:,5].round(2),
         "pv_net_recovery": pv_net_recovery.round(2),
         "economic_lgd": economic_lgd.round(6),
         "write_off_flag": write_off_flag,
