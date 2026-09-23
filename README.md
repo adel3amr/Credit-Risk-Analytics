@@ -1,4 +1,8 @@
-# Credit Risk Analytics & SME PD Modeling
+# Credit Risk Analytics & IFRS 9 Decisioning System — V5
+
+V5 finalizes the implementation and validation of the frozen V4/V5 methodology. It retains Logistic Regression PD, facility workout Gradient Boosting LGD, existing staging/EWS policy, facility EAD and stage-dependent ECL. This is a synthetic demonstration, not a production-approved banking model.
+
+See the [V5 executive validation report](reports/credit_risk_report.md), [classified change log](docs/V5_CHANGELOG.md), and [known limitations](docs/MODEL_LIMITATIONS.md). Realized high-loss underprediction remains a documented limitation; V5 does not promote a challenger or tune the data to hide it.
 
 ## Overview
 End-to-end synthetic SME credit-risk platform covering borrower PD, independent qualitative underwriting information, early-warning monitoring, internal risk rating, facility-level EAD, workout-LGD modelling, simplified IFRS 9-style staging/ECL, model validation and governed human intervention.
@@ -129,7 +133,7 @@ For ECL recovery purposes, eligible cash collateral is recognized at 100% of nom
 The architecture is intentionally layered: facility EAD → facility security/product/seniority → workout-LGD estimate → stage-specific facility ECL → borrower aggregation. The original deterministic collateral proxy remains available as a challenger/diagnostic but is no longer the governed LGD input to ECL.
 
 ## Current governed validation
-The V4 workflow is deterministic and validated through CI. PD and LGD use separate holdouts.
+V5 preserves the deterministic V4 calibration. PD and LGD use separate fixed holdouts, which have been repeatedly inspected and are not fresh model-selection samples.
 
 ### PD — 3,000-borrower holdout
 - Logistic Regression (governed): **ROC-AUC 0.7595**, **Gini 0.5189**.
@@ -145,7 +149,7 @@ The governed Gradient Boosting model remains fixed rather than being re-selected
 - Calibration is strong at portfolio level, but the governed model underpredicts the severe-loss tail: top-10% EAD-weighted bias **-4.41 pp** and top-5% **-6.48 pp**.
 - Huber, Random Forest, Histogram Gradient Boosting and Ridge are retained as diagnostic challengers. None is promoted after viewing the frozen holdout; doing so would turn validation evidence into model-selection data.
 
-### Portfolio / ECL — current V4 holdout
+### Portfolio / ECL — retained V4/V5 holdout
 - Stage 1: **2,769 borrowers**, EAD **EUR 1.930bn**, ECL **EUR 28.44m**.
 - Stage 2: **221 borrowers**, EAD **EUR 156.95m**, ECL **EUR 14.25m**.
 - Stage 3: **10 borrowers**, EAD **EUR 4.67m**, ECL **EUR 2.58m**.
@@ -181,16 +185,24 @@ Credit-Risk-Analytics/
 └── docs/
 ```
 
-## Run
+## Run V5 from a clean checkout
+Use Python 3.12. Create and activate a virtual environment, install the tested direct dependencies, then run the complete build:
 ```bash
-pip install -r requirements.txt
-python scripts/generate_sme_portfolio.py
-python scripts/generate_lgd_workout_history.py
-python notebooks/lgd_model_pipeline.py
-python notebooks/credit_risk_pipeline.py
-python notebooks/hybrid_pd_experiment.py
+git clone --branch feature/v5-lgd-validation-hardening https://github.com/adel3amr/Credit-Risk-Analytics.git
+cd Credit-Risk-Analytics
+python -m venv .venv
+# Linux/macOS: source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install -r requirements-v5.txt
+python scripts/run_v5.py
+python -m pytest -q
+python scripts/test_dashboard.py
 python -m streamlit run app.py
 ```
+
+Select `validator.demo` for PD validation, LGD tails, challenger evidence, legacy comparisons and reconciliation checks. Other roles expose the portfolio, borrower/facility credit file and governed interventions. Facility rows show maturity, PD, LGD, EAD and ECL. Fixed identities demonstrate workflow permissions rather than authentication.
+
+The build fails on the first failed step and can be invoked from any working directory. It produces `v5_run_manifest.json` (environment and data hashes), `v5_release_checks.csv`, `v5_facility_trace_examples.csv`, and `v5_lgd_*.csv`. No external bank data or private service is required. `requirements-v5.txt` pins tested direct dependencies; pip resolves transitive versions. `requirements.txt` remains available for development.
 
 Generate the synthetic data before running the analytics so the raw schema and governed feature set stay synchronized.
 
@@ -203,7 +215,7 @@ Generated raw/processed CSVs and model outputs are intentionally not version-con
 - Holdout results are reported, not optimized; challengers observed on the frozen holdout are not silently promoted.
 - The 9-month EWS threshold is fixed ex ante for V2 and is not retuned after seeing validation results.
 - Synthetic assumptions and accounting simplifications are stated explicitly; see `docs/MODEL_LIMITATIONS.md`.
-- PD and LGD are validated on separate untouched holdouts.
+- PD and LGD use separate fixed holdouts; repeated diagnostic inspection is disclosed.
 - Realized recovery cash flows, cure outcome, recovery timing and write-off outcome are excluded from LGD model inputs.
 - Model output, accounting stage, internal rating and human override remain separate governed objects.
 - Methodology changes are versioned and reviewed rather than silently optimized against holdout results.

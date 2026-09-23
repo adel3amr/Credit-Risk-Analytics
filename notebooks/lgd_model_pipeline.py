@@ -134,6 +134,7 @@ holdout=df.loc[test_idx,[
     "collateral_coverage","lien_rank","guarantee_coverage","economic_lgd"
 ]].copy()
 holdout["predicted_lgd"]=champion_pred
+holdout["raw_predicted_lgd"]=champion.predict(df.loc[test_idx])
 holdout.to_csv(OUT/"lgd_holdout_predictions.csv",index=False)
 
 # Segment-level validation: detect pockets of bias hidden by near-zero portfolio bias.

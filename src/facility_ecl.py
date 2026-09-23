@@ -13,6 +13,24 @@ def calculate_facility_ecl(borrowers, facilities):
     if mf:
         raise ValueError(f"Missing facility ECL fields: {sorted(mf)}")
 
+    if borrowers['customer_id'].isna().any() or borrowers['customer_id'].duplicated().any():
+        raise ValueError('Borrower customer IDs must be non-null and unique')
+    if facilities[['customer_id', 'facility_id']].isna().any().any() or facilities['facility_id'].duplicated().any():
+        raise ValueError('Facility IDs must be unique; borrower/facility IDs must be non-null')
+    if not borrowers['stage'].isin(['Stage 1', 'Stage 2', 'Stage 3']).all():
+        raise ValueError('Unknown or missing borrower stage')
+    for frame, columns in [(borrowers, ['forward_looking_pd_12m']),
+                           (facilities, ['ead_at_default', 'predicted_lgd'])]:
+        for column in columns:
+            values = pd.to_numeric(frame[column], errors='raise')
+            if not np.isfinite(values).all():
+                raise ValueError(f'{column} must contain finite values')
+            if (values < 0).any() or (column != 'ead_at_default' and (values > 1).any()):
+                raise ValueError(f'{column} is outside its valid range')
+    maturity = facilities['remaining_months'].fillna(12).astype(float)
+    if not np.isfinite(maturity).all() or (maturity < 0).any():
+        raise ValueError('Remaining maturity must be finite and non-negative')
+
     b = borrowers[["customer_id","stage","forward_looking_pd_12m"]].copy()
     f = facilities.merge(b,on="customer_id",how="left",validate="many_to_one")
     if f["stage"].isna().any():

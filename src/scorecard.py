@@ -27,8 +27,8 @@ def add_risk_rating(df, pd_col="predicted_pd"):
     7: operational watchlist / enhanced monitoring
     8-10: non-performing Stage 3 severity grades
 
-    Full eligible cash coverage overrides performing/watchlist grades to 1.
-    It does not override a Stage 3/non-performing classification.
+    Full eligible cash coverage can produce Rating 1 only in Stage 1.
+    It does not override Stage 2 or Stage 3 classification.
     """
     out = df.copy()
     pdv = out[pd_col].clip(0, 1)
