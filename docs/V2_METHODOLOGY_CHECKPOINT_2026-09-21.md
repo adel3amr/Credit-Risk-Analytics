@@ -1,5 +1,7 @@
 # V2 Methodology Checkpoint — 2026-09-21
 
+> **Historical checkpoint — superseded by the reviewed current methodology in README.md and FINAL_PROJECT_RELEASE_2026-09-22.md. Values and implementation details below are retained only as development history and must not be treated as the current release.**
+
 This checkpoint freezes the methodology before the final governance/data audit. It is not a production IFRS 9 implementation.
 
 ## Frozen architecture
