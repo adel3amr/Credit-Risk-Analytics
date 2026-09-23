@@ -20,6 +20,8 @@ jobs:
       - name: Generate app data
         run: |
           python scripts/generate_sme_portfolio.py
+          python scripts/generate_lgd_workout_history.py
+          python notebooks/lgd_model_pipeline.py
           python notebooks/credit_risk_pipeline.py
       - name: Streamlit runtime smoke test
         run: |
