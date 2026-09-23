@@ -43,7 +43,7 @@ Trade CCFs and other portfolio-generation parameters are synthetic methodology a
 ### LGD
 The governed LGD layer is now a separate **facility-level workout model** trained on a synthetic history of resolved defaulted facilities. The workout history contains EAD at default, product type, collateral, lien rank, guarantee coverage, borrower condition, recovery cash flows, workout costs and recovery timing.
 
-Economic LGD is defined from discounted net recoveries relative to EAD at default. Post-default outcomes such as realized recovery cash flows, workout timing, cure outcome and write-off outcome are retained for target construction and audit but are excluded from the predictive feature set. A Gradient Boosting regression is fixed ex ante as the governed non-linear LGD model and Ridge is retained as an interpretable challenger.
+Economic LGD is defined from discounted net recoveries relative to EAD at default. Post-default outcomes such as realized recovery cash flows, workout timing, cure outcome and write-off outcome are retained for target construction and audit but are excluded from the predictive feature set. A Gradient Boosting regression is fixed ex ante as the governed non-linear LGD model. Ridge, Huber Gradient Boosting, Random Forest and Histogram Gradient Boosting are retained as diagnostic challengers; the frozen holdout is not used to silently re-select the champion.
 
 For the current portfolio, each borrower is expanded into its live term-loan, OVD and trade facilities. Facility LGDs are predicted separately and then EAD-weighted back to borrower level for reporting.
 
