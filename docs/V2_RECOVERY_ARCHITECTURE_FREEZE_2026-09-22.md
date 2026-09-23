@@ -1,5 +1,7 @@
 # V2 Recovery Architecture Freeze — 2026-09-22
 
+> **Historical checkpoint — superseded by the reviewed current methodology in README.md and FINAL_PROJECT_RELEASE_2026-09-22.md. Values and implementation details below are retained only as development history and must not be treated as the current release.**
+
 ## Purpose
 
 This checkpoint freezes the revised synthetic collateral/LGD architecture after the root-cause review of ECL coverage. It replaces the earlier assumption that collateral is broadly generated as a high multiple of facilities.
