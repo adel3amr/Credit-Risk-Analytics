@@ -97,14 +97,17 @@ def portfolio_to_facilities(borrowers):
             "management_quality":float(x.get("management_quality",3)),
         }
         products=[
-            ("Term Loan",float(x.get("loan_ead",0)),0.0),
-            ("OVD",float(x.get("ovd_ead",0)),0.0),
+            ("Term Loan",float(x.get("loan_ead",0)),0.0,int(x.get("loan_remaining_months",x.get("loan_term_months",12)))),
+            ("OVD",float(x.get("ovd_ead",0)),0.0,int(x.get("ovd_remaining_months",12))),
         ]
         trade_type=str(x.get("trade_type","None"))
         if trade_type!="None":
             guarantee_map={"Import LC":.20,"Performance Guarantee":.35,"Financial Guarantee":.55}
-            products.append((trade_type,float(x.get("trade_ead",0)),guarantee_map.get(trade_type,0.0)))
-        for product,ead,guarantee in products:
+            products.append((
+                trade_type,float(x.get("trade_ead",0)),guarantee_map.get(trade_type,0.0),
+                int(x.get("trade_remaining_months",12))
+            ))
+        for product,ead,guarantee,remaining_months in products:
             if ead <= 0:
                 continue
             lien = "Unsecured" if base["collateral_type"]=="Unsecured" else (
@@ -117,6 +120,7 @@ def portfolio_to_facilities(borrowers):
                 "ead_at_default":ead,
                 "guarantee_coverage":guarantee,
                 "lien_rank":lien,
+                "remaining_months":remaining_months,
             })
     return pd.DataFrame(rows)
 
