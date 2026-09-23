@@ -38,8 +38,8 @@ def main():
     seed_sequence = np.random.SeedSequence(SEED)
     (
         rng_borrower, rng_facility, rng_behavior, rng_credit,
-        rng_recovery, rng_default,
-    ) = [np.random.default_rng(s) for s in seed_sequence.spawn(6)]
+        rng_recovery, rng_default, rng_maturity,
+    ) = [np.random.default_rng(s) for s in seed_sequence.spawn(7)]
     rng = rng_borrower
     n = N
 
@@ -91,7 +91,7 @@ def main():
     # Synthetic loan age is generated independently of credit outcome.
     loan_age_months = np.where(
         has_loan,
-        np.floor(rng.random(n) * np.maximum(loan_term_months, 1)).astype(int),
+        np.floor(rng_maturity.random(n) * np.maximum(loan_term_months, 1)).astype(int),
         0,
     )
     loan_remaining_months = np.where(
