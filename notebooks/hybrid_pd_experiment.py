@@ -5,7 +5,8 @@ Run from repository root:
 
 The same unweighted Logistic Regression specification is used for each nested
 information set so differences primarily reflect information content rather than
-algorithm choice. All portfolio and added V2 features are synthetic.
+algorithm choice. Qualitative fields are independently generated reporting-date
+information, not re-encodings of the quantitative model inputs.
 """
 import sys
 from pathlib import Path
@@ -47,7 +48,7 @@ order = [
     "Financial only",
     "Financial + Current Behavior",
     "Financial + Current Behavior + Trajectory",
-    "Full Hybrid",
+    "Full Hybrid + Independent Qualitative",
 ]
 results = []
 predictions = {}
