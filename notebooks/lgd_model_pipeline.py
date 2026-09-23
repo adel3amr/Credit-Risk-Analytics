@@ -11,6 +11,8 @@ from lgd_model import (
     gradient_boosting_lgd_model, ridge_lgd_challenger,
     huber_gradient_boosting_lgd_challenger, random_forest_lgd_challenger,
     hist_gradient_lgd_challenger,
+    huber_gradient_boosting_lgd_challenger, random_forest_lgd_challenger,
+    hist_gradient_lgd_challenger,
     predict_lgd, lgd_validation_summary, calibration_table, save_model,
 )
 
@@ -91,6 +93,34 @@ tail_challenger=pd.DataFrame(tail_compare)
 tail_challenger.to_csv(OUT/"lgd_challenger_tail_comparison.csv",index=False)
 print("\nLGD CHALLENGER TAIL COMPARISON\n",tail_challenger.round(4).to_string(index=False))
 
+# Compare every challenger on exactly the same facilities. The original table
+# above selects a different top-prediction population for each model and must
+# not be read as a paired model comparison. Realized-loss tails are retrospective
+# diagnostics only: their membership is unknown at prediction time.
+fixed_tail_rows=[]
+y_arr=y_hold.to_numpy()
+w_arr=w_hold.to_numpy()
+base_pred=preds["Gradient Boosting"]
+for definition,rank in [("champion_predicted",base_pred),("realized_outcome",y_arr)]:
+    for q in [.90,.95]:
+        cutoff=float(pd.Series(rank).quantile(q))
+        mask=rank>=cutoff
+        actual=y_arr[mask]
+        weights=w_arr[mask]
+        for name,p in preds.items():
+            error=p[mask]-actual
+            fixed_tail_rows.append({
+                "cohort":definition,"tail_percentile":q,"Model":name,
+                "facilities":int(mask.sum()),"actual_lgd":float(actual.mean()),
+                "predicted_lgd":float(p[mask].mean()),
+                "mean_error_bias":float(error.mean()),
+                "ead_weighted_bias":float((error*weights).sum()/weights.sum()),
+                "rmse":float((error**2).mean()**.5),
+            })
+fixed_tail=pd.DataFrame(fixed_tail_rows)
+fixed_tail.to_csv(OUT/"lgd_fixed_cohort_tail_comparison.csv",index=False)
+print("\nLGD FIXED-COHORT TAIL COMPARISON\n",fixed_tail.round(4).to_string(index=False))
+
 # Governance decision remains fixed ex ante: the original Gradient Boosting model is the governed champion.
 # Additional models are diagnostic challengers only; the untouched holdout is not used to tune or silently replace the champion.
 champion_name="Gradient Boosting"
@@ -104,6 +134,7 @@ holdout=df.loc[test_idx,[
     "collateral_coverage","lien_rank","guarantee_coverage","economic_lgd"
 ]].copy()
 holdout["predicted_lgd"]=champion_pred
+holdout["raw_predicted_lgd"]=champion.predict(df.loc[test_idx])
 holdout.to_csv(OUT/"lgd_holdout_predictions.csv",index=False)
 
 # Segment-level validation: detect pockets of bias hidden by near-zero portfolio bias.

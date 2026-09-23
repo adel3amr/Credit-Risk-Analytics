@@ -13,9 +13,10 @@ CALIBRATION = ROOT / "outputs" / "calibration_deciles.csv"
 LGD_VALIDATION = ROOT / "outputs" / "lgd_model_validation.csv"
 LGD_CALIBRATION = ROOT / "outputs" / "lgd_calibration_deciles.csv"
 FACILITY_LGD = ROOT / "outputs" / "facility_lgd_predictions.csv"
+FACILITY_ECL = ROOT / "outputs" / "facility_ecl_predictions.csv"
 
-st.set_page_config(page_title="SME Credit Risk Platform", layout="wide")
-st.title("SME Credit Risk Platform")
+st.set_page_config(page_title="Credit Risk Analytics — V5", layout="wide")
+st.title("Credit Risk Analytics & IFRS 9 Decisioning System — V5")
 st.caption("PD • LGD • EWS • IFRS 9-style staging • ECL • governed interventions")
 
 def pct(v, decimals=2):
@@ -65,7 +66,7 @@ with tabs[0]:
         data=df.to_csv(index=False).encode("utf-8"),
         file_name="sme_credit_risk_portfolio.csv",
         mime="text/csv",
-        use_container_width=False,
+        width="content",
     )
 
     # Portfolio exposure architecture: loans and OVD are direct; trade instruments are
@@ -104,7 +105,7 @@ with tabs[0]:
             ((has_loan.astype(int)+has_ovd.astype(int)+has_trade.astype(int)) >= 2).sum(),
         ],
     })
-    st.dataframe(product_view, hide_index=True, use_container_width=True)
+    st.dataframe(product_view, hide_index=True, width="stretch")
 
     st.markdown("#### Facility utilization")
     direct_limit = df["direct_limit"].sum()
@@ -125,7 +126,7 @@ with tabs[0]:
     util_view["Approved limit"]=util_view["Approved limit"].map(format_money)
     util_view["Utilized / issued amount"]=util_view["Utilized / issued amount"].map(format_money)
     util_view["Utilization"]=util_view["Utilization"].map(pct)
-    st.dataframe(util_view, hide_index=True, use_container_width=True)
+    st.dataframe(util_view, hide_index=True, width="stretch")
     st.caption("Direct utilization uses current term-loan outstanding plus OVD drawn amount against approved direct limits. Trade utilization is issued nominal trade facilities against approved indirect limits; CCF-adjusted trade EAD remains a separate credit-risk exposure measure.")
 
     st.markdown("#### Industry assessment")
@@ -150,7 +151,7 @@ with tabs[0]:
         industry_display[col]=industry_display[col].map(pct)
     for col in ["EAD","ECL"]:
         industry_display[col]=industry_display[col].map(format_money)
-    st.dataframe(industry_display, hide_index=True, use_container_width=True)
+    st.dataframe(industry_display, hide_index=True, width="stretch")
 
     st.markdown("#### Data-driven risk patterns")
     # Broad, pre-defined monitoring cuts only. No decision-tree fitting or threshold
@@ -189,7 +190,7 @@ with tabs[0]:
         patterns_display["ECL / EAD"]=patterns_display["ECL / EAD"].map(pct)
         patterns_display["PD vs portfolio"]=patterns_display["PD vs portfolio"].map(lambda v:f"{v:.2f}x")
         patterns_display["Loss vs portfolio"]=patterns_display["Loss vs portfolio"].map(lambda v:f"{v:.2f}x")
-        st.dataframe(patterns_display, hide_index=True, use_container_width=True)
+        st.dataframe(patterns_display, hide_index=True, width="stretch")
 
     st.markdown("#### Portfolio review actions")
     actions=[]
@@ -212,7 +213,7 @@ with tabs[0]:
     stage_view["EAD"]=stage_view["EAD"].map(format_money)
     stage_view["ECL"]=stage_view["ECL"].map(format_money)
     st.markdown("#### Stage distribution")
-    st.dataframe(stage_view,hide_index=True,use_container_width=True)
+    st.dataframe(stage_view,hide_index=True,width="stretch")
 
     st.markdown("#### Highest-priority cases")
     priority=df.copy()
@@ -224,7 +225,7 @@ with tabs[0]:
     if "predicted_pd" in cases: cases["predicted_pd"]=cases["predicted_pd"].map(pct)
     for money_col in ["ead","ecl"]:
         if money_col in cases: cases[money_col]=cases[money_col].map(format_money)
-    st.dataframe(cases,hide_index=True,use_container_width=True)
+    st.dataframe(cases,hide_index=True,width="stretch")
 
 with tabs[1]:
     st.subheader("Borrower Credit File")
@@ -237,7 +238,7 @@ with tabs[1]:
     if search_mode == "Customer number":
         customer_search = st.text_input("Customer number", placeholder="e.g. SME11286")
         if customer_search:
-            filtered_customers = df[customer_ids.str.contains(customer_search.strip(), case=False, na=False)]
+            filtered_customers = df[customer_ids.str.contains(customer_search.strip(), case=False, na=False, regex=False)]
     elif search_mode == "Risk rating":
         selected_rating = st.selectbox("Risk rating", sorted(df["risk_rating"].dropna().astype(int).unique().tolist()))
         filtered_customers = df[df["risk_rating"].astype(int).eq(selected_rating)]
@@ -275,7 +276,7 @@ with tabs[1]:
     for field, label in [("recognized_collateral", "Recognized collateral"), ("unsecured_ead", "Unsecured EAD")]:
         if field in df.columns:
             recovery_rows.insert(-1, (label, format_money(x[field])))
-    st.dataframe(pd.DataFrame(recovery_rows, columns=["Metric","Value"]), hide_index=True, use_container_width=True)
+    st.dataframe(pd.DataFrame(recovery_rows, columns=["Metric","Value"]), hide_index=True, width="stretch")
     st.subheader("Credit interpretation")
     adverse=[]
     if "leverage_ratio" in df.columns and x.leverage_ratio >= 3: adverse.append(f"leverage {x.leverage_ratio:.1f}x")
@@ -293,19 +294,23 @@ with tabs[1]:
         "supplier_concentration","key_person_dependency","audit_quality"
     ] if c in df.columns]
     if qcols:
-        st.dataframe(pd.DataFrame({"Field":qcols,"Value":[x[c] for c in qcols]}), hide_index=True, use_container_width=True)
+        st.dataframe(pd.DataFrame({"Field":qcols,"Value":[str(x[c]) for c in qcols]}), hide_index=True, width="stretch")
 
     st.subheader("Risk signals")
     cols=[c for c in ["days_past_due","credit_utilization","delinquencies_12m","previous_defaults","consecutive_ews_months","risk_direction","current_credit_impaired","write_off_flag"] if c in df.columns]
-    st.dataframe(pd.DataFrame({"Field":cols,"Value":[x[c] for c in cols]}), hide_index=True)
+    st.dataframe(pd.DataFrame({"Field":cols,"Value":[str(x[c]) for c in cols]}), hide_index=True)
 
-    if FACILITY_LGD.exists():
-        fac = pd.read_csv(FACILITY_LGD)
+    if FACILITY_ECL.exists():
+        fac = pd.read_csv(FACILITY_ECL)
         fac = fac[fac["customer_id"].astype(str).eq(str(cid))].copy()
         if not fac.empty:
-            st.subheader("Facility-level workout LGD")
-            show=[z for z in ["facility_id","product_type","ead_at_default","collateral_type","collateral_coverage","lien_rank","guarantee_coverage","predicted_lgd"] if z in fac.columns]
-            st.dataframe(fac[show], hide_index=True, use_container_width=True)
+            st.subheader("Facility LGD and ECL trace")
+            show=[z for z in ["facility_id","product_type","ead_at_default","collateral_type","collateral_coverage","lien_rank","guarantee_coverage","predicted_lgd","remaining_months","stage","facility_pd_12m","facility_lifetime_pd","facility_ecl"] if z in fac.columns]
+            st.dataframe(fac[show].style.format({
+                'ead_at_default': '€{:,.2f}', 'facility_ecl': '€{:,.2f}',
+                'predicted_lgd': '{:.2%}', 'facility_pd_12m': '{:.2%}', 'facility_lifetime_pd': '{:.2%}',
+            }), hide_index=True, width="stretch")
+            st.caption("Stage 1: 12-month forward-looking PD × LGD × EAD. Stage 2: facility lifetime PD × LGD × EAD. Stage 3: LGD × EAD. Borrower ECL is the sum of these facilities.")
 
 with tabs[2]:
     st.subheader("Manual intervention")
@@ -382,7 +387,7 @@ with tabs[2]:
 
     st.markdown("#### Macro scenarios")
     scenarios=pd.read_csv(MACRO)
-    st.dataframe(scenarios,use_container_width=True)
+    st.dataframe(scenarios,width="stretch")
     if {"pit_pd_12m","forward_looking_pd_12m"}.issubset(df.columns):
         base=(df.pit_pd_12m*df.lgd*df.ead).sum()
         fwd=(df.forward_looking_pd_12m*df.lgd*df.ead).sum()
@@ -391,7 +396,7 @@ with tabs[2]:
         m2.metric("Forward-looking 12M ECL",format_money(fwd))
         m3.metric("Macro overlay impact",format_money(fwd-base))
     if has_permission(role,"manage_macro"):
-        edited=st.data_editor(scenarios,use_container_width=True,num_rows="fixed")
+        edited=st.data_editor(scenarios,width="stretch",num_rows="fixed")
         if st.button("Validate proposed scenarios"):
             try:
                 validate_macro_scenarios(edited); st.success("Valid scenario set: weights sum to 100%.")
@@ -448,7 +453,7 @@ if role == "Model Validation":
             for col in ["Mean predicted PD","Observed DR"]:
                 if col in bucket_view.columns:
                     bucket_view[col] = bucket_view[col].map(pct)
-            st.dataframe(bucket_view, hide_index=True, use_container_width=True)
+            st.dataframe(bucket_view, hide_index=True, width="stretch")
 
             st.markdown("#### Validation interpretation")
             st.info("Discrimination (AUC/Gini/KS) evaluates rank ordering. Brier, Log Loss, calibration-in-the-large and bucket-level predicted-vs-observed default rates evaluate probability quality. Fixed classification thresholds are operational diagnostics and are not optimized on the holdout.")
@@ -457,10 +462,32 @@ if role == "Model Validation":
             if LGD_VALIDATION.exists() and LGD_CALIBRATION.exists():
                 lgdv = pd.read_csv(LGD_VALIDATION)
                 lgdc = pd.read_csv(LGD_CALIBRATION)
-                st.dataframe(lgdv, use_container_width=True)
+                st.dataframe(lgdv, width="stretch")
+                governed_lgd = lgdv.loc[lgdv['Model'].eq('Gradient Boosting')].iloc[0]
+                l1,l2,l3 = st.columns(3)
+                l1.metric('LGD MAE', f"{100*governed_lgd['MAE']:.2f} pp")
+                l2.metric('LGD RMSE', f"{100*governed_lgd['RMSE']:.2f} pp")
+                l3.metric('LGD mean bias', f"{100*governed_lgd['Mean_Error_Bias']:+.2f} pp")
                 st.caption("LGD validation is performed on a separate holdout of resolved synthetic defaulted facilities. Post-default recovery outcomes and workout timing are targets/audit fields, not model inputs.")
                 lgd_chart = lgdc.rename(columns={"mean_predicted_lgd":"Predicted LGD","mean_actual_lgd":"Actual LGD"})
                 if {"Predicted LGD","Actual LGD"}.issubset(lgd_chart.columns):
                     st.line_chart(lgd_chart.set_index("Predicted LGD")["Actual LGD"], x_label="Mean predicted LGD", y_label="Mean actual LGD")
+                st.warning('High-loss underprediction remains a known limitation. Gradient Boosting remains the approved LGD model. Bias is predicted minus realized LGD; negative values indicate underprediction.')
+                for title, filename in [
+                    ('Realized-loss bands and segments', 'v5_lgd_realized_segments.csv'),
+                    ('Challengers on the same facilities', 'lgd_fixed_cohort_tail_comparison.csv'),
+                    ('Training and holdout support', 'v5_lgd_sample_support.csv'),
+                    ('Train-to-holdout stability', 'lgd_train_holdout_stability.csv'),
+                    ('Reapplied legacy proxy vs facility model', 'v5_lgd_legacy_holdout_comparison.csv'),
+                    ('Portfolio ECL comparison with legacy LGD', 'ecl_methodology_bridge.csv'),
+                    ('Release reconciliation checks', 'v5_release_checks.csv'),
+                ]:
+                    path = ROOT / 'outputs' / filename
+                    with st.expander(title):
+                        if path.exists():
+                            st.dataframe(pd.read_csv(path), hide_index=True, width="stretch")
+                        else:
+                            st.info('Run the complete V5 build to generate this diagnostic.')
+                st.caption('Realized-loss cohorts are retrospective and cannot identify facilities in advance. The legacy holdout benchmark reapplies the old proxy formula with a fixed synthetic residual seed; it is not an original historical forecast. Current-portfolio ECL differences are not accuracy metrics.')
             else:
                 st.info("Run the LGD model pipeline to generate independent workout-LGD validation outputs.")
