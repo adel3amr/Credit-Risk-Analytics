@@ -1,0 +1,33 @@
+{
+  "checks": {
+    "hero borrower count": true,
+    "hero mean PD": true,
+    "hero EAD": true,
+    "hero ECL": true,
+    "role analyst.demo no error": true,
+    "role analyst.demo required tabs": true,
+    "role analyst.demo validation tab scope": true,
+    "role risk.manager.demo no error": true,
+    "role risk.manager.demo required tabs": true,
+    "role risk.manager.demo validation tab scope": true,
+    "role validator.demo no error": true,
+    "role validator.demo required tabs": true,
+    "role validator.demo validation tab scope": true,
+    "validator AUC": true,
+    "validator LGD bias": true,
+    "role auditor.demo no error": true,
+    "role auditor.demo required tabs": true,
+    "role auditor.demo validation tab scope": true,
+    "role admin.demo no error": true,
+    "role admin.demo required tabs": true,
+    "role admin.demo validation tab scope": true,
+    "facility table present": true,
+    "facility table exact IDs": true,
+    "facility table ECL": true,
+    "borrower ECL equals shown facilities": true
+  },
+  "role_views": 5,
+  "borrower_id": "SME08035",
+  "facilities_rendered": 2,
+  "borrower_ecl": 19603.51217705241
+}

@@ -4,7 +4,7 @@ V5 finalizes the implementation and validation of the frozen V4/V5 methodology. 
 
 See the [V5 executive validation report](reports/credit_risk_report.md), [classified change log](docs/V5_CHANGELOG.md), and [known limitations](docs/MODEL_LIMITATIONS.md). Realized high-loss underprediction remains a documented limitation; V5 does not promote a challenger or tune the data to hide it.
 
-An additional [forensic V4–V5 reconstruction and independent recalculation](validation_review/RESEARCH_REPORT.md) includes a publication PDF, clean historical reruns, four figures, per-stage worked ECL examples, an evidence register and explicit open limitations. This separate review preserves the approved model code and the frozen V5 reference commit. Its 15 executed historical snapshots are representative rather than an execution of every commit.
+The [independent full-repository lifecycle review](validation_review/RESEARCH_REPORT.md) covers the initial prototype through V5 and separate experiments. It includes a [publication PDF](validation_review/RESEARCH_REPORT.pdf), 15 clean historical reruns, seven figures, a version matrix, model and findings registers, 49 local tests and per-stage worked ECL examples. The approved model code and frozen V5 reference commit remain intact; representative reruns are not an execution of every commit. The high-loss LGD finding remains open.
 
 ## Overview
 End-to-end synthetic SME credit-risk platform covering borrower PD, independent qualitative underwriting information, early-warning monitoring, internal risk rating, facility-level EAD, workout-LGD modelling, simplified IFRS 9-style staging/ECL, model validation and governed human intervention.

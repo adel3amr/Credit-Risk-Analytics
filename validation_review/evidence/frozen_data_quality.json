@@ -1,0 +1,99 @@
+{
+  "checks": {
+    "borrower IDs unique/non-null": {
+      "passed": true,
+      "detail": ""
+    },
+    "workout facility IDs unique/non-null": {
+      "passed": true,
+      "detail": ""
+    },
+    "holdout facility IDs unique/non-null": {
+      "passed": true,
+      "detail": ""
+    },
+    "reporting facility IDs unique/non-null": {
+      "passed": true,
+      "detail": ""
+    },
+    "all reporting borrowers in raw": {
+      "passed": true,
+      "detail": ""
+    },
+    "all scored facilities linked": {
+      "passed": true,
+      "detail": ""
+    },
+    "structural trade missingness only for no-trade accounts": {
+      "passed": true,
+      "detail": "missing=7659, zero trade=7659"
+    },
+    "all other raw fields complete": {
+      "passed": true,
+      "detail": ""
+    },
+    "all workout fields complete": {
+      "passed": true,
+      "detail": ""
+    },
+    "finite financial and model values": {
+      "passed": true,
+      "detail": ""
+    },
+    "nonnegative exposure and bounded probability/loss": {
+      "passed": true,
+      "detail": ""
+    },
+    "month history complete": {
+      "passed": true,
+      "detail": ""
+    },
+    "raw trade CCF identity": {
+      "passed": true,
+      "detail": ""
+    },
+    "holdout workout outcome unchanged by join": {
+      "passed": true,
+      "detail": ""
+    },
+    "no observed outcome columns in scored facility schema": {
+      "passed": true,
+      "detail": ""
+    }
+  },
+  "profile": {
+    "raw_borrowers": 12000,
+    "raw_columns": 65,
+    "raw_future_defaults": 407,
+    "sectors": {
+      "Services": 2894,
+      "Retail": 2458,
+      "Manufacturing": 2115,
+      "Construction": 1397,
+      "Transport": 1189,
+      "Hospitality": 1001,
+      "Technology": 946
+    },
+    "structural_missing_trade_type": 7659,
+    "resolved_workouts": 8000,
+    "zero_or_negative_pv_recovery": 57,
+    "observed_zero_lgd": 0,
+    "high_lgd_gt75": 1307,
+    "cured_workouts": 1381,
+    "collateral_segments": {
+      "Unsecured": 2819,
+      "Mortgage": 2797,
+      "Other": 1584,
+      "Cash": 800
+    },
+    "reporting_borrowers": 3000,
+    "reporting_facilities": 5172,
+    "reporting_products": {
+      "Term Loan": 2354,
+      "OVD": 1742,
+      "Import LC": 483,
+      "Performance Guarantee": 390,
+      "Financial Guarantee": 203
+    }
+  }
+}

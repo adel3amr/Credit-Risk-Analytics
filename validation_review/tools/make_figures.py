@@ -61,4 +61,46 @@ ax.set(xlabel='Forecast minus realized LGD (percentage points)', ylabel='Facilit
        title='Holdout residuals: two-sided errors despite small mean bias')
 fig.savefig(F/'lgd_residuals.png',bbox_inches='tight'); plt.close(fig)
 
+borrowers = pd.read_csv(Path(sys.argv[1])/'outputs/borrower_audit_trace.csv')
+sorted_b = borrowers.sort_values('predicted_pd',ascending=False)
+tpr = np.r_[0,sorted_b.default.cumsum().to_numpy()/borrowers.default.sum()]
+fpr = np.r_[0,(1-sorted_b.default).cumsum().to_numpy()/(len(borrowers)-borrowers.default.sum())]
+sorted_b=borrowers.assign(decile=pd.qcut(borrowers.predicted_pd.rank(method='first'),10,labels=False)+1)
+bins=sorted_b.groupby('decile').agg(pred=('predicted_pd','mean'),actual=('default','mean'))
+fig,axes=plt.subplots(1,2,figsize=(10,3.9),constrained_layout=True)
+axes[0].plot(fpr,tpr,color=BLUE,label='Governed Logistic Regression')
+axes[0].plot([0,1],[0,1],'--',color='#777777',label='Random ranking')
+axes[0].set(xlabel='False positive rate',ylabel='True positive rate',title='Borrower PD ROC (102 / 3,000 defaults)')
+axes[0].legend(loc='lower right',fontsize=8)
+axes[1].plot([0,.15],[0,.15],'--',color='#777777',label='Perfect group calibration')
+axes[1].scatter(bins.pred,bins.actual,color=BLUE,label='300 borrowers per decile')
+axes[1].set(xlabel='Mean predicted 12m default rate',ylabel='Observed 12m default rate',
+            title='PD calibration by predicted-risk decile',xlim=(0,.15),ylim=(0,.15))
+axes[1].legend(loc='upper left',fontsize=8)
+fig.savefig(F/'pd_roc_calibration.png',bbox_inches='tight');plt.close(fig)
+
+stage=borrowers.groupby('stage').agg(names=('customer_id','count'),ead=('ead','sum'),ecl=('ecl','sum')).reindex(['Stage 1','Stage 2','Stage 3'])
+fig,axes=plt.subplots(1,2,figsize=(8.6,3.7),constrained_layout=True)
+axes[0].bar(stage.index,stage.names,color=BLUE)
+axes[0].set(title='Borrowers by stage',ylabel='Borrowers')
+axes[1].bar(stage.index,stage.ecl/1e6,color=NAVY)
+axes[1].set(title='Facility ECL rolled up to stage',ylabel='ECL (millions of synthetic units)')
+fig.savefig(F/'portfolio_stage_ecl.png',bbox_inches='tight');plt.close(fig)
+
+v=pd.read_csv(E/'historical_lgd_tails.csv')
+v=v[v.snapshot.isin(['v4_early_facility','v4_final','v5_frozen'])]
+groups=['all','realized >75%','predicted top 10%']
+fig,ax=plt.subplots(figsize=(8.5,3.9),constrained_layout=True)
+offset=np.arange(len(groups))
+for shift,(snap,label,color) in enumerate([('v4_early_facility','Early V4',BLUE),
+                                            ('v4_final','Final V4',RED),('v5_frozen','Frozen V5',NAVY)]):
+    s=v[v.snapshot.eq(snap)].set_index('cohort').loc[groups]
+    ax.bar(offset+(shift-1)*.25,s.bias.to_numpy()*100,width=.24,label=label,color=color)
+ax.set_xticks(offset,['All','Actual >75%','Top 10% predicted'])
+ax.set(ylabel='Forecast − realized LGD (pp)',
+       title='LGD across versions: early V4 workout target differs')
+ax.axhline(0,color='#777777',linewidth=.8)
+ax.legend(ncol=3,fontsize=8)
+fig.savefig(F/'lgd_version_tail.png',bbox_inches='tight');plt.close(fig)
+
 print('Generated',len(list(F.glob('*.png'))),'figures')

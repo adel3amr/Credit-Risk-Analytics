@@ -129,8 +129,19 @@ assert ead_error < .02 and borrower_ecl_error < .02 and forward_max < 1e-12
 traces = []
 for label in ['Stage 1','Stage 2','Stage 3']:
     g = f.loc[f.stage == label].iloc[0]
+    borrower_row=borrower.set_index('customer_id').loc[g.customer_id]
     traces.append(dict(stage=label, customer_id=g.customer_id, facility_id=g.facility_id,
-                       pd_12m=g.forward_looking_pd_12m,
+                       product_type=g.product_type, collateral_type=g.collateral_type,
+                       lien_rank=g.lien_rank, guarantee_coverage=g.guarantee_coverage,
+                       leverage_ratio=borrower_row.leverage_ratio,
+                       credit_utilization=borrower_row.credit_utilization,
+                       days_past_due=borrower_row.days_past_due,
+                       current_credit_impaired=borrower_row.current_credit_impaired,
+                       consecutive_ews_months=borrower_row.consecutive_ews_months,
+                       risk_direction=borrower_row.risk_direction,
+                       risk_rating=borrower_row.risk_rating,
+                       borrower_predicted_pd=borrower_row.predicted_pd,
+                       pd_12m=g.forward_looking_pd_12m, remaining_months=g.remaining_months,
                        lifetime_pd=1-(1-g.forward_looking_pd_12m)**(g.remaining_months/12),
                        effective_pd=1 if label == 'Stage 3' else
                                     (1-(1-g.forward_looking_pd_12m)**(g.remaining_months/12)
