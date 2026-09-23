@@ -20,5 +20,7 @@ def test_lgd_validation_reports_calibration():
     y=np.array([0.2,0.4,0.6])
     p=np.array([0.25,0.35,0.55])
     s=lgd_validation_summary(y,p,np.array([1,2,3]))
-    assert "MAE" in s and "EAD_Weighted_MAE" in s
+    assert {"MAE","RMSE","Mean_Error_Bias","EAD_Weighted_MAE","EAD_Weighted_RMSE","EAD_Weighted_Mean_Error_Bias"}.issubset(s)
+    assert np.isclose(s["Mean_Error_Bias"], np.mean(p-y))
     assert np.isclose(s["Calibration_in_the_large"], y.mean()-p.mean())
+    assert np.isclose(s["Calibration_in_the_large"], -s["Mean_Error_Bias"])
