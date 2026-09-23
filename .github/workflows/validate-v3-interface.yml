@@ -2,9 +2,9 @@ name: Validate V3 Interface
 
 on:
   push:
-    branches: [feature/v3-governance-interface]
+    branches: [feature/v3-governance-interface, feature/v4-bank-grade-risk-engine]
   pull_request:
-    branches: [main]
+    branches: [main, fix/reviewer-code-only]
 
 jobs:
   validate:
@@ -20,6 +20,8 @@ jobs:
       - name: Generate app data
         run: |
           python scripts/generate_sme_portfolio.py
+          python scripts/generate_lgd_workout_history.py
+          python notebooks/lgd_model_pipeline.py
           python notebooks/credit_risk_pipeline.py
       - name: Streamlit runtime smoke test
         run: |

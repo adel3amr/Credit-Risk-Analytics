@@ -14,6 +14,10 @@ from pd_model import logistic_model, random_forest_model, gradient_boosting_mode
 from validation import validation_summary, calibration_table, threshold_diagnostics
 from scorecard import add_score, add_risk_rating
 from ecl import calculate_ecl
+from lgd_model import (
+    load_model, portfolio_to_facilities, predict_lgd, aggregate_borrower_lgd,
+)
+from facility_ecl import calculate_facility_ecl, aggregate_facility_ecl
 
 ROOT=Path(__file__).resolve().parents[1]
 (ROOT/"outputs").mkdir(parents=True, exist_ok=True)
@@ -52,7 +56,44 @@ print("\nREFERENCE THRESHOLD DIAGNOSTICS (not optimized)\n", threshold_diag.roun
 out=df.loc[Xte.index].copy()
 out["predicted_pd"]=primary_pd
 out=add_score(out)
+
+# Facility-level workout LGD application. The LGD model is trained and validated
+# separately on resolved synthetic default/workout histories, then applied to each
+# reporting-date facility and EAD-weighted back to the borrower for ECL.
+lgd_model_path = ROOT/"models/lgd_workout_model.joblib"
+if not lgd_model_path.exists():
+    raise FileNotFoundError(
+        "Missing deployed LGD model. Run notebooks/lgd_model_pipeline.py first."
+    )
+lgd_model = load_model(lgd_model_path)
+facility_lgd = portfolio_to_facilities(out)
+facility_lgd["predicted_lgd"] = predict_lgd(lgd_model, facility_lgd)
+facility_lgd.to_csv(ROOT/"outputs/facility_lgd_predictions.csv", index=False)
+borrower_lgd = aggregate_borrower_lgd(facility_lgd)
+
+out["lgd_legacy_proxy"] = out["lgd"]
+out = out.merge(
+    borrower_lgd[["customer_id","modelled_lgd","facilities"]],
+    on="customer_id", how="left", validate="one_to_one"
+)
+if out["modelled_lgd"].isna().any():
+    raise ValueError("Missing modelled LGD for one or more borrowers")
+out["lgd"] = out["modelled_lgd"].clip(0,1)
 out=calculate_ecl(out)
+
+# Replace borrower-level term approximation with facility-level lifetime ECL.
+facility_ecl = calculate_facility_ecl(out, facility_lgd)
+facility_ecl.to_csv(ROOT/"outputs/facility_ecl_predictions.csv", index=False)
+borrower_ecl = aggregate_facility_ecl(facility_ecl)
+out["ecl_legacy_borrower_term"] = out["ecl"]
+out["ecl_12m_legacy_borrower"] = out["ecl_12m"]
+out = out.merge(borrower_ecl,on="customer_id",how="left",validate="one_to_one")
+if out[["ecl_facility","ecl_12m_facility"]].isna().any().any():
+    raise ValueError("Missing facility-level ECL aggregation for one or more borrowers")
+out["ecl"] = out["ecl_facility"]
+out["ecl_12m"] = out["ecl_12m_facility"]
+out["lifetime_pd"] = out["facility_weighted_lifetime_pd"].clip(0,1)
+
 # Make the existing operational monitoring flag available before rating.
 # This does not change the existing rating policy because add_risk_rating
 # still preserves its original risk_direction fallback/union logic.
@@ -70,16 +111,22 @@ audit_trace_cols = [
     "credit_utilization", "utilization_6m_ago", "utilization_6m_change",
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
     "consecutive_ews_months", "delinquencies_12m", "previous_defaults",
-    "days_past_due", "current_credit_impaired", "collateral_value",
+    "days_past_due", "current_credit_impaired", "write_off_flag",
+    "management_quality", "governance_quality", "financial_reporting_quality",
+    "market_position", "sponsor_support", "customer_concentration",
+    "supplier_concentration", "key_person_dependency", "audit_quality",
+    "collateral_value",
     "collateral_coverage", "collateral_type", "collateral_haircut", "recognized_collateral",
     "recognized_collateral_coverage", "unsecured_ead", "unsecured_lgd", "loan_limit", "loan_draw_ratio", "loans", "loan_ead", "ovd", "ovd_ead", "trade",
     "direct_limit", "direct_drawn", "indirect_limit", "total_credit_limit", "total_utilized_amount",
-    "trade_type", "trade_ccf", "trade_ead", "ead", "lgd", "loan_term_months",
+    "trade_type", "trade_ccf", "trade_ead", "ead", "lgd_legacy_proxy",
+    "modelled_lgd", "lgd", "facilities", "loan_term_months",
     "predicted_pd", "pit_pd_12m", "pd_12m_upside", "pd_12m_baseline",
     "pd_12m_downside", "forward_looking_pd_12m", "credit_score", "risk_band", "risk_rating", "rating_status",
     "risk_direction", "ews_signal_count", "ews_sicr_flag", "stage", "sicr_flag",
-    "ecl_12m", "lifetime_pd_upside", "lifetime_pd_baseline",
-    "lifetime_pd_downside", "lifetime_pd", "ecl", "default",
+    "ecl_12m", "ecl_12m_legacy_borrower", "lifetime_pd_upside", "lifetime_pd_baseline",
+    "lifetime_pd_downside", "lifetime_pd", "ecl_legacy_borrower_term",
+    "ecl_facility", "ecl", "default",
 ]
 missing_audit_cols = [col for col in audit_trace_cols if col not in out.columns]
 if missing_audit_cols:
@@ -104,10 +151,12 @@ audit_dictionary = pd.DataFrame([
     ("ovd_ead", "EAD", "100% of synthetic approved OVD limit"),
     ("trade_ead", "EAD", "Trade amount multiplied by synthetic instrument CCF"),
     ("ead", "EAD", "Sum of loan, OVD and trade EAD"),
-    ("collateral_coverage / lgd", "LGD", "Aggregate borrower-level synthetic recovery proxy"),
-    ("ecl_12m", "ECL", "forward_looking_pd_12m x lgd x ead"),
-    ("lifetime_pd", "ECL", "Probability-weighted scenario lifetime PD using a simplified constant-hazard term structure"),
-    ("ecl", "ECL", "Stage-dependent simplified ECL"),
+    ("modelled_lgd / lgd", "LGD", "Facility-level workout-LGD predictions aggregated to borrower level by EAD"),
+    ("lgd_legacy_proxy", "LGD challenger", "Legacy collateral proxy retained for comparison only"),
+    ("ecl_12m", "ECL", "Sum of facility 12-month ECL using borrower forward-looking PD and facility LGD/EAD"),
+    ("lifetime_pd", "ECL", "EAD-weighted facility lifetime PD based on reporting-date remaining maturity"),
+    ("ecl_legacy_borrower_term", "ECL challenger", "Prior borrower-level contractual-term approximation retained for comparison"),
+    ("ecl", "ECL", "Governed sum of facility-level stage-dependent ECL"),
     ("default", "Validation outcome", "Future 12-month synthetic outcome; not a reporting-date input"),
 ], columns=["field_or_group", "layer", "interpretation"])
 audit_dictionary.to_csv(ROOT/"outputs/borrower_audit_trace_dictionary.csv", index=False)
@@ -202,8 +251,9 @@ monitor_cols = [
     "risk_direction", "ews_signal_count", "consecutive_ews_months", "ews_monitoring_flag", "days_past_due", "delinquencies_12m",
     "previous_defaults", "credit_utilization", "utilization_6m_change",
     "avg_utilization_6m", "months_above_80_utilization", "limit_breach_count",
-    "loans", "ovd", "trade", "trade_type", "ead", "lgd", "ecl_12m",
-    "lifetime_pd", "ecl", *trigger_cols, "stage2_trigger_count", "default",
+    "loans", "ovd", "trade", "trade_type", "ead", "lgd_legacy_proxy",
+    "modelled_lgd", "lgd", "ecl_12m",
+    "lifetime_pd", "ecl_legacy_borrower_term", "ecl", *trigger_cols, "stage2_trigger_count", "default",
 ]
 monitor_cols = [col for col in monitor_cols if col in out.columns]
 out[monitor_cols].sort_values(["stage", "predicted_pd"], ascending=[False, False]).to_csv(

@@ -1,19 +1,21 @@
 # Credit Risk Analytics & SME PD Modeling
 
 ## Overview
-End-to-end synthetic SME credit-risk project covering borrower PD, validation, credit scoring, early-warning monitoring, product-level EAD mechanics, aggregate LGD and a simplified IFRS 9-style staging/ECL layer.
+End-to-end synthetic SME credit-risk platform covering borrower PD, independent qualitative underwriting information, early-warning monitoring, internal risk rating, facility-level EAD, workout-LGD modelling, simplified IFRS 9-style staging/ECL, model validation and governed human intervention.
 
 > **Data note:** All customer and behavioural data are synthetic. Results demonstrate methodology under the stated data-generating assumptions; they are not estimates of a real bank portfolio.
 
 ## Architecture
 ```text
-Current financials + current behaviour -> PIT-oriented 12M PD -> score / risk band
-36-month behavioural history          -> EWS / monitoring
-Macro scenarios                       -> forward-looking PD overlay
-Reporting-date credit deterioration   -> simplified SICR / stage
-Facilities                            -> EAD
-Collateral / recovery assumptions     -> LGD
-Forward-looking PD + stage + LGD + EAD -> simplified ECL
+Financials + current behaviour + qualitative underwriting candidates     -> 12M PD / challenger tests
+36-month behavioural history                                      -> EWS / monitoring
+Reporting-date deterioration                                      -> simplified SICR / stage
+Resolved historical default/workout facilities                    -> workout LGD model
+Current facilities + collateral + product + seniority             -> facility LGD
+Facility EAD + remaining maturity + borrower PD/stage + LGD        -> facility ECL
+Facility ECL                                                       -> borrower / portfolio ECL
+Macro scenarios                                                    -> forward-looking PD overlay
+Policy + human override                                            -> governed internal rating
 ```
 
 Logistic Regression is the governed primary PD model because interpretability and probability calibration are central to the use case. Random Forest and Gradient Boosting are challengers; the primary model is not selected by whichever algorithm happens to achieve the highest holdout AUC.
@@ -39,10 +41,14 @@ For this project:
 Trade CCFs and other portfolio-generation parameters are synthetic methodology assumptions, not regulatory prescriptions.
 
 ### LGD
-LGD is an aggregate borrower-level synthetic recovery proxy driven primarily by collateral coverage, with limited sector differentiation. Collateral is not allocated by individual facility, seniority or enforceability. A production implementation would require facility-level recovery data and recovery timing.
+The governed LGD layer is now a separate **facility-level workout model** trained on a synthetic history of resolved defaulted facilities. The workout history contains EAD at default, product type, collateral, lien rank, guarantee coverage, borrower condition, recovery cash flows, workout costs and recovery timing.
+
+Economic LGD is defined from discounted net recoveries relative to EAD at default. Post-default outcomes such as realized recovery cash flows, workout timing, cure outcome and write-off outcome are retained for target construction and audit but are excluded from the predictive feature set. A Gradient Boosting regression is fixed ex ante as the governed non-linear LGD model. Ridge, Huber Gradient Boosting, Random Forest and Histogram Gradient Boosting are retained as diagnostic challengers; the frozen holdout is not used to silently re-select the champion.
+
+For the current portfolio, each borrower is expanded into its live term-loan, OVD and trade facilities. Facility LGDs are predicted separately and then EAD-weighted back to borrower level for reporting.
 
 ## PD model
-The governed feature set uses current financial and behavioural information:
+The governed PD framework evaluates current financial and behavioural information alongside **genuinely additional qualitative underwriting candidates**:
 - EBITDA margin
 - leverage ratio
 - current ratio
@@ -54,19 +60,30 @@ The governed feature set uses current financial and behavioural information:
 - previous defaults
 - days past due
 - industry
+- management quality
+- governance quality
+- financial reporting quality
+- market position
+- sponsor/support strength
+- customer concentration
+- supplier concentration
+- key-person dependency
+- audit quality
 
-Trajectory variables are evaluated separately and are not forced into the governed PD merely to improve apparent model performance.
+The qualitative fields are generated independently of the financial ratios and account behaviour, so they test genuinely incremental underwriting information rather than re-encoding existing variables. On the frozen V4 holdout, however, the full qualitative specification did **not** improve discrimination versus the simpler current-behaviour specification. That negative result is retained rather than tuning the synthetic DGP or holdout. Trajectory variables likewise remain primarily an EWS/monitoring layer.
 
 Validation includes ROC-AUC, Gini, KS, Brier score, log loss, calibration-in-the-large and calibration by holdout decile.
 
 ## Operational Risk Rating
 The continuous PD-derived credit score is retained as a model-risk measure, while the workbench also exposes a bank-style **1-10 internal Risk Rating**:
 
-- **1:** reserved for non-Stage-3 borrowers with full eligible cash coverage (recognized cash collateral coverage at least 99.9% of EAD).
+- **1:** reserved for Stage-1 borrowers with full eligible cash coverage (recognized cash collateral coverage at least 99.9% of EAD).
 - **2-6:** performing grades, ordered from strongest to weakest using transparent PD bands.
-- **7:** Watchlist / enhanced monitoring. This is an operational monitoring grade and is not synonymous with IFRS 9 Stage 2.
-- **8-10:** non-performing grades available only to Stage 3 borrowers; severity is differentiated using reporting-date delinquency.
- - Full cash security does **not** cure a Stage 3/non-performing exposure; staging remains governed separately.
+- **7:** Watchlist / enhanced monitoring. Stage 2 maps to Rating 7 by default, but Rating 7 does **not** itself create Stage 2. A rare Stage-2 Rating-6 case is a documented human override rather than an automatic rule.
+- **8:** defaulted / Stage 3 exposure.
+- **9:** severe NPL / advanced delinquency.
+- **10:** explicit write-off status. Rating 10 is not created by DPD alone.
+- Full cash security does **not** cure Stage 2/Stage 3 status; Rating 1 applies only to Stage 1 full eligible cash cover.
 
 Risk Rating 1 is therefore not a low-PD grade: a low-PD borrower without full cash coverage starts at Rating 2. The PD grade cut points are transparent synthetic policy assumptions and are not optimized on the holdout.
 
@@ -87,51 +104,56 @@ This repository is not a production IFRS 9 accounting engine.
 - **Stage 2:** simplified SICR proxies including DPD/conduct/history triggers and the fixed 9-month EWS-persistence policy.
 - **Stage 1:** exposures not meeting Stage 2 or Stage 3 conditions.
 
-Stage 1 uses 12-month PD. Stage 2 uses a simplified lifetime-PD approximation based on current annual PD and the synthetic contractual term. Stage 3 uses a simplified discounted cash-shortfall workout: collateral-type-specific recognized recovery is reduced for synthetic realization costs and discounted over a synthetic recovery horizon, with recovery capped at EAD.
+ECL is calculated at **facility level** and then aggregated to the borrower. Stage 1 uses 12-month forward-looking PD × facility LGD × facility EAD. Stage 2 uses a constant-hazard lifetime-PD approximation based on each facility's **reporting-date remaining maturity**, rather than applying one borrower-level term to the whole exposure. Stage 3 uses the governed workout-LGD estimate with PD effectively equal to 100%; the older direct collateral cash-shortfall calculation is retained only as a challenger/diagnostic.
 
 The ECL layer applies explicit upside, baseline and downside macroeconomic scenarios using GDP growth, unemployment, policy-rate and inflation shocks. These feed a fixed synthetic log-odds sensitivity mapping and are probability-weighted. The macro paths and sensitivities are methodology assumptions, not official forecasts or empirically estimated elasticities.
 
-Important limitations include no true origination/reference PD comparison, no empirically estimated macro-credit model, no instrument-level effective-interest-rate workout engine, no facility-level lifetime EAD term structure, and one borrower-level contractual term for aggregate facilities.
+Important limitations remain: no true origination/reference PD for a full IFRS 9 SICR comparison, no empirically estimated macro-credit satellite model, synthetic rather than observed workout history, and simplified facility maturity/CCF assumptions. The architecture is designed to resemble real bank risk systems; the numerical calibration is not represented as production-ready or regulatory-approved.
 
-## V2 information-set experiment
+## Incremental-information experiment
 Logistic Regression is held constant while four nested information sets are compared:
 
 1. Financial only.
 2. Financial + current behaviour.
 3. Financial + current behaviour + trajectory.
-4. Full hybrid, adding synthetic qualitative/relationship variables.
+4. Full hybrid + **independent qualitative underwriting information**.
 
-The purpose is to test whether broader information adds out-of-sample discrimination, not to maximize AUC through feature accumulation. Paired bootstrap resampling is used for AUC differences.
+The purpose is to measure incremental information content rather than maximize AUC through feature accumulation. The qualitative layer is no longer built from quantiles or transformations of the financial/behavioural variables. All fields exist before the train/holdout split, eliminating the earlier full-sample quantile contamination. Paired bootstrap resampling is used for AUC differences.
 
-The final V2 architecture keeps current behaviour in core PD and trajectory in the separate EWS layer. The frozen synthetic default DGP itself contains selected trajectory effects, so incremental trajectory discrimination is documented as a methodology result rather than treated as independent empirical evidence for expanding the governed PD feature set. Qualitative variables remain supplementary.
-
-## Collateral and LGD methodology
+## Collateral, recovery and workout-LGD methodology
 
 The recovery layer generates collateral type before collateral value so that security is conditional on the exposure rather than assuming that every SME is heavily collateralised. The synthetic portfolio mix is 35% unsecured, 10% cash collateral, 35% mortgage and 20% other collateral. Nominal collateral coverage is generated from type-specific distributions.
 
 For ECL recovery purposes, eligible cash collateral is recognized at 100% of nominal value (capped at EAD), mortgage collateral receives a 20% haircut, and other collateral receives a 35% haircut. Residual exposure after recognized collateral is treated as unsecured and carries the synthetic unsecured loss-severity assumption. These collateral shares, coverage distributions, haircuts and unsecured-LGD parameters are transparent project assumptions: they are not IFRS 9 minimums, regulatory haircuts, official benchmarks or empirically calibrated recovery rates.
 
-The architecture is intentionally causal: EAD → collateral type → nominal collateral → recognized recovery → unsecured EAD → LGD → ECL. Haircuts are not tuned to obtain a target Stage 2 ECL ratio.
+The architecture is intentionally layered: facility EAD → facility security/product/seniority → workout-LGD estimate → stage-specific facility ECL → borrower aggregation. The original deterministic collateral proxy remains available as a challenger/diagnostic but is no longer the governed LGD input to ECL.
 
 ## Current governed validation
-The final frozen workflow uses a 3,000-borrower untouched holdout. These figures are generated by the current repository release rather than carried forward from earlier DGP versions:
+The V4 workflow is deterministic and validated through CI. PD and LGD use separate holdouts.
 
-- governed Logistic Regression ROC-AUC: **0.7599**, Gini: **0.5198**, KS: **0.3995**;
-- Brier score: **0.0322**; Log Loss: **0.1354**;
-- holdout observed default rate: **3.47%**;
-- mean predicted PD: **3.38%**; calibration-in-the-large (observed minus predicted): **+0.08 percentage points**;
-- Stage 1: **2,763 borrowers**, EAD **EUR 1.927bn**, ECL **EUR 20.10m**, ECL/EAD **1.04%**;
-- Stage 2: **227 borrowers**, EAD **EUR 157.93m**, ECL **EUR 14.83m**, ECL/EAD **9.39%**;
-- Stage 3: **10 borrowers**, EAD **EUR 5.46m**, ECL **EUR 3.22m**, ECL/EAD **58.96%**;
-- total holdout EAD: approximately **EUR 2.090bn**;
-- mean PIT-oriented 12-month PD: **3.38%**;
-- mean probability-weighted forward-looking PD: **3.58%**;
-- upside / baseline / downside mean scenario PD: **2.89% / 3.38% / 4.87%**;
-- PIT diagnostic 12-month ECL: approximately **EUR 24.93m**;
-- forward-looking diagnostic 12-month ECL: approximately **EUR 26.40m**;
-- simplified forward-looking staged ECL: approximately **EUR 38.15m**.
+### PD — 3,000-borrower holdout
+- Logistic Regression (governed): **ROC-AUC 0.7595**, **Gini 0.5189**.
+- Observed default rate: **3.40%**; calibration-in-the-large: approximately **-0.04 pp**.
+- Random Forest AUC: **0.7405**; Gradient Boosting AUC: **0.7301**.
+- Incremental-information testing found a positive but statistically inconclusive lift from current behaviour over financials alone; trajectory and independent qualitative fields did not provide convincing additional out-of-sample discrimination. These null/negative results are retained.
 
-Logistic Regression remains the governed model by design, not because the holdout was used to select the best algorithm. Fixed reference-threshold classification diagnostics are supplementary operational views; thresholds are not optimized against the holdout. The fixed 9-month EWS policy is likewise retained without post-holdout optimization.
+### Workout LGD — 2,000-facility holdout
+The governed Gradient Boosting model remains fixed rather than being re-selected after inspecting challengers:
+- **MAE 11.40 pp**, **RMSE 16.58 pp**, **R² 59.51%**.
+- Actual mean LGD **45.43%** vs predicted **45.13%**; mean bias (prediction - actual) **-0.31 pp**.
+- EAD-weighted actual LGD **45.31%** vs predicted **45.18%**; EAD-weighted bias **-0.13 pp**.
+- Calibration is strong at portfolio level, but the governed model underpredicts the severe-loss tail: top-10% EAD-weighted bias **-4.41 pp** and top-5% **-6.48 pp**.
+- Huber, Random Forest, Histogram Gradient Boosting and Ridge are retained as diagnostic challengers. None is promoted after viewing the frozen holdout; doing so would turn validation evidence into model-selection data.
+
+### Portfolio / ECL — current V4 holdout
+- Stage 1: **2,769 borrowers**, EAD **EUR 1.930bn**, ECL **EUR 28.44m**.
+- Stage 2: **221 borrowers**, EAD **EUR 156.95m**, ECL **EUR 14.25m**.
+- Stage 3: **10 borrowers**, EAD **EUR 4.67m**, ECL **EUR 2.58m**.
+- Total EAD: approximately **EUR 2.092bn**; total staged ECL: approximately **EUR 45.27m**.
+- Probability-weighted forward-looking mean 12-month PD: approximately **3.64%**.
+- Same-population methodology bridge: legacy LGD + legacy term **EUR 39.31m**; workout LGD + legacy term **EUR 56.19m**; workout LGD + facility remaining maturity **EUR 45.27m**.
+
+These are synthetic project results, not estimates for a real bank or regulatory benchmark.
 
 ## Project structure
 ```text
@@ -148,6 +170,8 @@ Credit-Risk-Analytics/
 ├── src/
 │   ├── data_preparation.py
 │   ├── pd_model.py
+│   ├── lgd_model.py
+│   ├── facility_ecl.py
 │   ├── validation.py
 │   ├── scorecard.py
 │   ├── early_warning.py
@@ -161,6 +185,8 @@ Credit-Risk-Analytics/
 ```bash
 pip install -r requirements.txt
 python scripts/generate_sme_portfolio.py
+python scripts/generate_lgd_workout_history.py
+python notebooks/lgd_model_pipeline.py
 python notebooks/credit_risk_pipeline.py
 python notebooks/hybrid_pd_experiment.py
 python -m streamlit run app.py
@@ -174,10 +200,13 @@ Generated raw/processed CSVs and model outputs are intentionally not version-con
 - No future-default target leakage into reporting-date staging.
 - Governed PD features are explicit; missing required features fail rather than being silently omitted.
 - Logistic Regression is fixed as the primary model; RF/GB are challengers.
-- Holdout results are reported, not optimized.
+- Holdout results are reported, not optimized; challengers observed on the frozen holdout are not silently promoted.
 - The 9-month EWS threshold is fixed ex ante for V2 and is not retuned after seeing validation results.
-- Synthetic assumptions and accounting simplifications are stated explicitly.
-- The V2 DGP, PD specification, EWS threshold, staging logic and macro sensitivities are frozen after final validation; no post-holdout tuning is performed.
+- Synthetic assumptions and accounting simplifications are stated explicitly; see `docs/MODEL_LIMITATIONS.md`.
+- PD and LGD are validated on separate untouched holdouts.
+- Realized recovery cash flows, cure outcome, recovery timing and write-off outcome are excluded from LGD model inputs.
+- Model output, accounting stage, internal rating and human override remain separate governed objects.
+- Methodology changes are versioned and reviewed rather than silently optimized against holdout results.
 
 ## Disclaimer
 Educational synthetic portfolio project only. It is not a production credit model and does not constitute accounting, regulatory, lending or investment advice.

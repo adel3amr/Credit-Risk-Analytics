@@ -44,13 +44,20 @@ def add_risk_rating(df, pd_col="predicted_pd"):
     watch = out.get("ews_monitoring_flag", pd.Series(0, index=out.index)).fillna(0).astype(bool)
     if "risk_direction" in out.columns:
         watch = watch | out["risk_direction"].eq("Deteriorating")
+    # Internal policy: Stage 2 normally maps to Rating 7 / Watchlist, while
+    # Rating 7 itself does not create Stage 2. A rare Stage-2 Rating-6 case must
+    # be a documented human override rather than an automatic model shortcut.
+    if "stage" in out.columns:
+        watch = watch | out["stage"].eq("Stage 2")
     rating = pd.Series(np.where(watch, 7, rating), index=out.index, dtype=int)
 
     if "stage" in out.columns:
         npl = out["stage"].eq("Stage 3")
         dpd = out.get("days_past_due", pd.Series(0, index=out.index)).fillna(0)
         # Severity within NPL population only; no PD threshold can create Stage 3.
-        npl_rating = np.select([dpd >= 180, dpd >= 120], [10, 9], default=8)
+        # Rating 10 is an explicit write-off state, not a DPD bucket.
+        write_off = out.get("write_off_flag", pd.Series(0, index=out.index)).fillna(0).astype(bool)
+        npl_rating = np.select([write_off, dpd >= 120], [10, 9], default=8)
         rating = pd.Series(np.where(npl, npl_rating, rating), index=out.index, dtype=int)
 
     full_cash = pd.Series(False, index=out.index)
@@ -62,7 +69,7 @@ def add_risk_rating(df, pd_col="predicted_pd"):
     # Rating 1 is reserved exclusively for full eligible cash coverage.
     # Security strength changes the internal rating but never cures an NPL.
     if "stage" in out.columns:
-        full_cash &= ~out["stage"].eq("Stage 3")
+        full_cash &= out["stage"].eq("Stage 1")
     rating.loc[full_cash] = 1
 
     out["risk_rating"] = rating

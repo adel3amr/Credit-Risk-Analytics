@@ -170,7 +170,11 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
         (1.0 + stage3_discount_rate) ** stage3_recovery_years
     )
     out["stage3_discounted_collateral_recovery"] = np.minimum(discounted_recovery, ead)
-    out.loc[s3, "ecl"] = np.maximum(
+    out["stage3_direct_workout_ecl"] = np.maximum(
         ead - out["stage3_discounted_collateral_recovery"], 0.0
-    )[s3]
+    )
+    # Governed Stage-3 ECL now uses the independently trained facility/workout LGD
+    # aggregated to borrower level. The direct collateral cash-shortfall remains as
+    # a transparent diagnostic/challenger rather than being silently discarded.
+    out.loc[s3, "ecl"] = (lgd * ead)[s3]
     return out

@@ -10,6 +10,9 @@ MACRO = ROOT / "config" / "macro_scenarios.csv"
 AUDIT_LOG = ROOT / "outputs" / "governance_audit.jsonl"
 MODEL_VALIDATION = ROOT / "outputs" / "model_validation.csv"
 CALIBRATION = ROOT / "outputs" / "calibration_deciles.csv"
+LGD_VALIDATION = ROOT / "outputs" / "lgd_model_validation.csv"
+LGD_CALIBRATION = ROOT / "outputs" / "lgd_calibration_deciles.csv"
+FACILITY_LGD = ROOT / "outputs" / "facility_lgd_predictions.csv"
 
 st.set_page_config(page_title="SME Credit Risk Platform", layout="wide")
 st.title("SME Credit Risk Platform")
@@ -283,9 +286,26 @@ with tabs[1]:
     else: st.success("No significant adverse indicators.")
     if "forward_looking_pd_12m" in df.columns:
         st.write(f"Model PD **{pct(x.predicted_pd)}** → macro-adjusted 12M PD **{pct(x.forward_looking_pd_12m)}**. Accounting stage remains a separate decision dimension.")
+    st.subheader("Qualitative underwriting")
+    qcols=[c for c in [
+        "management_quality","governance_quality","financial_reporting_quality",
+        "market_position","sponsor_support","customer_concentration",
+        "supplier_concentration","key_person_dependency","audit_quality"
+    ] if c in df.columns]
+    if qcols:
+        st.dataframe(pd.DataFrame({"Field":qcols,"Value":[x[c] for c in qcols]}), hide_index=True, use_container_width=True)
+
     st.subheader("Risk signals")
-    cols=[c for c in ["days_past_due","credit_utilization","delinquencies_12m","previous_defaults","consecutive_ews_months","risk_direction","current_credit_impaired"] if c in df.columns]
+    cols=[c for c in ["days_past_due","credit_utilization","delinquencies_12m","previous_defaults","consecutive_ews_months","risk_direction","current_credit_impaired","write_off_flag"] if c in df.columns]
     st.dataframe(pd.DataFrame({"Field":cols,"Value":[x[c] for c in cols]}), hide_index=True)
+
+    if FACILITY_LGD.exists():
+        fac = pd.read_csv(FACILITY_LGD)
+        fac = fac[fac["customer_id"].astype(str).eq(str(cid))].copy()
+        if not fac.empty:
+            st.subheader("Facility-level workout LGD")
+            show=[z for z in ["facility_id","product_type","ead_at_default","collateral_type","collateral_coverage","lien_rank","guarantee_coverage","predicted_lgd"] if z in fac.columns]
+            st.dataframe(fac[show], hide_index=True, use_container_width=True)
 
 with tabs[2]:
     st.subheader("Manual intervention")
@@ -432,3 +452,15 @@ if role == "Model Validation":
 
             st.markdown("#### Validation interpretation")
             st.info("Discrimination (AUC/Gini/KS) evaluates rank ordering. Brier, Log Loss, calibration-in-the-large and bucket-level predicted-vs-observed default rates evaluate probability quality. Fixed classification thresholds are operational diagnostics and are not optimized on the holdout.")
+
+            st.markdown("#### Facility workout LGD validation")
+            if LGD_VALIDATION.exists() and LGD_CALIBRATION.exists():
+                lgdv = pd.read_csv(LGD_VALIDATION)
+                lgdc = pd.read_csv(LGD_CALIBRATION)
+                st.dataframe(lgdv, use_container_width=True)
+                st.caption("LGD validation is performed on a separate holdout of resolved synthetic defaulted facilities. Post-default recovery outcomes and workout timing are targets/audit fields, not model inputs.")
+                lgd_chart = lgdc.rename(columns={"mean_predicted_lgd":"Predicted LGD","mean_actual_lgd":"Actual LGD"})
+                if {"Predicted LGD","Actual LGD"}.issubset(lgd_chart.columns):
+                    st.line_chart(lgd_chart.set_index("Predicted LGD")["Actual LGD"], x_label="Mean predicted LGD", y_label="Mean actual LGD")
+            else:
+                st.info("Run the LGD model pipeline to generate independent workout-LGD validation outputs.")

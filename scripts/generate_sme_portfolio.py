@@ -38,8 +38,8 @@ def main():
     seed_sequence = np.random.SeedSequence(SEED)
     (
         rng_borrower, rng_facility, rng_behavior, rng_credit,
-        rng_recovery, rng_default,
-    ) = [np.random.default_rng(s) for s in seed_sequence.spawn(6)]
+        rng_recovery, rng_default, rng_qualitative, rng_maturity,
+    ) = [np.random.default_rng(s) for s in seed_sequence.spawn(8)]
     rng = rng_borrower
     n = N
 
@@ -53,6 +53,31 @@ def main():
     leverage_ratio = np.clip(rng.lognormal(np.log(2.0), .42, n), .15, 7.5)
     current_ratio = np.clip(rng.lognormal(np.log(1.45), .35, n), .35, 4.0)
     cash_flow = annual_revenue * np.clip(ebitda_margin + rng.normal(.015, .04, n), -.12, .32)
+
+    # Independent qualitative underwriting information. These fields are not
+    # reconstructed from the financial ratios or account behaviour below; they
+    # represent genuinely additional synthetic information that a credit officer
+    # could obtain through management meetings, KYC, governance review and market
+    # due diligence.
+    q = rng_qualitative
+    latent_management = q.normal(0, 1, n)
+    latent_governance = 0.35 * latent_management + q.normal(0, .94, n)
+    latent_reporting = 0.25 * latent_governance + q.normal(0, .97, n)
+    latent_market = q.normal(0, 1, n)
+    latent_support = q.normal(0, 1, n)
+
+    def ordinal_1_5(x):
+        return np.digitize(x, [-1.0, -0.3, 0.3, 1.0]) + 1
+
+    management_quality = ordinal_1_5(latent_management).astype(int)
+    governance_quality = ordinal_1_5(latent_governance).astype(int)
+    financial_reporting_quality = ordinal_1_5(latent_reporting).astype(int)
+    market_position = ordinal_1_5(latent_market).astype(int)
+    sponsor_support = ordinal_1_5(latent_support).astype(int)
+    customer_concentration = np.clip(q.beta(2.0, 4.5, n), .03, .90)
+    supplier_concentration = np.clip(q.beta(1.8, 5.0, n), .02, .85)
+    key_person_dependency = q.binomial(1, .22, n).astype(int)
+    audit_quality = q.choice([1, 2, 3], n, p=[.30, .50, .20]).astype(int)
 
     rng = rng_facility
     # Three product buckets per borrower: term loans, overdraft (OVD), and trade.
@@ -83,6 +108,14 @@ def main():
     indirect_limit = trade
     total_credit_limit = direct_limit + indirect_limit
     loan_term_months = rng.choice([12, 24, 36, 48, 60], n, p=[.15, .23, .30, .17, .15])
+    # Reporting-date remaining maturity is generated independently of credit risk.
+    loan_age_months = np.floor(
+        rng_maturity.random(n) * np.maximum(loan_term_months, 1)
+    ).astype(int)
+    loan_remaining_months = np.maximum(loan_term_months - loan_age_months, 1)
+    loan_age_months = np.where(has_loan, loan_age_months, 0)
+    loan_remaining_months = np.where(has_loan, loan_remaining_months, 0)
+    ovd_remaining_months = np.where(has_ovd, 12, 0)
     debt_to_income = np.clip(
         .12 + .075 * leverage_ratio + rng.normal(.08, .10, n), .03, .90
     )
@@ -219,6 +252,10 @@ def main():
     trade_ccf = np.where(has_trade, trade_ccf, 0.0)
     trade_type = np.where(has_trade, trade_type, "None")
     trade_ead = trade * trade_ccf
+    trade_remaining_months = np.array([
+        {"Import LC":6, "Performance Guarantee":18, "Financial Guarantee":24, "None":0}[x]
+        for x in trade_type
+    ], dtype=int)
 
     ead = loan_ead + ovd_ead + trade_ead
     # Collateral DGP: generate security type first, then nominal coverage conditional
@@ -286,6 +323,18 @@ def main():
         - .30 * np.minimum(collateral_coverage - 1.0, 1.0)
         + .20 * (industry == "Construction")
         + .18 * (industry == "Hospitality")
+        # Qualitative underwriting information is deliberately independent of
+        # the quantitative features. Coefficients are fixed synthetic assumptions,
+        # not tuned to the holdout or to a target AUC.
+        - .12 * (management_quality - 3)
+        - .10 * (governance_quality - 3)
+        - .08 * (financial_reporting_quality - 3)
+        - .08 * (market_position - 3)
+        - .08 * (sponsor_support - 3)
+        + .35 * (customer_concentration - .30)
+        + .20 * (supplier_concentration - .25)
+        + .18 * key_person_dependency
+        - .07 * (audit_quality - 2)
     )
     intercept = calibrate_intercept(lp, TARGET_DEFAULT_RATE)
     pd_true = np.clip(sigmoid(lp + intercept), .001, .65)
@@ -300,11 +349,28 @@ def main():
         (days_past_due >= 90) | (rng_credit.random(n) < severe_distress_prob)
     ).astype(int)
 
+    # Write-off is a distinct reporting-date resolution status, not merely a
+    # high-DPD bucket. This allows internal Rating 10 to represent write-off cases.
+    write_off_probability = np.where(days_past_due >= 120, .35, .06)
+    write_off_flag = (
+        (current_credit_impaired == 1)
+        & (rng_credit.random(n) < write_off_probability)
+    ).astype(int)
+
     default = rng_default.binomial(1, pd_true)
 
     df = pd.DataFrame({
         "customer_id": [f"SME{i:05d}" for i in range(1, n + 1)],
         "industry": industry,
+        "management_quality": management_quality,
+        "governance_quality": governance_quality,
+        "financial_reporting_quality": financial_reporting_quality,
+        "market_position": market_position,
+        "sponsor_support": sponsor_support,
+        "customer_concentration": customer_concentration.round(4),
+        "supplier_concentration": supplier_concentration.round(4),
+        "key_person_dependency": key_person_dependency,
+        "audit_quality": audit_quality,
         "annual_revenue": annual_revenue.round(2),
         "ebitda_margin": ebitda_margin.round(4),
         "current_ratio": current_ratio.round(4),
@@ -326,7 +392,11 @@ def main():
         "trade_type": trade_type,
         "trade_ccf": trade_ccf.round(2),
         "trade_ead": trade_ead.round(2),
+        "trade_remaining_months": trade_remaining_months,
         "loan_term_months": loan_term_months,
+        "loan_age_months": loan_age_months,
+        "loan_remaining_months": loan_remaining_months,
+        "ovd_remaining_months": ovd_remaining_months,
         "interest_rate": interest_rate.round(4),
         "debt_to_income": debt_to_income.round(4),
         "credit_utilization": credit_utilization.round(4),
@@ -352,6 +422,7 @@ def main():
         "ead": ead.round(2),
         "lgd": lgd.round(4),
         "current_credit_impaired": current_credit_impaired,
+        "write_off_flag": write_off_flag,
         "default": default,
         "pd_true": pd_true.round(6),
     })
