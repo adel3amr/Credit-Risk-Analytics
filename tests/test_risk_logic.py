@@ -71,3 +71,35 @@ def test_null_pd_is_rejected_for_rating():
     })
     with pytest.raises(ValueError):
         add_risk_rating(df)
+
+
+def test_stage2_defaults_to_rating7_without_forcing_stage():
+    df = pd.DataFrame({
+        "predicted_pd": [0.03, 0.03],
+        "stage": ["Stage 2", "Stage 1"],
+        "days_past_due": [0, 0],
+        "write_off_flag": [0, 0],
+        "ews_monitoring_flag": [0, 0],
+        "risk_direction": ["Stable", "Stable"],
+        "collateral_type": ["Unsecured", "Unsecured"],
+        "recognized_collateral_coverage": [0.0, 0.0],
+    })
+    out = add_risk_rating(df)
+    assert out.loc[0, "risk_rating"] == 7
+    assert out.loc[1, "risk_rating"] != 7
+
+
+def test_rating10_requires_explicit_writeoff():
+    df = pd.DataFrame({
+        "predicted_pd": [0.20, 0.20],
+        "stage": ["Stage 3", "Stage 3"],
+        "days_past_due": [120, 120],
+        "write_off_flag": [0, 1],
+        "ews_monitoring_flag": [0, 0],
+        "risk_direction": ["Deteriorating", "Deteriorating"],
+        "collateral_type": ["Unsecured", "Unsecured"],
+        "recognized_collateral_coverage": [0.0, 0.0],
+    })
+    out = add_risk_rating(df)
+    assert out.loc[0, "risk_rating"] == 9
+    assert out.loc[1, "risk_rating"] == 10
