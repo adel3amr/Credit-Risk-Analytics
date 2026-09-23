@@ -46,6 +46,8 @@ jobs:
         run: python -m pytest -q
       - name: Run original pipeline
         run: python notebooks/credit_risk_pipeline.py
+      - name: Run LGD governance diagnostics
+        run: python notebooks/lgd_governance_diagnostics.py
       - name: Audit accounting identities
         run: |
           python - <<'PY'
@@ -111,6 +113,12 @@ jobs:
             outputs/lgd_model_validation.csv
             outputs/lgd_calibration_deciles.csv
             outputs/lgd_holdout_predictions.csv
+            outputs/lgd_permutation_importance.csv
+            outputs/cash_lgd_deep_dive.csv
+            outputs/lgd_industry_comparison.csv
+            outputs/ecl_methodology_bridge.csv
+            outputs/ecl_methodology_bridge_by_stage.csv
+            outputs/portfolio_peer_metrics.csv
             outputs/facility_lgd_predictions.csv
             outputs/stage2_trigger_audit.csv
             outputs/portfolio_monitoring.csv
