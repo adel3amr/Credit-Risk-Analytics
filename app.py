@@ -30,9 +30,17 @@ def compact_money(v):
         return f"€{value / 1_000_000:.2f}m"
     return format_money(value)
 
-user = st.sidebar.text_input("User", value="demo.user")
-role = st.sidebar.selectbox("Role", ["Credit Analyst","Risk Manager","Model Validation","Auditor","Admin"])
-st.sidebar.info("Portfolio demo RBAC — not production authentication.")
+DEMO_IDENTITIES = {
+    "analyst.demo": "Credit Analyst",
+    "risk.manager.demo": "Risk Manager",
+    "validator.demo": "Model Validation",
+    "auditor.demo": "Auditor",
+    "admin.demo": "Admin",
+}
+user = st.sidebar.selectbox("Demo identity", list(DEMO_IDENTITIES))
+role = DEMO_IDENTITIES[user]
+st.sidebar.caption(f"Role: {role}")
+st.sidebar.info("Demo RBAC with fixed identities — not production authentication.")
 
 if not AUDIT.exists():
     st.error("Run the credit-risk pipeline first to generate borrower_audit_trace.csv.")
