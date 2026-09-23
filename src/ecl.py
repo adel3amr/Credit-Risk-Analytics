@@ -173,5 +173,4 @@ def calculate_ecl(df, pd_col="predicted_pd", lgd_col="lgd", ead_col="ead"):
     out.loc[s3, "ecl"] = np.maximum(
         ead - out["stage3_discounted_collateral_recovery"], 0.0
     )[s3]
-    out["lifetime_ecl"] = out["ecl"]
     return out
