@@ -34,11 +34,8 @@ models={
     "Gradient Boosting":gradient_boosting_lgd_model(),
     "Huber Gradient Boosting":huber_gradient_boosting_lgd_challenger(),
     "Random Forest":random_forest_lgd_challenger(),
-    "Hist Gradient Boosting":hist_gradient_lgd_challenger(),
-    "Ridge":ridge_lgd_challenger(),
-    "Huber Gradient Boosting":huber_gradient_boosting_lgd_challenger(),
-    "Random Forest":random_forest_lgd_challenger(),
     "Histogram Gradient Boosting":hist_gradient_lgd_challenger(),
+    "Ridge":ridge_lgd_challenger(),
 }
 rows=[]
 preds={}
@@ -78,7 +75,8 @@ tail_challenger=pd.DataFrame(tail_compare)
 tail_challenger.to_csv(OUT/"lgd_challenger_tail_comparison.csv",index=False)
 print("\nLGD CHALLENGER TAIL COMPARISON\n",tail_challenger.round(4).to_string(index=False))
 
-# Governance decision remains fixed ex ante: the original Gradient Boosting model is the governed champion.\n# Additional models are diagnostic challengers only; the untouched holdout is not used to tune or silently replace the champion.
+# Governance decision remains fixed ex ante: the original Gradient Boosting model is the governed champion.
+# Additional models are diagnostic challengers only; the untouched holdout is not used to tune or silently replace the champion.
 champion_name="Gradient Boosting"
 champion=models[champion_name]
 champion_pred=preds[champion_name]
