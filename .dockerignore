@@ -1,0 +1,12 @@
+.git
+__pycache__
+.pytest_cache
+.env
+.env.*
+*.db
+*.db-*
+models
+outputs
+data/raw
+data/processed
+platform_evidence/worked_cases.json

@@ -10,3 +10,12 @@ __pycache__/
 
 # Generated/deployed model binaries
 models/*.joblib
+
+# Local platform state and credentials
+models/platform/
+*.db
+*.db-*
+.env
+.env.*
+!.env.example
+platform-data/

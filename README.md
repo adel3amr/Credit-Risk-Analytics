@@ -1,3 +1,23 @@
+# Credit Risk Analytics, Decisioning & Model-Risk Platform
+
+**Production-oriented reference implementation on transparent synthetic credit data. Institutional production use remains BLOCKED.**
+
+This branch adds a governed platform foundation to the preserved V5/research system: canonical dated data, PostgreSQL-compatible persistence, traceable reference runs, authenticated API, backend permissions, validation, findings, controlled overrides and an audit trail.
+
+- [Reproduce and run](REPRODUCIBILITY.md)
+- [Executive architecture summary](EXECUTIVE_ARCHITECTURE_SUMMARY.md)
+- [Authoritative baseline](AUTHORITATIVE_BASELINE_RECONCILIATION.md)
+- [Independent validation report](FINAL_INDEPENDENT_VALIDATION_REPORT.md)
+- [Production-readiness matrix](FINAL_PRODUCTION_READINESS.md)
+- [Architecture](TARGET_ARCHITECTURE.md) · [Database](DATABASE_SCHEMA.md) · [API](API_DOCUMENTATION.md)
+- [Feature contracts](MODEL_FEATURE_CONTRACTS.md) · [Model inventory](MODEL_INVENTORY.md) · [Limitations](LIMITATIONS.md)
+
+87 tests pass locally. Full shadow scoring covers 5,172 facilities. New PostgreSQL/container execution and browser qualification remain unverified. LGD research improves aggregate error but does not close severe-loss/feature-availability gates. No challenger was promoted.
+
+## Historical V5 release documentation
+
+The retained release documentation below describes the earlier demonstration release, not approval of the new platform for bank use.
+
 # Credit Risk Analytics & IFRS 9 Decisioning System — V5
 
 > **Isolated LGD research branch:** [From Aggregate Calibration to Tail Risk](lgd_research/FROM_AGGREGATE_CALIBRATION_TO_TAIL_RISK.md) evaluates new synthetic data, prediction-time information, baselines, two-stage/component challengers, ablations, stress and a precommitted final holdout. The [executive research decision](lgd_research/EXECUTIVE_RESEARCH_SUMMARY.md) retains published V5 (`0dfe4c8`) as the benchmark and blocks live-bank use. These experimental models are **not** the governed V5 model.

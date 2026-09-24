@@ -1,0 +1,52 @@
+# Reproduce the platform
+
+Python 3.12. Start from branch `platform/production-foundation`. Historical branches remain unchanged.
+
+## Local reference (SQLite)
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+pip install -r requirements-platform-lock.txt
+python scripts/run_v5.py
+python -m credit_platform.cli build-models
+python -m alembic upgrade head
+python -m credit_platform.cli seed-governance
+python -m credit_platform.cli issue-token --name analyst --role analyst
+python -m credit_platform.cli issue-token --name validator --role validator
+python -m credit_platform.cli issue-token --name auditor --role audit
+python -m credit_platform.cli export-reference --output /tmp/reference.json
+python -m credit_platform.cli run-reference --operator analyst
+python scripts/platform_shadow.py
+python scripts/platform_verify_frozen.py
+python -m pytest -q
+python -m credit_platform.cli audit-verify
+python -m uvicorn credit_platform.api:app --host 127.0.0.1 --port 8000 --no-access-log --log-config deployment/logging.json
+```
+
+Copy the one-time displayed credential privately into the UI at `http://127.0.0.1:8000`. It is never stored cleartext by the application. Do not commit or include credentials in shared reports. On Windows use the corresponding virtualenv activation and temporary path. UI dataset upload accepts canonical JSON produced above. Use a validator credential for reconciliation. Owner/administrator is not automatically authorized to run or approve credit actions.
+
+`build-models` verifies frozen raw hashes and persists trusted reference models. It does not tune/select models. `platform_shadow.py` compares all 5,172 facility decisions with original V5; independent EAD rounding discrepancy up to one cent is reported explicitly. `platform_contracts.py` refreshes measured feature support and contract docs from frozen outputs. Existing research reproduction remains in `lgd_research/REPRODUCIBILITY.md`; never regenerate frozen research data to improve scores.
+
+## PostgreSQL reference composition
+
+Generate separate random hex passwords and set POSTGRES_PASSWORD and APP_DB_PASSWORD in a local ignored `.env`. Do not use example placeholders. Then:
+
+```bash
+docker compose up --build -d
+```
+
+`prepare` reproduces frozen reference artifacts; `migrate` creates schema and grants; API starts after both complete. PostgreSQL has no published host port. API is loopback only. Provision credentials through the migration-owner environment:
+
+```bash
+docker compose run --rm migrate python -m credit_platform.cli issue-token --name analyst --role analyst
+docker compose run --rm migrate python -m credit_platform.cli seed-governance
+```
+
+Export canonical reference JSON from the prepared environment or use `docker compose run --rm api python -m credit_platform.cli export-reference --output /tmp/reference.json` with an explicit bind mount for export; a removed container's `/tmp` is not a persistent deliverable. The recommended local export command above is simpler. The API database role cannot create credentials, delete evidence or run DDL.
+
+PostgreSQL/container commands are provided for reproducibility but were not executable in this workspace. Hosted CI includes PostgreSQL 16 migrations and shadow calculation. Treat its result as unverified until run; do not equate SQLite success with PostgreSQL success.
+
+## Gates
+
+`python scripts/assess_bank_readiness.py --purpose bank` and `python -m lgd_research.research_gate` return 2. API bank-purpose run status is BLOCKED. No command-line or API approval flag waives this.

@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: creditrisk
+      POSTGRES_USER: platform_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set owner password}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Set separate API database password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deployment/init-role.sh:/docker-entrypoint-initdb.d/10-role.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U platform_owner -d creditrisk']
+      interval: 5s
+      retries: 20
+  migrate:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://platform_owner:${POSTGRES_PASSWORD}@db/creditrisk
+    command: [sh, -c, 'python -m alembic upgrade head && python -m credit_platform.deploy_grants']
+    depends_on:
+      db: {condition: service_healthy}
+  prepare:
+    build: .
+    command: [sh, -c, 'python scripts/run_v5.py && python -m credit_platform.cli build-models']
+    volumes:
+      - models:/app/models
+      - data:/app/data
+      - outputs:/app/outputs
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://platform_app:${APP_DB_PASSWORD}@db/creditrisk
+    ports: ['127.0.0.1:8000:8000']
+    volumes:
+      - models:/app/models:ro
+      - data:/app/data:ro
+      - outputs:/app/outputs:ro
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      prepare: {condition: service_completed_successfully}
+volumes:
+  pgdata:
+  models:
+  data:
+  outputs:

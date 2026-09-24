@@ -1,0 +1,48 @@
+name: Platform reference validation
+on:
+  push:
+    branches: ['platform/**']
+  pull_request:
+    paths: ['credit_platform/**', 'migrations/**', 'tests/platform/**', 'requirements-platform.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
+permissions:
+  contents: read
+jobs:
+  platform:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: creditrisk_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ephemeral-ci-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements-platform-lock.txt
+      - run: python scripts/run_v5.py
+      - run: python -m credit_platform.cli build-models
+      - run: python scripts/platform_verify_frozen.py
+      - run: python -m pytest -q
+      - name: PostgreSQL migrations and full shadow calculation
+        env:
+          DATABASE_URL: postgresql+psycopg://postgres:ephemeral-ci-only@localhost:5432/creditrisk_test
+        run: |
+          python -m alembic upgrade head
+          python scripts/platform_shadow.py
+          python -m credit_platform.cli audit-verify
+      - name: Compile modules
+        run: python -m compileall -q credit_platform
+      - name: Container build
+        run: docker build -t credit-risk-reference .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: platform-reference-evidence
+          path: |
+            platform_evidence/shadow_execution.json
+            platform_evidence/worked_cases.json
+            outputs/v5_release_checks.csv

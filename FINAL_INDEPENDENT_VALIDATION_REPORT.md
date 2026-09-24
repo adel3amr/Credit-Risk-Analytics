@@ -1,0 +1,29 @@
+# Final platform validation report
+
+24 September 2026. Scope: whole-project reference platform on `platform/production-foundation`, rooted in newest research `ae9942a`. Independent here means source-independent recalculation and adverse tests; no external validator sign-off is claimed.
+
+## Verified baseline and history
+
+Frozen V5 remains `0dfe4c8`; PR25 is open/unmerged. Its hosted interface/risk workflows succeeded (35879967200 / 35879966965). No hosted research or platform success is asserted. Full historical source reconstruction remains in validation_review. The new baseline commit d50d6f8 records reconciliation before platform implementation. Original local R2 training truncation is preserved outside this clean worktree; all five frozen source/R2 hashes verified in platform_evidence/frozen_hash_verification.json.
+
+## Model evidence
+
+PD validation independently reproduced AUC .759455473, Gini .518910946, KS .408496732, Brier .030002535 and LogLoss .128562115 across 3,000 held-out borrowers, 102 defaults. V5 H LGD: 2,000 holdout, MAE .113964529, RMSE .165798487, bias −.003051719; realized >75%: 327 observations, bias −.155927834. No challenger was promoted.
+
+Newest R2 final common predictions were independently recalculated: 3,000 facilities, 536 >75%; V5 RMSE .176503254 and severe bias −.127421287; two-stage RMSE .156922972 and severe bias −.120482483. The previously completed uncertainty, ablation, oracle and stress findings remain authoritative research evidence, with the distinction between recalculated metrics and previously archived experiments explicit in the reconciliation document.
+
+## Software and calculations
+
+87 unit/regression/integration tests pass: 54 existing and 33 platform tests. Existing Streamlit all five role views, three filter modes, search and drill-down pass. New API actual Uvicorn startup, readiness HTTP 200 and static/OpenAPI routes were exercised; see http_startup.json. New visual/browser interaction testing is incomplete because Chromium archive download failed. No claim of browser sign-off is made.
+
+Full shadow: 5,172 facilities; maximum PD difference 9.97e-17, maximum LGD difference 9.71e-17, zero stage mismatches. New reference EAD 2,091,914,075.83000, ECL 45,265,972.04321. Maximum facility EAD difference 0.01000, ECL difference 0.00256855. Historical generated face/EAD amounts were rounded independently; new canonical trade conversion cannot reconstruct discarded precision. The maximum one-cent EAD tolerance is tied to source precision, not a weak model acceptance threshold. Original portfolio EAD remains 2,091,914,076.05 and ECL 45,265,972.05000534.
+
+Canonical DQ rejects missing/future/outcome/duplicate/orphan/invalid values. API denies unauthenticated and forbidden-role access. Expired/revoked keys are rejected. Different-person override approval is enforced; original ECL is retained. Model corruption/configuration failure produces a failed run. Evidence mutation and terminal-run rewrite fail in SQLite integration tests. Audit verification and SQLite backup/restore tests pass. Point-in-time history, Stage2→Stage1 policy transition and ordered ECL movement reconciliation pass.
+
+## Controls and remaining verification
+
+Dependency audit reported no known vulnerabilities for 65 resolved packages at scan time, archived with versions; no security certification follows. Python static undefined/unused-name checks and JavaScript syntax checks pass. PostgreSQL schema compiles; actual PostgreSQL/container execution remains unverified in this environment. Restricted DB grants, triggers, Docker and hosted PostgreSQL CI are implemented but need actual deployment evidence. New models cannot be promoted and bank-purpose runs remain BLOCKED.
+
+## Decision
+
+The work delivers an implemented, locally tested **reference-platform foundation**, extending the whole project beyond notebooks and flat files. It is not institution-production-complete. Model, feature, institutional-data, PostgreSQL/browser/deployment and security-qualification findings remain open in FINAL_PRODUCTION_READINESS.md and LIMITATIONS.md. No severe LGD cure, external approval, bank-grade certification or real deployment is claimed.
