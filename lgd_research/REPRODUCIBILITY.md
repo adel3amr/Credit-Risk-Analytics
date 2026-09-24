@@ -1,0 +1,12 @@
+# Reproduce the isolated LGD research programme
+
+Use Python 3.12 and `pip install -r requirements-v5.txt` from the repository root. The original frozen V5 source is commit `0dfe4c8`; this research lives on `research/lgd-tail-programme`. Source/archive evidence is under `validation_review/` and the original raw workout SHA is verified by `audit_data.py`.
+
+1. `python scripts/run_v5.py` reproduces the unchanged V5 synthetic portfolio, model and original holdout.
+2. `python lgd_research/generate_r2.py --n 9000 --seed 20261101 --vintage r2_dev --output lgd_research/data/r2_development.csv` generates research development. The same command with `--n 3000 --seed 20261102 --vintage r2_selection --output lgd_research/data/r2_selection.csv` generates selection. Seed 20261103, vintage `r2_final`, output `lgd_research/data/r2_final_holdout.csv` generates the predeclared final sample. Seed 20261104, vintage `r2_stress`, `--stress combined`, output `lgd_research/data/r2_stress_combined.csv` generates the archived combined stress. Hashes must match `results/dataset_hashes.csv` before comparison.
+3. `python lgd_research/audit_data.py` checks feature support, cash flows, IDs and hashes. `python -m pytest -q` runs the original suite plus new generator tests.
+4. `python -m lgd_research.run_study` runs selection, 2×2, ablation, oracle, quantile and stress work without reading the final holdout. Save the `FINAL_EVALUATION_LOCK.md` *before* running the next command in a new study; this repository already contains the original precommitted lock.
+5. `python -m lgd_research.final_evaluation` verifies the final SHA, applies fixed candidates, writes common final scorecards and a paired bootstrap. It can be rerun to reproduce the **same predeclared evaluation**, never to change candidates or seeds. `python lgd_research/figures.py` regenerates 18 charts, and `python lgd_research/make_paper.py` regenerates the study.
+6. `python scripts/assess_bank_readiness.py --purpose bank` and `python -m lgd_research.research_gate` each return exit code 2. Research scores do not lift either gate.
+
+The model-selection file `results/development_scorecard.csv`, independent final `results/final_scorecard.csv`, common prediction files, source assumptions and 18 plots are committed under this branch. No H/R2 comparison is an actual bank validation. The high-loss cohorts use outcome-selected labels and must always be described as retrospective.

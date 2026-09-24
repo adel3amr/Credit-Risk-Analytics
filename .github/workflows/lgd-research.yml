@@ -1,0 +1,47 @@
+name: Isolated LGD research reproducibility
+on:
+  push:
+    branches: [research/lgd-tail-programme]
+  pull_request:
+    paths: ["lgd_research/**", ".github/workflows/lgd-research.yml"]
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned project dependencies
+        run: pip install -r requirements-v5.txt
+      - name: Rebuild frozen V5 without modifying its source
+        run: python scripts/run_v5.py
+      - name: Check research dataset identity, recovery math and generator tests
+        run: |
+          python lgd_research/audit_data.py
+          python -m pytest -q
+          git diff --exit-code -- data/raw/lgd_workout_history.csv
+      - name: Rerun fixed research selection and precommitted holdout
+        run: |
+          python -m lgd_research.run_study
+          python -m lgd_research.final_evaluation
+          python lgd_research/figures.py
+          python lgd_research/make_paper.py
+      - name: Bank gate must remain blocked
+        run: |
+          set +e
+          python scripts/assess_bank_readiness.py --purpose bank
+          code=$?
+          python -m lgd_research.research_gate
+          research_code=$?
+          set -e
+          test "$code" -eq 2
+          test "$research_code" -eq 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lgd-research-scorecards
+          path: |
+            lgd_research/results/*.csv
+            lgd_research/results/final_holdout_evaluated.json
+            lgd_research/FROM_AGGREGATE_CALIBRATION_TO_TAIL_RISK.md
