@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/dccfe612c897/credit-risk-platform/scripts/platform_http_smoke.py", line 50, in <module>
+    raise RuntimeError("Readiness timeout")
+RuntimeError: Readiness timeout

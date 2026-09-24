@@ -6,21 +6,33 @@
     "match": true
   },
   {
+    "file": "data/raw/sme_behavioral_history_36m.csv",
+    "expected": "38be57d2027ef2fcd3210d6243cf21e45d8f87be7abe998736cd402fcab3cfcc",
+    "actual": "38be57d2027ef2fcd3210d6243cf21e45d8f87be7abe998736cd402fcab3cfcc",
+    "match": true
+  },
+  {
+    "file": "data/raw/sme_credit_portfolio.csv",
+    "expected": "2312db398a92c242abec665af6e1e7535b18e47349cfaf0cdf48e8ed3f83c8cd",
+    "actual": "2312db398a92c242abec665af6e1e7535b18e47349cfaf0cdf48e8ed3f83c8cd",
+    "match": true
+  },
+  {
     "file": "lgd_research/data/r2_development.csv",
     "expected": "b19f397ac75e39687efe5b35d940f6381597fc6800a037b6974b720383bd0216",
     "actual": "b19f397ac75e39687efe5b35d940f6381597fc6800a037b6974b720383bd0216",
     "match": true
   },
   {
-    "file": "lgd_research/data/r2_selection.csv",
-    "expected": "422b5c75d600675c0f498f6610d69fb8700650b92e006f7cfbc46d635991f652",
-    "actual": "422b5c75d600675c0f498f6610d69fb8700650b92e006f7cfbc46d635991f652",
-    "match": true
-  },
-  {
     "file": "lgd_research/data/r2_final_holdout.csv",
     "expected": "093a0686316812d0cbf267c42b2a6551d6de6ba21a86529f0ba61f3e1fc2fc59",
     "actual": "093a0686316812d0cbf267c42b2a6551d6de6ba21a86529f0ba61f3e1fc2fc59",
+    "match": true
+  },
+  {
+    "file": "lgd_research/data/r2_selection.csv",
+    "expected": "422b5c75d600675c0f498f6610d69fb8700650b92e006f7cfbc46d635991f652",
+    "actual": "422b5c75d600675c0f498f6610d69fb8700650b92e006f7cfbc46d635991f652",
     "match": true
   },
   {

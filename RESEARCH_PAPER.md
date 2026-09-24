@@ -94,7 +94,7 @@ TLS, SSO/MFA, perimeter controls, institutional secrets management and independe
 
 ## 14. Software validation and reproducibility
 
-The local suite passes 87 tests: 54 existing and 33 added platform cases. Tests cover data admission, authorization, credential lifecycle, immutable records, separate approvals, failed models/configuration/database, zero/subunit/extreme exposure, point-in-time history, movements and SQLite backup restoration. The legacy dashboard passed five role views, three filter modes, search and drill-down.
+The local suite passes 93 tests: 54 existing and 39 added platform cases. Tests cover data admission, authorization, credential lifecycle, immutable records, separate approvals, failed models/configuration/database, zero/subunit/extreme exposure, point-in-time history, movements and SQLite backup restoration. The legacy dashboard passed five role views, three filter modes, search and drill-down.
 
 The full shadow comparison covers 5,172 facilities with numerically identical PD/LGD and no stage mismatches. ECL differences are bounded by the disclosed cent-level source precision. Actual Uvicorn startup and HTTP readiness/assets were exercised. A resolved dependency scan reported no known vulnerabilities at scan time; that is not a security guarantee.
 

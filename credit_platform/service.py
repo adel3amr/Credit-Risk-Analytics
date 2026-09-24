@@ -129,8 +129,8 @@ def dataset(conn, id):
         "name": d["name"],
         "effective_date": d["effective_date"],
         "source": d["source"],
-        "borrowers": bs,
-        "facilities": fs,
+        "borrowers": sorted(bs, key=lambda row: row["id"]),
+        "facilities": sorted(fs, key=lambda row: row["id"]),
     }
     if digest(payload) != d["hash"]:
         raise ValueError("Stored dataset hash mismatch")
@@ -302,20 +302,17 @@ def execute(db, request, actor):
 
 
 def traces(conn, run_id):
-    one(conn, s.runs, run_id)
-    rows = (
-        conn.execute(
-            select(s.decisions)
-            .where(s.decisions.c.run_id == run_id)
-            .order_by(s.decisions.c.facility_id)
-        )
-        .mappings()
-        .all()
-    )
+    run = one(conn, s.runs, run_id)
+    if run["status"] != "SUCCEEDED":
+        raise Conflict("A successful run is required for validated results")
+    rows = conn.execute(select(s.decisions).where(s.decisions.c.run_id == run_id)).mappings().all()
     for row in rows:
         if digest(row["trace"]) != row["hash"]:
             raise ValueError("Decision hash mismatch")
-    return [row["trace"] for row in rows]
+    result = sorted((row["trace"] for row in rows), key=lambda t: t["facility_id"])
+    if digest(result) != run["output_hash"]:
+        raise ValueError("Run output hash mismatch")
+    return result
 
 
 def propose(db, payload, actor):

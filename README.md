@@ -12,7 +12,7 @@ This branch adds a governed platform foundation to the preserved V5/research sys
 - [Architecture](TARGET_ARCHITECTURE.md) · [Database](DATABASE_SCHEMA.md) · [API](API_DOCUMENTATION.md)
 - [Feature contracts](MODEL_FEATURE_CONTRACTS.md) · [Model inventory](MODEL_INVENTORY.md) · [Limitations](LIMITATIONS.md)
 
-87 tests pass locally. Full shadow scoring covers 5,172 facilities. New PostgreSQL/container execution and browser qualification remain unverified. LGD research improves aggregate error but does not close severe-loss/feature-availability gates. No challenger was promoted.
+93 tests pass locally. Full shadow scoring covers 5,172 facilities. New PostgreSQL/container execution and browser qualification remain unverified. LGD research improves aggregate error but does not close severe-loss/feature-availability gates. No challenger was promoted.
 
 ## Historical V5 release documentation
 

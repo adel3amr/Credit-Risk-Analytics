@@ -9,5 +9,5 @@
 | Role enforcement and audit | security.py/audit.py | Auth/RBAC/expiry/revocation/chain tests | P03 remediated; P09 open |
 | Overrides | Separate original/proposal/approval | Same-person/duplicate/role rejection tests | Controlled reference only |
 | Validation and monitoring | Independent validation.py | ECL/outcome/movement/tail-denominator tests | Synthetic-only limitation |
-| Reproducibility | pinned lock + scripts/run_v5.py + platform_shadow.py | 87 tests; HTTP startup; legacy AppTest | PostgreSQL/browser pending |
+| Reproducibility | pinned lock + scripts/run_v5.py + platform_shadow.py | 93 tests; HTTP startup; legacy AppTest | PostgreSQL/browser pending |
 | Deployment | compose, Dockerfile, platform workflow | Source/config inspection; no actual hosted platform success | P07–P09 open |

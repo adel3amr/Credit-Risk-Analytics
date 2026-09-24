@@ -4,7 +4,7 @@ The project now has an additive reference-platform implementation on `platform/p
 
 Implemented: dated canonical borrower/facility snapshots, data-quality checks and feature contracts; PostgreSQL-compatible schema/migrations; governed model loading; source/model/policy/run hashes; PD→EWS/staging→LGD→EAD→ECL decision traces; portfolio concentrations and movements; registry/findings/validation; controlled overrides; audit chain; authenticated API and workflow UI; operational health/logging; container and CI configuration.
 
-Validation: 87 passing tests, successful legacy dashboard checks, actual API HTTP startup, a 5,172-facility shadow run with identical stages and numerically identical PD/LGD, independently reconciled ECL, and a disclosed one-cent EAD source-rounding bound. A dependency scan found no known vulnerabilities at scan time.
+Validation: 93 passing tests, successful legacy dashboard checks, actual API HTTP startup, a 5,172-facility shadow run with identical stages and numerically identical PD/LGD, independently reconciled ECL, and a disclosed one-cent EAD source-rounding bound. A dependency scan found no known vulnerabilities at scan time.
 
 LGD remains unresolved for institutional use. R2 two-stage RMSE improves to 15.69 percentage points, but realized >75% bias remains −12.05 points over 536 cases and required quality inputs are unavailable. The registry and API retain blocked production status.
 

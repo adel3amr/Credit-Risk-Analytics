@@ -468,3 +468,18 @@ def test_zero_and_total_loss_arithmetic():
                     }
                 )
     assert validation.reconcile(traces)["maximum_ecl_error"] == 0
+
+
+@pytest.mark.parametrize('field,value', [('stage','Stage 4'),('pd',float('nan')),('lgd',float('inf')),('ead',-1),('remaining_months',-1)])
+def test_independent_reconciliation_fails_closed(field,value):
+    trace={'stage':'Stage 1','pd':.1,'lgd':.5,'ead':100,'ecl':5,'remaining_months':12}
+    trace[field]=value
+    with pytest.raises(ValueError):validation.reconcile([trace])
+
+
+def test_blocked_run_cannot_receive_successful_validation(clients):
+    c,h=clients
+    run=create_run(c,h,key='blocked-validation',purpose='bank').json()
+    response=c.post(f'/api/v1/runs/{run["id"]}/validation',headers=h['validator'])
+    assert response.status_code==409
+    assert c.get('/api/v1/validation',headers=h['audit']).json()==[]

@@ -1,0 +1,6 @@
+Saved 12,000 borrowers to /workspace/scratch/dccfe612c897/credit-risk-platform/data/raw/sme_credit_portfolio.csv
+Saved 432,000 monthly observations to /workspace/scratch/dccfe612c897/credit-risk-platform/data/raw/sme_behavioral_history_36m.csv
+Observed default rate: 3.3917%
+Mean latent PD: 3.4952%
+Mean LGD: 33.5816%
+Total EAD: 8,588,945,534

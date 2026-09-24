@@ -17,3 +17,9 @@
 | METHODOLOGY | None promoted or changed | Frozen methodology and historical outputs preserved |
 
 The new field contract rejects missing canonical scoring inputs instead of relying on notebook imputation/fill defaults. This is an explicit data-admission control, not a model refit or method change. Historical notebook behavior remains reproducible.
+
+## Continued validation hardening
+
+BUG FIX / VALIDATION: independent reconciliation now rejects invalid stages, non-finite and out-of-range values; only successful runs may be validated. Full output hashes are verified, with canonical Python ordering independent of SQL collation. Six additional adverse cases bring the suite to 93 passing tests.
+
+VALIDATION / DATA: frozen hash gate now includes borrower and conduct inputs. Resume exposed a malformed development database and truncated borrower CSV/figure; damaged copies were preserved, exact source data reproduced by frozen seed, and a new migrated database successfully replayed the full portfolio. No model or generator relationship was changed.

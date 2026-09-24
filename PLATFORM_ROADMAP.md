@@ -10,3 +10,7 @@ This programme implements reference deployment capability; it does not grant ban
 | Institution qualification | Real source mapping, capture of security/guarantor quality, approved policies, time-split bank validation, TLS/SSO, independent security review | Institution data, infrastructure and governance | Data/model/feature/security/operational gates supported by institution evidence | Remains BLOCKED; cannot be satisfied by generated evidence |
 
 No automatic model promotion, unvalidated macro calibration, forced LGD winner, distributed queues or microservices. Longitudinal support first stores independently dated canonical snapshots and transition history; economic generator expansion requires a separate justified hypothesis. Existing longitudinal conduct and recovery generators remain reference sources.
+
+## Implementation status after local validation
+
+Foundation 0.1 and Service 0.2 have implemented reference code, with 93 tests passing. Reference deployment 0.3 has configuration, actual local HTTP startup and shadow evidence; hosted PostgreSQL/container and real-browser qualification remain open. Institution qualification is BLOCKED. This status supersedes any implication that the entire roadmap is complete.

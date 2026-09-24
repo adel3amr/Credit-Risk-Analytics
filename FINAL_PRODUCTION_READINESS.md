@@ -4,7 +4,7 @@ No arbitrary score is assigned. Reference software evidence and institutional pr
 
 | Domain | Status | Evidence | Open findings | Residual risk | Production gate |
 |---|---|---|---|---|---|
-| Data | Reference validated | Canonical DQ, source hashes, 87 tests | No institution feed; local research truncation isolated | Synthetic support only | BLOCKED for institution |
+| Data | Reference validated | Canonical DQ, source hashes, 93 tests | No institution feed; local research truncation isolated | Synthetic support only | BLOCKED for institution |
 | PD | Reference validated | Independent holdout metrics; shadow agreement | No bank calibration or observed vintages | Population transfer | BLOCKED for institution |
 | SICR | Policy fidelity tested | Independent source conditions; boundary tests | Synthetic policy, no institution origination comparison | Policy suitability | REFERENCE ONLY |
 | Staging | Policy fidelity tested | Zero shadow mismatches; precedence/cure tests | Institution policy approval absent | Approximation scope | REFERENCE ONLY |

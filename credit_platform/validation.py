@@ -7,6 +7,14 @@ from collections import Counter
 def reconcile(traces):
     maximum = 0.0
     for t in traces:
+        if t["stage"] not in ("Stage 1", "Stage 2", "Stage 3"):
+            raise ValueError("Invalid stage in independent reconciliation")
+        for field in ("pd", "lgd", "ead", "ecl", "remaining_months"):
+            value = t[field]
+            if not isinstance(value, (int, float)) or not math.isfinite(value):
+                raise ValueError("Nonfinite or nonnumeric reconciliation input")
+            if value < 0 or (field in ("pd", "lgd") and value > 1):
+                raise ValueError("Reconciliation input outside permitted range")
         effective = (
             1
             if t["stage"] == "Stage 3"

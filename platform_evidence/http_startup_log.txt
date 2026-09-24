@@ -1,0 +1,1 @@
+{'status_code': 200, 'body': {'status': 'READY', 'bank_gate': 'BLOCKED'}, 'actual_socket_http': True}

@@ -16,3 +16,11 @@ Older and closed findings are preserved in validation_review/FINDINGS_REGISTER.c
 | P10 | Simulation/product / Moderate | No full longitudinal financial/default/workout simulator or external macro feed | Preserve existing conduct/recovery simulators; dated snapshots/movements implemented | OPEN; new assumptions need evidence/governed version |
 
 Classification: P01 DATA/VALIDATION; P02 MODEL RISK; P03 SECURITY; P04 DATA ARCHITECTURE/GOVERNANCE; P05 BUG FIX; P06 MODEL IMPLEMENTATION; P07 INFRASTRUCTURE; P08 UI/UX; P09 SECURITY; P10 DATA/RESEARCH. Owner: reference platform maintainer until an institution assigns accountability. No finding was erased to obtain a pass.
+
+## Continued validation findings
+
+| ID | Finding | Correction and evidence | Status |
+|---|---|---|---|
+| P11 | Independent reconciliation accepted invalid stages/non-finite inputs and an empty blocked run could be validated | Strict independent input checks; successful-run prerequisite; six adverse regression cases | CLOSED; 93-test suite passes |
+| P12 | On workspace resume, historical PNG was truncated and development SQLite file was malformed | Preserved damaged evidence; recovered exact Git image; new migrated database and canonical reload | Contained; no claim of production storage reliability |
+| P13 | Whole-run integrity previously relied on row hashes and DB sort order | Full output hash verification; Python canonical ordering independent of DB collation | CLOSED; full shadow replay verifies |
