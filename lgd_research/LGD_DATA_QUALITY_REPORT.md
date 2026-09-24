@@ -1,0 +1,7 @@
+# Data quality and economic recovery checks
+
+`python lgd_research/audit_data.py` recomputes present values independently from dated net cash flows and recorded discount rates and enforces non-null unique facility IDs, strictly positive EAD and bounded LGD. H development 6,000 rows / 980 severe >75% / 1,059 cures; H historical holdout 2,000 / 327 severe / 322 cures. R2 development 9,000 / 1,447 severe / 1,516 cures; R2 selection 3,000 / 491 severe / 520 cures. Full data profile and PV discrepancies are in `results/data_quality.csv`.
+
+R2's maximum independent PV discrepancy per EAD is <1e-15. The historical V5 file rounds cash flows to cents and rates to five decimals, giving a maximum relative PV difference of 1.52e-5; this is a storage precision effect, not a silently adjusted target. R2 recovery components are capped to EAD before cash flow timing and cost deductions; LGD is `clip(1 - PV(net recovery cash flows)/EAD, 0, 1)`. The generator tests independently recalculate this identity and verify a paired combined stress worsens mean realized recoveries.
+
+The four R2 datasets have different seeds and unique vintage-prefixed IDs; hashes and exact byte sizes are recorded in `results/dataset_hashes.csv`. The final dataset is **frozen before model comparisons** and not accessed by `run_study.py`. Observational support is synthetic; no bank collateral appraisal, lien enforceability, guarantor obligation, cure status at decision time or economic time series is represented as verified institution data.

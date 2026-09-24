@@ -1,0 +1,66 @@
+population,feature,n,status,missing,zero_count,mean,minimum,p05,median,p95,maximum,categories
+H development,ead_at_default,6000,present,0.0,0.0,549319.3294650001,20000.0,74467.632,353899.77,1711058.7820000001,8000000.0,
+H development,collateral_coverage,6000,present,0.0,2103.0,0.62031515,0.0,0.0,0.6632,1.5708400000000002,2.0,
+H development,guarantee_coverage,6000,present,0.0,1.0,0.18288021666666668,0.0,0.0061,0.0994,0.6204350000000001,0.9493,
+H development,leverage_at_default,6000,present,0.0,0.0,3.1638866999999995,0.3485,1.293985,2.81745,6.286270000000001,9.0,
+H development,current_ratio_at_default,6000,present,0.0,0.0,1.1379272333333332,0.2535,0.540095,1.0508,2.04334,3.5,
+H development,management_quality,6000,present,0.0,0.0,3.0008333333333335,1.0,1.0,3.0,5.0,5.0,
+H development,product_type,6000,present,0.0,0.0,,,,,,,Term Loan: 2546; OVD: 1496; Performance Guarantee: 788; Import LC: 684; Financial Guarantee: 486
+H development,industry,6000,present,0.0,0.0,,,,,,,Services: 1464; Retail: 1173; Manufacturing: 1051; Construction: 742; Transport: 602; Hospitality: 487; Technology: 481
+H development,collateral_type,6000,present,0.0,0.0,,,,,,,Mortgage: 2112; Unsecured: 2103; Other: 1177; Cash: 608
+H development,lien_rank,6000,present,0.0,0.0,,,,,,,First: 3024; Unsecured: 2103; Second: 873
+H development,security_quality,6000,not recorded,,,,,,,,,
+H development,guarantor_strength,6000,not recorded,,,,,,,,,
+H development,downturn_at_default,6000,not recorded,,,,,,,,,
+H held out (historically viewed),ead_at_default,2000,present,0.0,0.0,558547.90515,20000.0,74716.228,366186.98,1716709.2725,8000000.0,
+H held out (historically viewed),collateral_coverage,2000,present,0.0,716.0,0.61528395,0.0,0.0,0.6487,1.5729099999999998,2.0,
+H held out (historically viewed),guarantee_coverage,2000,present,0.0,0.0,0.18872730000000001,0.0001,0.0072,0.1089,0.6047149999999999,0.9688,
+H held out (historically viewed),leverage_at_default,2000,present,0.0,0.0,3.1036667500000004,0.5936,1.22466,2.7679,6.137384999999998,9.0,
+H held out (historically viewed),current_ratio_at_default,2000,present,0.0,0.0,1.13437965,0.2906,0.5596099999999999,1.0453999999999999,1.9640849999999999,3.5,
+H held out (historically viewed),management_quality,2000,present,0.0,0.0,2.9935,1.0,1.0,3.0,5.0,5.0,
+H held out (historically viewed),product_type,2000,present,0.0,0.0,,,,,,,Term Loan: 820; OVD: 509; Performance Guarantee: 264; Import LC: 249; Financial Guarantee: 158
+H held out (historically viewed),industry,2000,present,0.0,0.0,,,,,,,Services: 510; Retail: 395; Manufacturing: 350; Construction: 242; Transport: 192; Hospitality: 162; Technology: 149
+H held out (historically viewed),collateral_type,2000,present,0.0,0.0,,,,,,,Unsecured: 716; Mortgage: 685; Other: 407; Cash: 192
+H held out (historically viewed),lien_rank,2000,present,0.0,0.0,,,,,,,First: 1009; Unsecured: 716; Second: 275
+H held out (historically viewed),security_quality,2000,not recorded,,,,,,,,,
+H held out (historically viewed),guarantor_strength,2000,not recorded,,,,,,,,,
+H held out (historically viewed),downturn_at_default,2000,not recorded,,,,,,,,,
+R2 development,ead_at_default,9000,present,0.0,0.0,538636.6561681805,20000.0,70514.66411558187,350391.8745025574,1623571.1935300387,8000000.0,
+R2 development,collateral_coverage,9000,present,0.0,3244.0,0.6129714323145846,0.0,0.0,0.6544394749717906,1.5730399850606485,2.0,
+R2 development,guarantee_coverage,9000,present,0.0,5414.0,0.13212777777777776,0.0,0.0,0.0,0.55,0.8,
+R2 development,leverage_at_default,9000,present,0.0,0.0,3.1426396694793826,0.5115945769460993,1.2703487033798475,2.8119844263448064,6.198296389851778,9.0,
+R2 development,current_ratio_at_default,9000,present,0.0,0.0,1.1401012067845195,0.25,0.5519801361764506,1.051508795340254,2.041580594243776,3.5,
+R2 development,management_quality,9000,present,0.0,0.0,2.9974444444444446,1.0,1.0,3.0,5.0,5.0,
+R2 development,product_type,9000,present,0.0,0.0,,,,,,,Term Loan: 3766; OVD: 2282; Performance Guarantee: 1181; Import LC: 1072; Financial Guarantee: 699
+R2 development,industry,9000,present,0.0,0.0,,,,,,,Services: 2290; Retail: 1770; Manufacturing: 1478; Construction: 1089; Transport: 871; Hospitality: 772; Technology: 730
+R2 development,collateral_type,9000,present,0.0,0.0,,,,,,,Unsecured: 3244; Mortgage: 3055; Other: 1758; Cash: 943
+R2 development,lien_rank,9000,present,0.0,0.0,,,,,,,First: 4471; Unsecured: 3244; Second: 1285
+R2 development,security_quality,9000,present,0.0,3244.0,0.4109742647660827,0.0,0.0,0.49073886962687374,0.8874290218433603,0.9957649605278464,
+R2 development,guarantor_strength,9000,present,0.0,5414.0,0.22778521607493615,0.0,0.0,0.0,0.8088925124783516,0.99551797841892,
+R2 development,downturn_at_default,9000,present,0.0,7040.0,0.21777777777777776,0.0,0.0,0.0,1.0,1.0,
+R2 selection,ead_at_default,3000,present,0.0,0.0,556927.5064272479,20000.0,68731.34387507307,350331.36106870614,1669554.4199447786,8000000.0,
+R2 selection,collateral_coverage,3000,present,0.0,1084.0,0.6116717261868309,0.0,0.0,0.6418192104587241,1.5820884993529802,2.0,
+R2 selection,guarantee_coverage,3000,present,0.0,1796.0,0.13531666666666667,0.0,0.0,0.0,0.55,0.8,
+R2 selection,leverage_at_default,3000,present,0.0,0.0,3.1754387938684983,0.5032057205531782,1.29373904886455,2.822237239609303,6.2812929302609355,9.0,
+R2 selection,current_ratio_at_default,3000,present,0.0,0.0,1.1389405374946078,0.2954460352806643,0.5542168445388456,1.0480729831587685,2.0309351121594634,3.5,
+R2 selection,management_quality,3000,present,0.0,0.0,3.0366666666666666,1.0,1.0,3.0,5.0,5.0,
+R2 selection,product_type,3000,present,0.0,0.0,,,,,,,Term Loan: 1211; OVD: 758; Performance Guarantee: 413; Import LC: 374; Financial Guarantee: 244
+R2 selection,industry,3000,present,0.0,0.0,,,,,,,Services: 708; Retail: 601; Manufacturing: 537; Construction: 381; Transport: 302; Hospitality: 238; Technology: 233
+R2 selection,collateral_type,3000,present,0.0,0.0,,,,,,,Unsecured: 1084; Mortgage: 992; Other: 625; Cash: 299
+R2 selection,lien_rank,3000,present,0.0,0.0,,,,,,,First: 1504; Unsecured: 1084; Second: 412
+R2 selection,security_quality,3000,present,0.0,1084.0,0.41548755680973304,0.0,0.0,0.5053257695344855,0.8868395353291435,0.992777340277506,
+R2 selection,guarantor_strength,3000,present,0.0,1796.0,0.2303100294743991,0.0,0.0,0.0,0.8196720101984991,0.9909138584423364,
+R2 selection,downturn_at_default,3000,present,0.0,2365.0,0.21166666666666667,0.0,0.0,0.0,1.0,1.0,
+Current synthetic facilities,ead_at_default,5172,present,0.0,0.0,404469.07886310905,4000.0,33361.697,244598.81,1339313.0769999991,3935574.9,
+Current synthetic facilities,collateral_coverage,5172,present,0.0,1775.0,0.6154077532869296,0.0,0.0,0.69075,1.4957049999999998,1.8,
+Current synthetic facilities,guarantee_coverage,5172,present,0.0,4096.0,0.0666569992266048,0.0,0.0,0.0,0.35,0.55,
+Current synthetic facilities,leverage_at_default,5172,present,0.0,0.0,2.1764806457849963,0.5561,0.9821,1.99195,4.054,7.5,
+Current synthetic facilities,current_ratio_at_default,5172,present,0.0,0.0,1.5301774361948957,0.4271,0.805855,1.4415,2.5280249999999986,4.0,
+Current synthetic facilities,management_quality,5172,present,0.0,0.0,2.9994199535962878,1.0,1.0,3.0,5.0,5.0,
+Current synthetic facilities,product_type,5172,present,0.0,0.0,,,,,,,Term Loan: 2354; OVD: 1742; Import LC: 483; Performance Guarantee: 390; Financial Guarantee: 203
+Current synthetic facilities,industry,5172,present,0.0,0.0,,,,,,,Services: 1210; Retail: 1043; Manufacturing: 923; Construction: 607; Transport: 543; Hospitality: 424; Technology: 422
+Current synthetic facilities,collateral_type,5172,present,0.0,0.0,,,,,,,Mortgage: 1936; Unsecured: 1775; Other: 955; Cash: 506
+Current synthetic facilities,lien_rank,5172,present,0.0,0.0,,,,,,,First: 1824; Unsecured: 1775; Second: 1573
+Current synthetic facilities,security_quality,5172,not recorded,,,,,,,,,
+Current synthetic facilities,guarantor_strength,5172,not recorded,,,,,,,,,
+Current synthetic facilities,downturn_at_default,5172,not recorded,,,,,,,,,
