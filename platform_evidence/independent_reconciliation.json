@@ -1,0 +1,40 @@
+{
+  "frozen_v5": "/workspace/scratch/dccfe612c897/credit-risk-platform",
+  "lgd_sample": 8000,
+  "holdout": 2000,
+  "workout_target_max_error": 1.553404667464786e-05,
+  "lgd_clipped": 1,
+  "ews_mismatches": 0,
+  "stage_mismatches": 0,
+  "forward_pd_max_error": 1.6653345369377348e-16,
+  "ecl_facility_max_error": 3.4924596548080444e-10,
+  "lifetime_pd_max_error": 5.412337245047638e-16,
+  "borrower_ecl_max_error": 1.1641532182693481e-10,
+  "borrower_ead_max_error": 0.010000000707805157,
+  "pd_metrics": {
+    "n": 3000,
+    "defaults": 102,
+    "observed_default_rate": 0.034,
+    "predicted_mean": 0.03438768859645263,
+    "auc": 0.7594554730104602,
+    "gini": 0.5189109460209205,
+    "ks": 0.40849673202614384,
+    "brier": 0.030002534586613554,
+    "log_loss": 0.12856211473794532
+  },
+  "reported_pd_metric_differences": {
+    "auc": 1.1102230246251565e-16,
+    "gini": 2.220446049250313e-16,
+    "ks": 5.551115123125783e-17,
+    "brier": 5.204170427930421e-17,
+    "log_loss": 1.1102230246251565e-16
+  },
+  "total_ead": 2091914076.05,
+  "total_ecl": 45265972.05000534,
+  "stage_counts": {
+    "Stage 1": 2769,
+    "Stage 2": 221,
+    "Stage 3": 10
+  },
+  "watchlist_count": 287
+}
