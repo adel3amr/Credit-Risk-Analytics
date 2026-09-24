@@ -24,3 +24,10 @@ Classification: P01 DATA/VALIDATION; P02 MODEL RISK; P03 SECURITY; P04 DATA ARCH
 | P11 | Independent reconciliation accepted invalid stages/non-finite inputs and an empty blocked run could be validated | Strict independent input checks; successful-run prerequisite; six adverse regression cases | CLOSED; 93-test suite passes |
 | P12 | On workspace resume, historical PNG was truncated and development SQLite file was malformed | Preserved damaged evidence; recovered exact Git image; new migrated database and canonical reload | Contained; no claim of production storage reliability |
 | P13 | Whole-run integrity previously relied on row hashes and DB sort order | Full output hash verification; Python canonical ordering independent of DB collation | CLOSED; full shadow replay verifies |
+
+## LGD remediation follow-up
+
+| ID | Finding | Correction and evidence | Status |
+|---|---|---|---|
+| P14 | LGD clipping could disguise infinity and prediction cardinality was unchecked | Validate finite one-dimensional output length before approved clipping; unit and failed-run/no-decisions integration tests | CLOSED for platform adapter; frozen historical implementation preserved |
+| P15 | Severe realized-cohort bias was not separated from outcome selection under conditional expectation | Independent R2 conditional simulation: expected-loss tail bias -12.5017 pp versus V5 -12.7421 pp; see LGD_REMEDIATION_REPORT.md | DIAGNOSED for R2 only; P02 calibration/support/feature and institutional validation blockers remain OPEN |

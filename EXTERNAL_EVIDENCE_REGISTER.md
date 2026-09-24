@@ -12,3 +12,9 @@ Accessed 24 September 2026. Sources guide architecture/controls; no imported emp
 | E06 | pgserver project documentation | Primary software project | Optional local test server packaging | Test environment alternative only; startup failed; not a production dependency | https://github.com/orm011/pgserver |
 
 GitHub connected tooling verified PR25 and V5 workflow status. No connected Scite/Exa/Supabase/Datadog/PostHog tool was identified. Public primary-source retrieval was used. No licensed external economic dataset was incorporated; licensing and redistribution gates therefore remain prerequisites for any future feed. The nine-month rule is PROJECT METHODOLOGY, never externally attributed.
+
+E07 — Tilmann Gneiting, *Making and Evaluating Point Forecasts* (2009 preprint;
+2011 journal publication), Tier 3 original statistical research, no institution-
+specific population. https://arxiv.org/abs/0912.0902, accessed 2026-09-24.
+Supports matching scoring to the mean/quantile target in the LGD conditional
+expectation diagnostic. Supplies no recovery parameters or production approval.

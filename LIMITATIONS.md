@@ -31,3 +31,11 @@ The API serves a workflow UI with credential authentication, role-aware actions,
 ## Longitudinal and external data scope
 
 Multiple dated snapshots, point-in-time reads, stage migration and ECL movements are implemented. Existing 36-month conduct and recovery generators are preserved. No new correlated financial-statement/default/recovery lifecycle generator was scientifically justified in this release; synthetic transition fixtures are software tests, not empirical transition calibration. No external macro feed, paid data, Scite, Exa, Supabase, Datadog or PostHog integration was fabricated. Scenario ingestion remains the frozen governed CSV, snapshot into each run. Expanded simulation and live integrations remain roadmap work tied to evidence and actual infrastructure.
+
+### LGD diagnostic update
+
+See LGD_REMEDIATION_REPORT.md. The conditional expected loss under the frozen R2
+simulator still has -12.5017 pp bias among realized >75% cases, demonstrating that
+zero retrospective severe-cohort bias is not a valid sole expected-loss target.
+This does not close prediction-time calibration, live-support or unavailable-input
+findings. The diagnostic is synthetic, retrospective and non-deployable.

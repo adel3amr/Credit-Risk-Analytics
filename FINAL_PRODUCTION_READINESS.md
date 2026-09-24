@@ -31,3 +31,15 @@ No arbitrary score is assigned. Reference software evidence and institutional pr
 Foundation and service code are implemented and locally tested. Reference deployment packaging is implemented but not operationally qualified. Institutional qualification remains blocked. The complete productionization mandate is therefore **not fully complete**, and no deployment/model approval is inferred.
 
 Next required evidence: execute PostgreSQL/container CI and restore rehearsal; complete real-browser QA; configure TLS/identity/perimeter controls; acquire institution-approved inputs/outcomes and independently validate model/policy suitability. Existing LGD R&D must not be repeated merely to seek a favorable score.
+
+## LGD follow-up validation — 24 September 2026
+
+The follow-up suite passes **104 tests**. The 5,172-facility shadow replay
+retains the previous predictions and reconciliation bounds. Infinite/incomplete
+LGD outputs now fail explicitly before clipping or persistence.
+
+[LGD_REMEDIATION_REPORT.md](LGD_REMEDIATION_REPORT.md) adds a new conditional-mean
+diagnostic: simulated expected LGD has -12.5017 pp realized >75% bias compared
+with V5 -12.7421 pp. This changes the root-cause interpretation, not the production
+gate. Prediction-time calibration, support and unavailable features remain open.
+Historical validation and adverse findings above are preserved.

@@ -23,3 +23,13 @@ The new field contract rejects missing canonical scoring inputs instead of relyi
 BUG FIX / VALIDATION: independent reconciliation now rejects invalid stages, non-finite and out-of-range values; only successful runs may be validated. Full output hashes are verified, with canonical Python ordering independent of SQL collation. Six additional adverse cases bring the suite to 93 passing tests.
 
 VALIDATION / DATA: frozen hash gate now includes borrower and conduct inputs. Resume exposed a malformed development database and truncated borrower CSV/figure; damaged copies were preserved, exact source data reproduced by frozen seed, and a new migrated database successfully replayed the full portfolio. No model or generator relationship was changed.
+
+## LGD follow-up — 24 September 2026
+
+- BUG FIX: reject nonfinite and incomplete LGD model output before clipping;
+  failed runs write no partial decisions. Preserve approved finite clipping.
+- VALIDATION / RESEARCH: fixed-protocol, 4,096-draw conditional-mean diagnostic
+  separates simulator expectation from realized severe-outcome selection. No
+  model retraining, generator alteration, calibration or challenger promotion.
+- DOCUMENTATION: LGD_REMEDIATION_REPORT.md supersedes an undifferentiated reading
+  of retrospective tail bias while retaining adverse calibration/support findings.

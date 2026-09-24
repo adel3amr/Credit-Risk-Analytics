@@ -7,9 +7,16 @@ from .common import ROOT, digest, file_hash
 from .contracts import PD_FEATURES
 from src.ecl import assign_stage, macro_odds_multiplier, _shift_pd_odds
 from src.scorecard import add_score, add_risk_rating
-from src.lgd_model import predict_lgd
 
 CCF = {"Import LC": 0.2, "Performance Guarantee": 0.5, "Financial Guarantee": 1.0}
+
+
+def validated_lgd_prediction(model, features):
+    """Preserve V5 finite clipping, reject corrupt or incomplete model output first."""
+    raw = np.asarray(model.predict(features), dtype=float)
+    if raw.shape != (len(features),) or not np.isfinite(raw).all():
+        raise ValueError("LGD model must return one finite prediction per facility")
+    return np.clip(raw, 0.0, 1.0)
 
 
 def ead(f):
@@ -130,7 +137,7 @@ def score(dataset, models, manifest, configuration):
     if not frows:
         return []
     features = pd.DataFrame(frows)
-    predictions = predict_lgd(models["lgd"], features)
+    predictions = validated_lgd_prediction(models["lgd"], features)
     traces = []
     for f, feat, lgd in zip(dataset["facilities"], frows, predictions):
         b = borrowers.loc[f["borrower_id"]]

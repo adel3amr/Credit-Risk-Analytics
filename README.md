@@ -1,3 +1,8 @@
+> Latest LGD follow-up: [remediation and root-cause report](LGD_REMEDIATION_REPORT.md).
+> 104 tests pass; scoring-output defects corrected. Conditional simulation explains
+> much of the retrospective severe-loss gap; live-support and calibration findings
+> remain open. No challenger promoted; bank use remains blocked.
+
 # Credit Risk Analytics, Decisioning & Model-Risk Platform
 
 **Production-oriented reference implementation on transparent synthetic credit data. Institutional production use remains BLOCKED.**

@@ -35,3 +35,15 @@ A later resume lost runtime-installed dependencies and exposed a truncated histo
 Continued validation closed P11: invalid reconciliation input and blocked/failed runs can no longer receive a successful validation record. Whole-run hashes are checked on validated result reads using canonical ordering. The final suite passes 93 tests.
 
 The resumed borrower CSV also failed its identity check. Frozen seed-42 regeneration reproduced SHA-256 `2312db398a92c242abec665af6e1e7535b18e47349cfaf0cdf48e8ed3f83c8cd`; the fresh database shadow replay then passed across all 5,172 facilities. The read-only frozen hash gate now checks borrower/conduct as well as workout/R2 sources.
+
+## LGD follow-up validation — 24 September 2026
+
+The follow-up suite passes **104 tests**. The 5,172-facility shadow replay
+retains the previous predictions and reconciliation bounds. Infinite/incomplete
+LGD outputs now fail explicitly before clipping or persistence.
+
+[LGD_REMEDIATION_REPORT.md](LGD_REMEDIATION_REPORT.md) adds a new conditional-mean
+diagnostic: simulated expected LGD has -12.5017 pp realized >75% bias compared
+with V5 -12.7421 pp. This changes the root-cause interpretation, not the production
+gate. Prediction-time calibration, support and unavailable features remain open.
+Historical validation and adverse findings above are preserved.

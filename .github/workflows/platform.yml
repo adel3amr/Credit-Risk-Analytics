@@ -3,7 +3,7 @@ on:
   push:
     branches: ['platform/**']
   pull_request:
-    paths: ['credit_platform/**', 'migrations/**', 'tests/platform/**', 'requirements-platform.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
+    paths: ['credit_platform/**', 'research_diagnostics/**', 'migrations/**', 'tests/platform/**', 'requirements-platform.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
 permissions:
   contents: read
 jobs:

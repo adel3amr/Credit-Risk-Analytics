@@ -483,3 +483,29 @@ def test_blocked_run_cannot_receive_successful_validation(clients):
     response=c.post(f'/api/v1/runs/{run["id"]}/validation',headers=h['validator'])
     assert response.status_code==409
     assert c.get('/api/v1/validation',headers=h['audit']).json()==[]
+
+
+@pytest.mark.parametrize('bad_prediction', [float('inf'), []])
+def test_invalid_lgd_fails_run_without_partial_decisions(clients, monkeypatch, db, bad_prediction):
+    from sqlalchemy import select, func
+    real_load = artifacts.load
+
+    class InvalidLGD:
+        def predict(self, features):
+            return bad_prediction if isinstance(bad_prediction, list) else [bad_prediction] * len(features)
+
+    def invalid_load():
+        models, manifest = real_load()
+        models['lgd'] = InvalidLGD()
+        return models, manifest
+
+    monkeypatch.setattr(artifacts, 'load', invalid_load)
+    c, h = clients
+    response = create_run(c, h)
+    assert response.status_code == 200
+    run = response.json()
+    assert run['status'] == 'FAILED'
+    assert 'one finite prediction per facility' in run['summary']['reason']
+    with db.connect() as conn:
+        count = conn.scalar(select(func.count()).select_from(s.decisions).where(s.decisions.c.run_id == run['id']))
+        assert count == 0

@@ -1,0 +1,11 @@
+{
+  "holdout_sha256": "093a0686316812d0cbf267c42b2a6551d6de6ba21a86529f0ba61f3e1fc2fc59",
+  "seed": 2026092401,
+  "draws_per_case": 4096,
+  "n": 3000,
+  "max_case_mc_se": 0.00397120927271103,
+  "prediction_sha256": "61b1ed7f82d754209c5f2d60562c620fd60cd9fc945e2c2aee141f0665938726",
+  "implementation_sha256": "7c4cb41a42a6e8be15187b8ac31710d8323bedd77f3aef6ff288f44f04ff0508",
+  "generator_sha256": "76e4c0315f6d7ddf897f8bf8bbac828403148fbee87e9d05392dd97a42631ee8",
+  "status": "RETROSPECTIVE SIMULATOR DIAGNOSTIC; NOT DEPLOYABLE; NO PROMOTION"
+}
