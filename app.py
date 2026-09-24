@@ -473,6 +473,19 @@ if role == "Model Validation":
                 if {"Predicted LGD","Actual LGD"}.issubset(lgd_chart.columns):
                     st.line_chart(lgd_chart.set_index("Predicted LGD")["Actual LGD"], x_label="Mean predicted LGD", y_label="Mean actual LGD")
                 st.warning('High-loss underprediction remains a known limitation. Gradient Boosting remains the approved LGD model. Bias is predicted minus realized LGD; negative values indicate underprediction.')
+                independent_path = ROOT / 'outputs/lgd_independent_vintage_assessment.csv'
+                if independent_path.exists():
+                    independent = pd.read_csv(independent_path)
+                    severe = independent.loc[
+                        independent['model'].eq('support_corrected')
+                        & independent['vintage'].eq('separate_live_profile_seed')
+                        & independent['cohort'].eq('realized_above_75pct')
+                    ]
+                    if len(severe) == 1:
+                        row = severe.iloc[0]
+                        st.error(f"Bank-use gate: BLOCKED. A separate synthetic validation vintage still underpredicts {int(row['facilities']):,} realized severe losses by {abs(row['bias'])*100:.2f} percentage points on average. Independent institution-specific validation and approval are absent.")
+                    with st.expander('Guarantee input support and independent vintage comparison'):
+                        st.dataframe(independent, hide_index=True, width='stretch')
                 for title, filename in [
                     ('Realized-loss bands and segments', 'v5_lgd_realized_segments.csv'),
                     ('Challengers on the same facilities', 'lgd_fixed_cohort_tail_comparison.csv'),

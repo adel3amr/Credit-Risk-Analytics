@@ -1,6 +1,8 @@
 # Credit Risk Analytics & IFRS 9 Decisioning System — V5
 
-V5 finalizes the implementation and validation of the frozen V4/V5 methodology. It retains Logistic Regression PD, facility workout Gradient Boosting LGD, existing staging/EWS policy, facility EAD and stage-dependent ECL. This is a synthetic demonstration, not a production-approved banking model.
+V5 finalizes the implementation and validation of the frozen V4/V5 methodology. It retains Logistic Regression PD, facility workout Gradient Boosting LGD, existing staging/EWS policy, facility EAD and stage-dependent ECL. This is a synthetic demonstration, **blocked for live bank provisioning**.
+
+**Whole-project review and decision:** [initial prototype through V5, all major branches, new guarantee-support experiment and bank-use gate](validation_review/PROJECT_WIDE_DECISION.md). The 2026-09-24 experiment identified an original-training/live guarantee-input mismatch (almost no zero-guarantee workouts versus 79.2% zero-guarantee live facilities). Separate generated development and validation vintages test the same approved model specification; the severe realized-loss bias persists. The refit is diagnostic and was **not** promoted to the governed model. To check the operating decision, run `python scripts/assess_bank_readiness.py --purpose bank`; expected exit code is 2 until actual bank workout validation and independent approval exist.
 
 See the [V5 executive validation report](reports/credit_risk_report.md), [classified change log](docs/V5_CHANGELOG.md), and [known limitations](docs/MODEL_LIMITATIONS.md). Realized high-loss underprediction remains a documented limitation; V5 does not promote a challenger or tune the data to hide it.
 

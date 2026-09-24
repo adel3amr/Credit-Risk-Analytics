@@ -5,6 +5,7 @@ facility-level workout-LGD model. Recovery outcomes, workout timing and costs ar
 post-default outcomes and are never used as model inputs.
 """
 from pathlib import Path
+import argparse
 import numpy as np
 import pandas as pd
 
@@ -14,9 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "raw" / "lgd_workout_history.csv"
 
 
-def main():
-    rng = np.random.default_rng(SEED)
-    n = N
+def main(n=N, seed=SEED, output=OUT, guarantee_profile="historical"):
+    rng = np.random.default_rng(seed)
 
     product_type = rng.choice(
         ["Term Loan", "OVD", "Import LC", "Performance Guarantee", "Financial Guarantee"],
@@ -53,6 +53,20 @@ def main():
         np.clip(rng.beta(2.2, 3.2, n), 0, 1),
         np.clip(rng.beta(1.0, 12.0, n), 0, .35),
     )
+    if guarantee_profile == "live":
+        # The reporting-date facility mapper records no separate recovery
+        # guarantee for loans/OVDs and fixed instrument-specific coverage for
+        # trade facilities. The original workout history almost never contains
+        # a zero guarantee, so it cannot validate that dominant live population.
+        # This separate synthetic vintage uses the *existing* live input values;
+        # recovery arithmetic and model features remain unchanged.
+        guarantee_coverage = np.select(
+            [product_type == "Import LC", product_type == "Performance Guarantee",
+             product_type == "Financial Guarantee"],
+            [.20, .35, .55], default=0.0,
+        )
+    elif guarantee_profile != "historical":
+        raise ValueError(f"Unknown guarantee profile: {guarantee_profile}")
 
     leverage_at_default = np.clip(rng.lognormal(np.log(2.8), .48, n), .3, 9.0)
     current_ratio_at_default = np.clip(rng.lognormal(np.log(1.05), .40, n), .25, 3.5)
@@ -190,12 +204,19 @@ def main():
         "economic_lgd": economic_lgd.round(6),
         "write_off_flag": write_off_flag,
     })
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(OUT,index=False)
-    print(f"Saved {len(df):,} resolved default facilities to {OUT}")
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(output,index=False)
+    print(f"Saved {len(df):,} resolved default facilities to {output}")
     print(f"Mean economic LGD: {df.economic_lgd.mean():.2%}")
     print(f"Write-off share: {df.write_off_flag.mean():.2%}")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--n", type=int, default=N)
+    parser.add_argument("--seed", type=int, default=SEED)
+    parser.add_argument("--output", type=Path, default=OUT)
+    parser.add_argument("--guarantee-profile", choices=["historical", "live"], default="historical")
+    args = parser.parse_args()
+    main(args.n, args.seed, args.output, args.guarantee_profile)

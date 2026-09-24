@@ -1,7 +1,7 @@
 # Credit Risk Analytics & IFRS 9 Decisioning System — V5
 ## Forensic reconstruction and independent implementation validation
 
-**Review date:** 23 September 2026. **Frozen reference:** `0dfe4c883a8314704394c49fa096dfb45525096c`. **Review branch:** `review/independent-system-validation`. **Disposition:** Implementation validated on synthetic data; high-loss conditional LGD limitation remains open. No approved methodology changed.
+**Review dates:** 23–24 September 2026. **Frozen reference:** `0dfe4c883a8314704394c49fa096dfb45525096c`. **Review branch:** `review/independent-system-validation`. **Disposition:** Implementation validated on synthetic data; high-loss conditional LGD limitation remains open. No approved methodology changed. **Read the [repository-wide decision and subsequent independent-seed LGD experiment](PROJECT_WIDE_DECISION.md) alongside this paper; it supersedes this paper's original input-support conclusion.**
 
 ### Abstract
 

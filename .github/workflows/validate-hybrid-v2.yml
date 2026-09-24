@@ -1,15 +1,6 @@
 name: Validate V5 Risk Engine
 
-on:
-  push:
-    branches:
-      - feature/v4-bank-grade-risk-engine
-      - feature/v5-lgd-validation-hardening
-  pull_request:
-    branches:
-      - main
-      - fix/reviewer-code-only
-      - feature/v4-bank-grade-risk-engine
+on: [push, pull_request]
 
 jobs:
   validate:
@@ -108,6 +99,22 @@ jobs:
           cat outputs/trajectory_signal_audit.csv
       - name: V5 release reconciliation and LGD diagnostics
         run: python scripts/validate_v5.py
+      - name: Dashboard role, filter and drill-down smoke test
+        run: python scripts/test_dashboard.py
+      - name: Independent guarantee-support LGD assessment
+        run: |
+          python scripts/generate_lgd_workout_history.py --n 12000 --seed 20261011 --guarantee-profile live --output data/raw/lgd_live_profile_development.csv
+          python scripts/generate_lgd_workout_history.py --n 8000 --seed 20261012 --guarantee-profile live --output data/raw/lgd_live_profile_validation.csv
+          python validation_review/tools/assess_lgd_support.py
+          python scripts/assess_bank_readiness.py --purpose demo
+          set +e
+          python scripts/assess_bank_readiness.py --purpose bank
+          gate_status=$?
+          set -e
+          if [ "$gate_status" -ne 2 ]; then
+            echo 'Bank deployment gate must return the explicit blocked code 2' >&2
+            exit 1
+          fi
       - name: Upload validation outputs
         uses: actions/upload-artifact@v4
         with:
@@ -117,6 +124,7 @@ jobs:
             outputs/v5_run_manifest.json
             outputs/model_validation.csv
             outputs/lgd_model_validation.csv
+            outputs/lgd_independent_vintage_assessment.csv
             outputs/lgd_calibration_deciles.csv
             outputs/lgd_holdout_predictions.csv
             outputs/lgd_segment_validation.csv
