@@ -63,6 +63,24 @@ class SegmentMean:
                          for x in data.itertuples(index=False)])
 
 
+class LegacyCollateralProxy:
+    """Transfer of old deterministic V2 collateral mechanics, diagnostic only.
+
+    The original generator also included an unobserved random unsecured-loss
+    residual; using its conditional mean avoids giving a baseline future noise.
+    """
+    def fit(self, data):
+        return self
+
+    def predict(self, data):
+        haircut = data.collateral_type.map({'Cash': 0., 'Mortgage': .20,
+                                             'Other': .35, 'Unsecured': 1.}).to_numpy()
+        if not np.isfinite(haircut).all(): raise ValueError('Unknown collateral type')
+        recognized = np.minimum(data.collateral_coverage.to_numpy()*(1-haircut), 1.)
+        loss_on_unsecured = .62+.06*data.industry.eq('Hospitality').to_numpy()
+        return np.clip(loss_on_unsecured*(1-recognized), 0, 1)
+
+
 class TwoStage:
     """Probabilistic severe-regime mixture; .75 fixed before selection."""
     def __init__(self, num=NUMERIC_FEATURES, cat=CATEGORICAL_FEATURES):
@@ -136,7 +154,7 @@ def score(y, p, ead, label, population):
 
 
 def fit_and_record(rows, predictions, name, candidate, train, evals):
-    fitted = candidate.fit(train) if isinstance(candidate, (TwoStage, SegmentMean, Component)) else candidate.fit(train, train[Y])
+    fitted = candidate.fit(train) if isinstance(candidate, (TwoStage, SegmentMean, LegacyCollateralProxy, Component)) else candidate.fit(train, train[Y])
     for pop, data in evals.items():
         p = predict(fitted, data)
         rows.extend(score(data[Y], p, data.ead_at_default, name, pop))
@@ -163,6 +181,7 @@ def main():
         ("C two-stage H", TwoStage(), h_dev),
         ("D two-stage R2 equal N", TwoStage(), r_equal),
         ("mean R2", SegmentMean(), r_dev),
+        ("simple original proxy transfer", LegacyCollateralProxy(), r_dev),
         ("V5 R2 full", gradient_boosting_lgd_model(), r_dev),
         ("Huber R2", model(kind="huber"), r_dev),
         ("RF R2", model(kind="rf"), r_dev),

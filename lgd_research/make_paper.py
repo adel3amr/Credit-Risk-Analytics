@@ -76,7 +76,7 @@ For the controlled 2×2, original H and R2 each contribute 6,000 training cases;
 
 ## 7. Baselines, challenger methodology and leakage
 
-The simple collateral/product segment mean has much higher RMSE than V5 on R2 selection. Fixed alternatives include unchanged Huber and Random Forest; the enhanced GB adds synthetic observable-at-default information; the two-stage mixture models the *probability* of a >75% regime then recombines conditional expected losses; the component approach separately predicts recoveries, costs and duration under an EAD cash budget. These are research methodology changes and do not affect ECL. The p90 conditional quantile illustrates an upper-risk bound, **not** an unbiased expected loss: its large aggregate positive bias is therefore unsurprising. The oracle alone sees future cure, resolution duration and realization shocks; it is non-deployable by design. Target and postdefault recovery values never enter deployable candidate features.
+The simple collateral/product segment mean has much higher RMSE than V5 on R2 selection. A later completeness check also transferred the *original simple collateral proxy* to the already viewed selection sample, using the original mean unsecured severity but no future random residual; its MAE {row(select,'simple original proxy transfer').mae*100:.2f} pp and realized >75 bias {row(select,'simple original proxy transfer','realized_gt75').bias*100:+.2f} pp are retrospective baseline diagnostics, and it was not added to the locked final contender set. Fixed alternatives include unchanged Huber and Random Forest; the enhanced GB adds synthetic observable-at-default information; the two-stage mixture models the *probability* of a >75% regime then recombines conditional expected losses; the component approach separately predicts recoveries, costs and duration under an EAD cash budget. These are research methodology changes and do not affect ECL. The p90 conditional quantile illustrates an upper-risk bound, **not** an unbiased expected loss: its large aggregate positive bias is therefore unsurprising. The oracle alone sees future cure, resolution duration and realization shocks; it is non-deployable by design. Target and postdefault recovery values never enter deployable candidate features.
 
 ## 8. Ablation and information sufficiency
 
@@ -113,6 +113,7 @@ All 18 charts are generated directly from selection data by `figures.py`. They a
 """
 for i in range(1,19):
     p=next((HERE/'figures').glob(f'{i:02d}_*.png'))
-    intro+=f"\n### Figure {i}: {p.stem.replace('_',' ')}\n\n![{p.stem}](figures/{p.name})\n"
+    title=p.stem[3:].replace('_',' ').capitalize()
+    intro+=f"\n![{title}](figures/{p.name})\n"
 (HERE/'FROM_AGGREGATE_CALIBRATION_TO_TAIL_RISK.md').write_text(intro)
 print('Research paper created',len(intro),'characters')

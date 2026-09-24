@@ -26,7 +26,7 @@ Original H development has 980 >75% cases and 1/6,000 exactly zero guarantees; o
 
 ## 5. Economic recovery process and prediction time
 
-R2 generates EAD, sector, product, borrower financial condition, collateral coverage/type/legal quality, guarantee coverage/strength and downturn state at **default**, before workout. Future random market, guarantee and collection shocks affect the realized component recoveries; stochastic cure, length and costs affect dated net cash flows at months 1, 6, 12, 24, 36 and 60. Each component is capped by residual EAD, then the cash flows are discounted using a facility rate. Correlated downturn lowers recoveries while increasing delays and costs. `lgd_research/generate_r2.py` documents every coefficient; none is a regulatory or empirical bank estimate. `LGD_DATA_GENERATION_REGISTER.md` was written before R2 creation. Hashes and seeds appear in `results/dataset_hashes.csv`. R2 final holds 3000 observations and was evaluated only after the precommitted lock. The generator tests recalculate PV and LGD independently. Future cure, shock, realized recoveries and timing are explicitly excluded from deployable features.
+R2 generates EAD, sector, product, borrower financial condition, collateral coverage/type/legal quality, guarantee coverage/strength and downturn state at **default**, before workout. Future random market, guarantee and collection shocks affect the realized component recoveries; stochastic cure, length and costs affect dated net cash flows at months 1, 6, 12, 24, 36 and 60. Each component is capped by residual EAD, then the cash flows are discounted using a facility rate. Correlated downturn lowers recoveries while increasing delays and costs. `lgd_research/generate_r2.py` documents every coefficient; none is a regulatory or empirical bank estimate. `LGD_DATA_GENERATION_REGISTER.md` was written before R2 creation. Hashes and seeds appear in `results/dataset_hashes.csv`. R2 final holds 3,000 observations and was evaluated only after the precommitted lock. The generator tests recalculate PV and LGD independently. Future cure, shock, realized recoveries and timing are explicitly excluded from deployable features.
 
 ## 6. Comparative designs and data-vs-method attribution
 
@@ -34,7 +34,7 @@ For the controlled 2×2, original H and R2 each contribute 6,000 training cases;
 
 ## 7. Baselines, challenger methodology and leakage
 
-The simple collateral/product segment mean has much higher RMSE than V5 on R2 selection. Fixed alternatives include unchanged Huber and Random Forest; the enhanced GB adds synthetic observable-at-default information; the two-stage mixture models the *probability* of a >75% regime then recombines conditional expected losses; the component approach separately predicts recoveries, costs and duration under an EAD cash budget. These are research methodology changes and do not affect ECL. The p90 conditional quantile illustrates an upper-risk bound, **not** an unbiased expected loss: its large aggregate positive bias is therefore unsurprising. The oracle alone sees future cure, resolution duration and realization shocks; it is non-deployable by design. Target and postdefault recovery values never enter deployable candidate features.
+The simple collateral/product segment mean has much higher RMSE than V5 on R2 selection. A later completeness check also transferred the *original simple collateral proxy* to the already viewed selection sample, using the original mean unsecured severity but no future random residual; its MAE 22.22 pp and realized >75 bias -25.85 pp are retrospective baseline diagnostics, and it was not added to the locked final contender set. Fixed alternatives include unchanged Huber and Random Forest; the enhanced GB adds synthetic observable-at-default information; the two-stage mixture models the *probability* of a >75% regime then recombines conditional expected losses; the component approach separately predicts recoveries, costs and duration under an EAD cash budget. These are research methodology changes and do not affect ECL. The p90 conditional quantile illustrates an upper-risk bound, **not** an unbiased expected loss: its large aggregate positive bias is therefore unsurprising. The oracle alone sees future cure, resolution duration and realization shocks; it is non-deployable by design. Target and postdefault recovery values never enter deployable candidate features.
 
 ## 8. Ablation and information sufficiency
 
@@ -77,74 +77,38 @@ Use `REPRODUCIBILITY.md`, `LGD_EXPERIMENT_REGISTER.md`, `LGD_METHODOLOGY_CHANGEL
 All 18 charts are generated directly from selection data by `figures.py`. They are research diagnostics and never replace the quantitative scorecards. Figures 1–3 show scatter/residuals, 4–9 calibration, band and EAD distributions, 10–12 feature support, 13–16 challenger/cancellation/ablation/oracle evidence, and 17–18 stress and data/method attribution.
 
 
-### Figure 1: 01 actual predicted
+![Actual predicted](figures/01_actual_predicted.png)
 
-![01_actual_predicted](figures/01_actual_predicted.png)
+![Residual distribution](figures/02_residual_distribution.png)
 
-### Figure 2: 02 residual distribution
+![Residual vs forecast](figures/03_residual_vs_forecast.png)
 
-![02_residual_distribution](figures/02_residual_distribution.png)
+![Calibration](figures/04_calibration.png)
 
-### Figure 3: 03 residual vs forecast
+![Bias by band](figures/05_bias_by_band.png)
 
-![03_residual_vs_forecast](figures/03_residual_vs_forecast.png)
+![Mae rmse by band](figures/06_mae_rmse_by_band.png)
 
-### Figure 4: 04 calibration
+![Count by band](figures/07_count_by_band.png)
 
-![04_calibration](figures/04_calibration.png)
+![Ead by band](figures/08_ead_by_band.png)
 
-### Figure 5: 05 bias by band
+![Severe actual vs pred](figures/09_severe_actual_vs_pred.png)
 
-![05_bias_by_band](figures/05_bias_by_band.png)
+![Guarantee support](figures/10_guarantee_support.png)
 
-### Figure 6: 06 mae rmse by band
+![Guarantee by product](figures/11_guarantee_by_product.png)
 
-![06_mae_rmse_by_band](figures/06_mae_rmse_by_band.png)
+![Collateral errors](figures/12_collateral_errors.png)
 
-### Figure 7: 07 count by band
+![Challenger comparison](figures/13_challenger_comparison.png)
 
-![07_count_by_band](figures/07_count_by_band.png)
+![Error cancellation](figures/14_error_cancellation.png)
 
-### Figure 8: 08 ead by band
+![Ablation](figures/15_ablation.png)
 
-![08_ead_by_band](figures/08_ead_by_band.png)
+![Oracle gap](figures/16_oracle_gap.png)
 
-### Figure 9: 09 severe actual vs pred
+![Stress response](figures/17_stress_response.png)
 
-![09_severe_actual_vs_pred](figures/09_severe_actual_vs_pred.png)
-
-### Figure 10: 10 guarantee support
-
-![10_guarantee_support](figures/10_guarantee_support.png)
-
-### Figure 11: 11 guarantee by product
-
-![11_guarantee_by_product](figures/11_guarantee_by_product.png)
-
-### Figure 12: 12 collateral errors
-
-![12_collateral_errors](figures/12_collateral_errors.png)
-
-### Figure 13: 13 challenger comparison
-
-![13_challenger_comparison](figures/13_challenger_comparison.png)
-
-### Figure 14: 14 error cancellation
-
-![14_error_cancellation](figures/14_error_cancellation.png)
-
-### Figure 15: 15 ablation
-
-![15_ablation](figures/15_ablation.png)
-
-### Figure 16: 16 oracle gap
-
-![16_oracle_gap](figures/16_oracle_gap.png)
-
-### Figure 17: 17 stress response
-
-![17_stress_response](figures/17_stress_response.png)
-
-### Figure 18: 18 data vs model
-
-![18_data_vs_model](figures/18_data_vs_model.png)
+![Data vs model](figures/18_data_vs_model.png)

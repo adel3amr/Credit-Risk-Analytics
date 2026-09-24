@@ -9,6 +9,7 @@ All entries use `run_study.py` and `results/development_scorecard.csv`; R2 train
 | C: two-stage architecture | H 6k, common inputs | .12968 | .17816 | −.01820 | −.12904 | No overall case for replacing V5 on H-trained transfer. |
 | D: data × method | R2 6k, common two-stage | .12670 | .16982 | +.00352 | −.15899 | Interaction measurable; tail remains. |
 | S: simple segment mean | R2 9k | .15283 | .19271 | +.00499 | −.20831 | Materially less accurate. |
+| P: original simple proxy transfer | No fit; original collateral haircut and mean unsecured severity applied to already viewed R2 selection | .22222 | .26507 | −.14549 | −.25853 | **Added as a postfinal completeness diagnostic only**; not a locked final candidate. Its original random severity residual is unavailable for forecasting. |
 | V5 GB same method | R2 9k | .12695 | .16983 | +.00376 | −.16478 | Better support, same severe issue. |
 | Huber | R2 9k, unchanged feature set | .12375 | .17107 | +.01618 | −.13603 | Lower MAE but material aggregate positive bias. |
 | Random forest | R2 9k, unchanged feature set | .12668 | .17032 | +.00440 | −.16332 | No robust advantage. |

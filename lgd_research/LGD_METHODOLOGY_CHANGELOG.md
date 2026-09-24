@@ -9,5 +9,6 @@
 | M4 | Component recovery, duration and costs, then discounted cash shortfall | **Methodological structure change** | Experiment only, higher operating complexity. |
 | M5 | Huber or random forest on unchanged input set | **Algorithmic challengers** | Experiment only, no V5 promotion. |
 | M6 | Conditional .90 quantile and future-information oracle | **Non-deployable diagnostic objectives** | Quantile is a risk bound, not expected LGD. Oracle uses future resolution variables and cannot be scored prospectively. |
+| M7 | Original simple collateral proxy transferred using the original mean unsecured severity and recognized collateral rules | **Postfinal diagnostic baseline** | Added after the locked final comparison; computed on previously viewed selection data only. The original random unsecured-severity residual is not observable to a forecast. No finalist selection or holdout result changed. |
 
 No challenger is allowed into V5 or ECL solely because its synthetic metric improves. Change approval requires a controlled live-data policy review, performance validation and reproducible ECL impact assessment.
