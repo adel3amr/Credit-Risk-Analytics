@@ -39,3 +39,12 @@ simulator still has -12.5017 pp bias among realized >75% cases, demonstrating th
 zero retrospective severe-cohort bias is not a valid sole expected-loss target.
 This does not close prediction-time calibration, live-support or unavailable-input
 findings. The diagnostic is synthetic, retrospective and non-deployable.
+
+### Final LGD interpretation and current transfer
+
+See LGD_FINAL_RESOLUTION.md. Realized-tail bias alone is not proof of expected-LGD
+underestimation. The separate S1 current conditional bias is real under the synthetic
+DGP and concentrated in omitted downturn context. Full-information simulator
+expectations are not a deployable oracle and do not validate real-bank applicability.
+Borrower-cluster intervals do not span arbitrary sector-regime histories; existing
+final data cannot be reused as an untouched promotion population.

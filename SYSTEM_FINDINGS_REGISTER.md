@@ -39,3 +39,11 @@ Classification: P01 DATA/VALIDATION; P02 MODEL RISK; P03 SECURITY; P04 DATA ARCH
 | P16 | Original workout/live guarantee discontinuity | S1 shared source generation: all cohorts approximately 80% zero guarantee; borrower/FK/cashflow/source checks pass | REMEDIATED for S1 source design only; original incumbent remains unsupported |
 | P17 | Better aggregate fit does not establish tail improvement | New final 1,017 facilities: enhanced RMSE 17.08 pp versus V5 18.13 pp, severe bias -15.31 versus -10.42 pp (168 facilities) | OPEN; no promotion |
 | P18 | Natural defaults yield fewer development workouts than standalone R2 | 1,933 development facilities; correlated within borrower, changing observed sector states | Sampling/transfer limitation retained; no favorable reseeding |
+
+## Final LGD disposition findings
+
+| ID | Finding | Evidence / decision | Status |
+|---|---|---|---|
+| P19 | Realized severe bias conflated with conditional underprediction | S1 governed total -12.1078 = +2.4830 -14.5908 pp; supersedes tail-only interpretation of P02/P17, preserves statistics | INTERPRETATION CORRECTED; not a bank-use waiver |
+| P20 | Governed S1 current conditional mean shortfall under regime transfer | -12.65 pp overall, -10.92 pp in conditional >75% group; 82.38% current downturn context omitted from incumbent | OPEN model/support deficiency; reference only |
+| P21 | Narrow context/rate candidate does not clear promotion | Known rate added, industry proxy removed; current high-conditional bias -4.91 pp versus existing enhanced -4.55 pp; no untouched promotion test | RESEARCH COMPLETE / NOT PROMOTED |

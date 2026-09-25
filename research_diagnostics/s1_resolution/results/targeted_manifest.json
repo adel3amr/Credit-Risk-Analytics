@@ -1,0 +1,7 @@
+{
+  "status": "RESEARCH; NO UNTOUCHED PROMOTION TEST; NOT PROMOTED",
+  "artifact_hash": "76415e71d54e922092943f65e7c41e5331eccadbc7f91f17b0beb36d5257f75c",
+  "source_hash": "98ebb9af3ed3a2abc09e71e484208e104e27e60e3a011091c8c5a7fabb8aa284",
+  "development_n": 1933,
+  "changed_features": "remove industry, add known contractual interest_rate; GB hyperparameters unchanged"
+}

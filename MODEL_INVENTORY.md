@@ -14,3 +14,13 @@
 | ECL / v5-facility-hazard-1 | Reference loss estimate | PD, stage, LGD, EAD and maturity → ECL | Facility hazard approximation, Stage3 PD=1 | Independent reconciliation, source rounding disclosed | REFERENCE; movement and aggregate checks |
 
 Artifact version, SHA-256, frozen source hashes, dataset identities, owner/purpose, contract and limitations accompany inventory docs and run versions. Registry status cannot become ACTIVE through this API. Database model rows are append-only and research entries explicitly BLOCKED. Institutional promotion requires a separate governed release with empirical evidence and feature/deployment qualification.
+
+## S1 targeted context/rate research candidate
+
+ID `s1-context-rate-gb-1`, status RESEARCH / NOT PROMOTED; same fixed GB as S1,
+industry excluded and known borrower interest rate included with quality/context.
+Artifact/hash: `research_diagnostics/s1_resolution/results/targeted_manifest.json`.
+Development: frozen S1 default facilities only. Evaluation: existing retrospective
+selection/final and current simulator expectations; no untouched promotion test.
+Limitation: residual conditional errors and institution capture/transfer unknown.
+No dependency from governed scoring; current active reference model is unchanged.

@@ -1,3 +1,7 @@
+> Latest LGD disposition: [LGD_FINAL_RESOLUTION.md](LGD_FINAL_RESOLUTION.md).
+> Severe-realized bias is largely a conditioning effect; a separate current-context
+> transfer deficiency remains. 111 tests pass; no challenger promoted.
+
 > New integrated dataset: [Synthetic Bank S1](synthetic_bank/README.md)—65,000 borrowers,
 > linked facilities/conduct/workouts, frozen cohort comparison, no automatic model promotion.
 

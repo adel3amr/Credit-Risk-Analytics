@@ -1,0 +1,9 @@
+{
+  "interpretation": "paired simulator sensitivity; only context changed; no source mutation",
+  "n": 8695,
+  "downturn_share": 0.8238067855089132,
+  "conditional_mean_current": 0.5826440454679118,
+  "conditional_mean_context_zero": 0.4539274649439457,
+  "difference": 0.12871658052396623,
+  "governed_mean": 0.45610619419535775
+}

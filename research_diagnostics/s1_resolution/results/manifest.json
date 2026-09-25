@@ -1,0 +1,16 @@
+{
+  "baseline": "3539e36",
+  "draws": 4096,
+  "seed": 2026092501,
+  "data_manifest_hash": "f0e59d71c26b0944b4410dd08ffee1d6b254b265068ba00141fd9cddf7149625",
+  "candidate_hash": "eccfa1e0e1eac15d988982cf26ac769b928bf3011cc40c55e5ebcad83fbde85b",
+  "governed_artifact_hash": "c221d27bb2aace1f675a6e45562c2e4a4fedc037a85eda8668da018db5558e21",
+  "source_hashes": {
+    "research_diagnostics/s1_resolution/analyze.py": "7b702934bb846424ac0ca22df2d0db850eb3f0d7ef9e52993302b8720dbfada4",
+    "research_diagnostics/s1_resolution/conditional.py": "fa5c81a029d9a506a73abcc2fb4d56ef4d16e805a6bfa5ebba11b17ab6d1a8a0",
+    "synthetic_bank/generate.py": "a9ef5404c5f07feb2f55dcef0c5f6c009b26f0fd9b2f775a3ff5399933ac4fe0"
+  },
+  "status": "RETROSPECTIVE SYNTHETIC DIAGNOSTIC; NO PROMOTION",
+  "uncertainty": "approximate normal cluster-robust mean intervals; multiple comparisons not adjusted; independent integration draws",
+  "execution_note": "All simulations and scorecards completed on first execution. Missing pathlib import failed manifest-only finalization. Import corrected and metadata finalized without rerunning simulations or changing results."
+}

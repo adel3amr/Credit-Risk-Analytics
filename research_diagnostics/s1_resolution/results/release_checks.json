@@ -1,0 +1,13 @@
+{
+  "decomposition_max_error": 8.326672684688674e-17,
+  "unchanged_governed_ecl": 78746507.57437636,
+  "unchanged_stages": {
+    "Stage 1": 7802,
+    "Stage 2": 859,
+    "Stage 3": 34
+  },
+  "unchanged_ead": 3594645614.15,
+  "source_data_regenerated": false,
+  "governed_model_replaced": false,
+  "challenger_promoted": false
+}

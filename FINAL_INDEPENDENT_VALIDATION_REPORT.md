@@ -57,3 +57,12 @@ Consistent synthetic guarantee support is demonstrated; old model support is not
 retrospectively fixed. Enhanced LGD RMSE improves but severe-loss bias worsens on
 the new final population. No candidate promoted; institutional production remains
 BLOCKED. Historical metrics above remain evidence for their original populations.
+
+## Final LGD disposition — 25 September 2026
+
+See [LGD_FINAL_RESOLUTION.md](LGD_FINAL_RESOLUTION.md). Category **3 — MODEL DEFECT
+REMAINS**, specifically current-population conditional calibration/transfer. The
+realized-tail diagnostic interpretation is corrected: actual governed final severe
+bias -12.1078 pp = +2.4830 pp model component -14.5908 pp realization component.
+Current governed conditional bias remains -12.65 pp, linked to omitted known
+context and regime shift. 111 tests pass; no promotion or institutional gate waiver.

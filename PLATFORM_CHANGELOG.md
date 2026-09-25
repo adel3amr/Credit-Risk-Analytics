@@ -41,3 +41,12 @@ quality capture, shared borrower recovery shocks and explicit collateral allocat
 RESEARCH / VALIDATION: fixed candidates, chronological disjoint cohorts, single final
 evaluation and independent cashflow checks. No incumbent method or artifact changed.
 DOCUMENTATION: full results and remaining adverse tail findings in synthetic_bank/README.md.
+
+## Final LGD disposition — 25 September 2026
+
+VALIDATION / RESEARCH: independent S1 conditional-mean integration, borrower-cluster
+uncertainty, ex-ante segment calibration, noise floor, current context sensitivity
+and shadow ECL impacts. Distinguishes actual 8000-case governed fit from 6000-case
+benchmark. One targeted specification experiment (remove industry, add rate), kept
+RESEARCH. DOCUMENTATION: category 3 disposition, corrected tail interpretation and
+retained current-transfer finding. No active methodology/artifact or source data change.
