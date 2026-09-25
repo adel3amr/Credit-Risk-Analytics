@@ -31,3 +31,11 @@ Classification: P01 DATA/VALIDATION; P02 MODEL RISK; P03 SECURITY; P04 DATA ARCH
 |---|---|---|---|
 | P14 | LGD clipping could disguise infinity and prediction cardinality was unchecked | Validate finite one-dimensional output length before approved clipping; unit and failed-run/no-decisions integration tests | CLOSED for platform adapter; frozen historical implementation preserved |
 | P15 | Severe realized-cohort bias was not separated from outcome selection under conditional expectation | Independent R2 conditional simulation: expected-loss tail bias -12.5017 pp versus V5 -12.7421 pp; see LGD_REMEDIATION_REPORT.md | DIAGNOSED for R2 only; P02 calibration/support/feature and institutional validation blockers remain OPEN |
+
+## S1 findings — 25 September 2026
+
+| ID | Finding | Evidence / decision | Status |
+|---|---|---|---|
+| P16 | Original workout/live guarantee discontinuity | S1 shared source generation: all cohorts approximately 80% zero guarantee; borrower/FK/cashflow/source checks pass | REMEDIATED for S1 source design only; original incumbent remains unsupported |
+| P17 | Better aggregate fit does not establish tail improvement | New final 1,017 facilities: enhanced RMSE 17.08 pp versus V5 18.13 pp, severe bias -15.31 versus -10.42 pp (168 facilities) | OPEN; no promotion |
+| P18 | Natural defaults yield fewer development workouts than standalone R2 | 1,933 development facilities; correlated within borrower, changing observed sector states | Sampling/transfer limitation retained; no favorable reseeding |

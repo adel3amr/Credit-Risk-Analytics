@@ -1,3 +1,6 @@
+> New integrated dataset: [Synthetic Bank S1](synthetic_bank/README.md)—65,000 borrowers,
+> linked facilities/conduct/workouts, frozen cohort comparison, no automatic model promotion.
+
 > Latest LGD follow-up: [remediation and root-cause report](LGD_REMEDIATION_REPORT.md).
 > 104 tests pass; scoring-output defects corrected. Conditional simulation explains
 > much of the retrospective severe-loss gap; live-support and calibration findings

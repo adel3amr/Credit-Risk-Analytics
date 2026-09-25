@@ -33,3 +33,11 @@ VALIDATION / DATA: frozen hash gate now includes borrower and conduct inputs. Re
   model retraining, generator alteration, calibration or challenger promotion.
 - DOCUMENTATION: LGD_REMEDIATION_REPORT.md supersedes an undifferentiated reading
   of retrospective tail bias while retaining adverse calibration/support findings.
+
+## Synthetic Bank S1 — 25 September 2026
+
+DATA / DATA ARCHITECTURE: linked whole-platform dataset, separated targets, dated
+quality capture, shared borrower recovery shocks and explicit collateral allocation.
+RESEARCH / VALIDATION: fixed candidates, chronological disjoint cohorts, single final
+evaluation and independent cashflow checks. No incumbent method or artifact changed.
+DOCUMENTATION: full results and remaining adverse tail findings in synthetic_bank/README.md.

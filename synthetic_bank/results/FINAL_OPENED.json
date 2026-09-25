@@ -1,0 +1,8 @@
+{
+  "status": "RESEARCH ONLY; ALL THREE LGD CANDIDATES RETAINED; NO TUNING",
+  "artifact_hash": "eccfa1e0e1eac15d988982cf26ac769b928bf3011cc40c55e5ebcad83fbde85b",
+  "data_manifest_hash": "f0e59d71c26b0944b4410dd08ffee1d6b254b265068ba00141fd9cddf7149625",
+  "evaluation_source_hash": "0dc696a35aa8e1d6a6abfeff123baead0e6fab989a0b9d059d816f40388651cc",
+  "n_training_workouts": 1933,
+  "n_training_borrowers": 29909
+}

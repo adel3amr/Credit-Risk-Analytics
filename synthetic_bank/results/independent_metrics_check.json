@@ -1,0 +1,6 @@
+{
+  "status": "PASS",
+  "max_difference": 1.1102230246251565e-16,
+  "source": "saved final predictions independently recalculated with NumPy",
+  "checked": "all and >75 bias/MAE/RMSE for all three models"
+}

@@ -18,3 +18,10 @@ E07 — Tilmann Gneiting, *Making and Evaluating Point Forecasts* (2009 preprint
 specific population. https://arxiv.org/abs/0912.0902, accessed 2026-09-24.
 Supports matching scoring to the mean/quantile target in the LGD conditional
 expectation diagnostic. Supplies no recovery parameters or production approval.
+
+E08 — EBA/GL/2017/16, *Guidelines on PD estimation, LGD estimation and treatment
+of defaulted exposures*, 20 November 2017, Tier 1, prudential IRB population.
+Primary reference linked in synthetic_bank/PROTOCOL.md; accessed 24 September 2026.
+Context for representativeness and explicit economic recovery/cost data; not IFRS9
+policy and no empirical parameter imported. S1 coefficients remain transparent
+synthetic assumptions, not regulatory prescriptions.

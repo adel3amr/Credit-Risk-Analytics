@@ -47,3 +47,13 @@ diagnostic: simulated expected LGD has -12.5017 pp realized >75% bias compared
 with V5 -12.7421 pp. This changes the root-cause interpretation, not the production
 gate. Prediction-time calibration, support and unavailable features remain open.
 Historical validation and adverse findings above are preserved.
+
+## S1 dataset release — 25 September 2026
+
+New linked synthetic data and its predeclared comparisons are complete: see
+[synthetic_bank/README.md](synthetic_bank/README.md). 107 tests pass; 8,695 current
+facilities run through the reference platform with independent EAD/ECL reconciliation.
+Consistent synthetic guarantee support is demonstrated; old model support is not
+retrospectively fixed. Enhanced LGD RMSE improves but severe-loss bias worsens on
+the new final population. No candidate promoted; institutional production remains
+BLOCKED. Historical metrics above remain evidence for their original populations.

@@ -3,7 +3,7 @@ on:
   push:
     branches: ['platform/**']
   pull_request:
-    paths: ['credit_platform/**', 'research_diagnostics/**', 'migrations/**', 'tests/platform/**', 'requirements-platform.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
+    paths: ['credit_platform/**', 'research_diagnostics/**', 'synthetic_bank/**', 'migrations/**', 'tests/platform/**', 'requirements-platform.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
 permissions:
   contents: read
 jobs:
@@ -27,6 +27,7 @@ jobs:
       - run: python scripts/run_v5.py
       - run: python -m credit_platform.cli build-models
       - run: python scripts/platform_verify_frozen.py
+      - run: python -m synthetic_bank.validate
       - run: python -m pytest -q
       - name: PostgreSQL migrations and full shadow calculation
         env:

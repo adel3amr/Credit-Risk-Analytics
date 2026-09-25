@@ -1,0 +1,41 @@
+{
+  "run_id": "ce038415-3237-4ebf-905e-0adfdcf357d9",
+  "dataset_hash": "313c8a6987cf6f35c9a92107c0d316ea08711be5b11fa0a8dcbe897aa70c7969",
+  "summary": {
+    "facility_count": 8695,
+    "maximum_ecl_error": 0.0,
+    "ead": 3594645614.15,
+    "ecl": 78746507.57437636,
+    "stages": {
+      "Stage 1": 7802,
+      "Stage 2": 859,
+      "Stage 3": 34
+    },
+    "monitoring": {
+      "n": 8695,
+      "zero_guarantee_share": 0.7952846463484762,
+      "mean_lgd": 0.4561061941953578,
+      "stage_counts": {
+        "Stage 1": 7802,
+        "Stage 2": 859,
+        "Stage 3": 34
+      },
+      "alerts": [
+        "Reference LGD training has virtually no zero-guarantee support",
+        "No institutional outcome validation; bank use blocked"
+      ],
+      "classification": "support diagnostics, not outcome validation"
+    },
+    "borrowers": 5000,
+    "bank_gate": "BLOCKED"
+  },
+  "independent_max_ead_error": 0.0,
+  "independent_max_ecl_error": 5.820766091346741e-11,
+  "audit": {
+    "events": 4,
+    "head": "fbb580f55f66d885cfb41229ea88483c764aff568d7a9a26f04009576c0ac66a",
+    "status": "VERIFIED"
+  },
+  "status": "REFERENCE EXECUTION ONLY; S1 CHALLENGERS NOT PROMOTED",
+  "data_manifest_hash": "f0e59d71c26b0944b4410dd08ffee1d6b254b265068ba00141fd9cddf7149625"
+}
