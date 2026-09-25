@@ -1,0 +1,7 @@
+{
+  "baseline": "4a9599f",
+  "artifacts_sha256": "547502f1dc3e097e16853840621cf823baba27e213e0591f6f951de7b37595c7",
+  "source_sha256": "9311b15ee191872af06b2f1f72ac73e1d1ca196f88c46cfb071185f605c3edda",
+  "status": "RESEARCH/SCENARIO SENSITIVITY ONLY; NO PROMOTION",
+  "retained_two_stage": "Original R2 published predictions retained; no serialized model exists; no retrain"
+}

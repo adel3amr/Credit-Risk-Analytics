@@ -1,3 +1,7 @@
+> Latest downturn decision: [LGD_DOWNTURN_FINAL_DECISION.md](LGD_DOWNTURN_FINAL_DECISION.md).
+> Oracle calibration works; operational state proxies fail. Separate guarded scenario
+> sensitivity implemented; no booked adjustment or promotion. 122 tests pass.
+
 > Latest LGD disposition: [LGD_FINAL_RESOLUTION.md](LGD_FINAL_RESOLUTION.md).
 > Severe-realized bias is largely a conditioning effect; a separate current-context
 > transfer deficiency remains. 111 tests pass; no challenger promoted.

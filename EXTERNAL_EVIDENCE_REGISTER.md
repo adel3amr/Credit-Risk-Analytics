@@ -25,3 +25,10 @@ Primary reference linked in synthetic_bank/PROTOCOL.md; accessed 24 September 20
 Context for representativeness and explicit economic recovery/cost data; not IFRS9
 policy and no empirical parameter imported. S1 coefficients remain transparent
 synthetic assumptions, not regulatory prescriptions.
+
+E09 — IFRS Foundation, IFRS9 issued 2021 text, paragraphs 5.5.17 and B5.5.41–42,
+Tier 1 accounting; accessed 25 September 2026. Primary PDF linked in E05 and
+LGD_DOWNTURN_FINAL_DECISION.md. Supports distinguishing probability-weighted expected
+loss from a declared stressed sensitivity; no new coefficient or institutional
+accounting-policy approval inferred. EBA 2019 press-release page retrieval failed;
+no numerical prudential MoC requirement was taken from that unavailable page.

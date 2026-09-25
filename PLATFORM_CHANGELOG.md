@@ -50,3 +50,16 @@ and shadow ECL impacts. Distinguishes actual 8000-case governed fit from 6000-ca
 benchmark. One targeted specification experiment (remove industry, add rate), kept
 RESEARCH. DOCUMENTATION: category 3 disposition, corrected tail interpretation and
 retained current-transfer finding. No active methodology/artifact or source data change.
+
+## Downturn calibration/control decision — 25 September 2026
+
+RESEARCH / VALIDATION: six-mechanism paired DGP attribution, canonical/captured-state
+proxies, development-only bounded regime calibration and normal/downturn evaluation.
+MODEL IMPLEMENTATION / GOVERNANCE: standalone scenario sensitivity control preserves
+base output and rejects booking/production use. This is not an active methodology
+change. DOCUMENTATION: explicit NO/category E decision, no invented state feed or
+scenario weights. Eleven additional tests; 122 pass; all historical data retained.
+
+Change-control clarification: fractional-logistic regime calibration is a new
+METHODOLOGY in RESEARCH ONLY, identified as `s1-regime-calibration-1`. It is not
+classified as a coding fix and has not entered the governed scoring path.

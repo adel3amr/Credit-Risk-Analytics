@@ -47,3 +47,10 @@ Classification: P01 DATA/VALIDATION; P02 MODEL RISK; P03 SECURITY; P04 DATA ARCH
 | P19 | Realized severe bias conflated with conditional underprediction | S1 governed total -12.1078 = +2.4830 -14.5908 pp; supersedes tail-only interpretation of P02/P17, preserves statistics | INTERPRETATION CORRECTED; not a bank-use waiver |
 | P20 | Governed S1 current conditional mean shortfall under regime transfer | -12.65 pp overall, -10.92 pp in conditional >75% group; 82.38% current downturn context omitted from incumbent | OPEN model/support deficiency; reference only |
 | P21 | Narrow context/rate candidate does not clear promotion | Known rate added, industry proxy removed; current high-conditional bias -4.91 pp versus existing enhanced -4.55 pp; no untouched promotion test | RESEARCH COMPLETE / NOT PROMOTED |
+
+## Downturn decision follow-up
+
+| ID | Finding | Evidence / decision | Status |
+|---|---|---|---|
+| P22 | True-state calibration works but state is not operationally identified | Current oracle bias +0.55 pp; canonical no-industry state AUC .5001; industry shortcut AUC .2274 | OPEN feature identification/transfer limitation |
+| P23 | Blanket downturn adjustment harms normal-state calibration | Current normal bias +16.85 pp and final aggregate +14.42 pp | REJECTED as expected LGD; sensitivity-only control implemented |

@@ -24,3 +24,12 @@ Development: frozen S1 default facilities only. Evaluation: existing retrospecti
 selection/final and current simulator expectations; no untouched promotion test.
 Limitation: residual conditional errors and institution capture/transfer unknown.
 No dependency from governed scoring; current active reference model is unchanged.
+
+## Downturn regime calibration research/control
+
+ID `s1-regime-calibration-1`, RESEARCH. Fractional-logistic bounded mean calibration
+of governed LGD with collateral/state interactions, development outcomes only.
+Artifact/coefficients: `research_diagnostics/downturn_resolution/results/`. True-state
+version is ORACLE ONLY; proxy variants not promoted. Explicit normal/downturn
+scenario helper preserves original predictions, rejects expected-loss booking, and
+returns a separate risk sensitivity. No active registry or risk-engine replacement.

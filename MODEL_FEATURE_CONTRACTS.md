@@ -85,3 +85,12 @@ The S1 source facility table records quality, guarantor strength and reporting-d
 sector context in every cohort; future outcome columns are separate. This repairs
 synthetic capture only. These features still REQUIRE NEW DATA CAPTURE at an actual
 institution and are not added to the active V5 feature list.
+
+## S1 downturn-state deployability clarification
+
+`downturn_at_default` is assigned by S1 sector/vintage random draws. An assigned
+reporting timestamp does not make it an independently observed economic indicator.
+It remains RESEARCH ONLY in these experiments. No macro/market-series mapping has
+been validated. A real scoring input requires separately captured dated external
+recovery-environment evidence and validation; no direct production propagation.
+Security/guarantor assessments remain institution-specific capture requirements.

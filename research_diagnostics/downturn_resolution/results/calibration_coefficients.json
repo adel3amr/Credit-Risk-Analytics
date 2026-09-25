@@ -1,0 +1,26 @@
+{
+  "names": [
+    "intercept",
+    "base_logit",
+    "state",
+    "Cash",
+    "Mortgage",
+    "Other",
+    "Cash_state",
+    "Mortgage_state",
+    "Other_state"
+  ],
+  "coefficients": [
+    -0.0007552279800390225,
+    0.7667786896296297,
+    0.6185587591847979,
+    -0.05794426483066541,
+    0.045357196569174515,
+    0.02844887874550923,
+    0.42285991719743926,
+    0.07804724311174346,
+    -0.09578682686733149
+  ],
+  "training": "S1 development realized losses only",
+  "status": "RESEARCH; state-source gate required"
+}

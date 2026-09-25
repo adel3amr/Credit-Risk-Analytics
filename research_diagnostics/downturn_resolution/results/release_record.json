@@ -1,0 +1,13 @@
+{
+  "baseline": "4a9599f",
+  "sources": {
+    "research_diagnostics/downturn_resolution/mechanisms.py": "7ab1795b3e919434e05570465fba7b06086aaee5693370fab0971e802553a926",
+    "research_diagnostics/downturn_resolution/calibration.py": "1615553df18ac4b5194bda5332201e4b3a6bf6c8473f8f917e50c4eda6292ab1",
+    "research_diagnostics/downturn_resolution/run.py": "9311b15ee191872af06b2f1f72ac73e1d1ca196f88c46cfb071185f605c3edda"
+  },
+  "protocol_sha256": "41fa31f37502f9f6cd0d19bbf7c02e274fa957261b73eefe699e3f9a605c8c63",
+  "outcome": "E \u2014 UNRESOLVED for operational point prediction; separate sensitivity control implemented",
+  "active_model_changed": false,
+  "dataset_regenerated": false,
+  "pushed": false
+}

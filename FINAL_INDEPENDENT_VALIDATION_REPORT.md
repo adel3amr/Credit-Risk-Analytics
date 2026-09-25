@@ -66,3 +66,11 @@ realized-tail diagnostic interpretation is corrected: actual governed final seve
 bias -12.1078 pp = +2.4830 pp model component -14.5908 pp realization component.
 Current governed conditional bias remains -12.65 pp, linked to omitted known
 context and regime shift. 111 tests pass; no promotion or institutional gate waiver.
+
+## Downturn resolution decision — 25 September 2026
+
+[LGD_DOWNTURN_FINAL_DECISION.md](LGD_DOWNTURN_FINAL_DECISION.md): category E, operational
+point prediction unresolved. True-state bounded calibration changes current bias
+-12.65 to +0.55 pp, but deployable state proxies fail and all-downturn treatment
+overstates normal-state LGD by 16.85 pp. Guarded sensitivity control implemented;
+no allowance adjustment or active model change. 122 tests pass; bank use blocked.

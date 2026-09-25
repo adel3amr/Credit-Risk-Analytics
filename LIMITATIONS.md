@@ -48,3 +48,10 @@ DGP and concentrated in omitted downturn context. Full-information simulator
 expectations are not a deployable oracle and do not validate real-bank applicability.
 Borrower-cluster intervals do not span arbitrary sector-regime histories; existing
 final data cannot be reused as an untouched promotion population.
+
+### Downturn operational identification
+
+Calibration with hidden S1 state reduces the shortfall, but canonical predictors
+do not identify its arbitrary current sector assignment. Blanket stressed LGD
+materially overstates normal outcomes. See LGD_DOWNTURN_FINAL_DECISION.md; a
+sensitivity control is not a booked MoC, IFRS9 allowance or production approval.
