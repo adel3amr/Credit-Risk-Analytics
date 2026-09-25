@@ -1,0 +1,50 @@
+{
+  "status": "DATA CHECKS PASSED; NO MODEL APPROVAL",
+  "manifest_sha256": "f0e59d71c26b0944b4410dd08ffee1d6b254b265068ba00141fd9cddf7149625",
+  "cohorts": {
+    "development": {
+      "borrowers": 30000,
+      "facilities": 52098,
+      "conduct_rows": 1080000,
+      "workouts": 1933,
+      "zero_guarantee_share": 0.801988560021498,
+      "default_rate": 0.034237186131264835,
+      "lgd_gt75": 454,
+      "lgd_le10": 46,
+      "economic_loss_gt100": 8
+    },
+    "selection": {
+      "borrowers": 15000,
+      "facilities": 26130,
+      "conduct_rows": 540000,
+      "workouts": 1055,
+      "zero_guarantee_share": 0.7980482204362801,
+      "default_rate": 0.038379245787643755,
+      "lgd_gt75": 216,
+      "lgd_le10": 25,
+      "economic_loss_gt100": 4
+    },
+    "final": {
+      "borrowers": 15000,
+      "facilities": 26089,
+      "conduct_rows": 540000,
+      "workouts": 1017,
+      "zero_guarantee_share": 0.7991490666564453,
+      "default_rate": 0.03625660579302963,
+      "lgd_gt75": 168,
+      "lgd_le10": 37,
+      "economic_loss_gt100": 0
+    },
+    "current": {
+      "borrowers": 5000,
+      "facilities": 8695,
+      "conduct_rows": 180000,
+      "workouts": 0,
+      "zero_guarantee_share": 0.7952846463484762,
+      "default_rate": null,
+      "lgd_gt75": null,
+      "lgd_le10": null,
+      "economic_loss_gt100": null
+    }
+  }
+}

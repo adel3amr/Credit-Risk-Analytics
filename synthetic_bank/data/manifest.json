@@ -1,0 +1,52 @@
+{
+  "version": "S1",
+  "status": "FROZEN SYNTHETIC; NOT BANK DATA",
+  "cohorts": {
+    "development": {
+      "n": 30000,
+      "seed": 31001,
+      "observed_at": "2005-01-01"
+    },
+    "selection": {
+      "n": 15000,
+      "seed": 31002,
+      "observed_at": "2012-01-01"
+    },
+    "final": {
+      "n": 15000,
+      "seed": 31003,
+      "observed_at": "2019-01-01"
+    },
+    "current": {
+      "n": 5000,
+      "seed": 31004,
+      "observed_at": "2026-01-01"
+    }
+  },
+  "sources": {
+    "synthetic_bank/generate.py": "a9ef5404c5f07feb2f55dcef0c5f6c009b26f0fd9b2f775a3ff5399933ac4fe0",
+    "scripts/generate_sme_portfolio.py": "f085b67009db7638c48e11b5193b4a0deafa633b48e9dad59d98cea527548020",
+    "synthetic_bank/PROTOCOL.md": "18d448575939f293a5a3e3418a16676e9c8522bf80fd1339a992b09eae5fbeb5"
+  },
+  "files": {
+    "synthetic_bank/data/current/borrowers.csv.gz": "97fc4df144445e952719386b5e8be5d2ee9459343dc0bff6a7e6b2d8a6b2ec97",
+    "synthetic_bank/data/current/canonical.json.gz": "c1fd4c690d6321d5b292fcf70181d9ddb79b8305e08d72ca09fb012ec488ab24",
+    "synthetic_bank/data/current/conduct.csv.gz": "b8c573ad90fff1cdd9c976995b351bb80b286b01d6012e29e5972813381ec65c",
+    "synthetic_bank/data/current/facilities.csv.gz": "44f5ddf373efc70c33f48a07afb2041bd95850c64a9e54df1fbeabe10dc10a8f",
+    "synthetic_bank/data/development/borrowers.csv.gz": "1d66fa53323ac93b6a4b2d0967cbe803fb8b9c609d62b13b22597fc0e7cb8a70",
+    "synthetic_bank/data/development/conduct.csv.gz": "d1047cd78e59ee518cb8eb9d0161144746d869148ebd800b180eef30e33aa4d4",
+    "synthetic_bank/data/development/facilities.csv.gz": "1b73a83baf6b4bc2e98c99100de5a94d1e271915f58e19507d311a98c81fe2b5",
+    "synthetic_bank/data/development/targets.csv.gz": "866727552008b7991acfaf927619094f625285e5aa49086fbb4811dbeceff474",
+    "synthetic_bank/data/development/workouts.csv.gz": "1b9e7caa2352059fb615e7a07c08fa850afcaf211aa05b3b56ecc54e248d79a6",
+    "synthetic_bank/data/final/borrowers.csv.gz": "39b0cdebc3c922c34c0308fbc048652749cd1305be41c88646f788f2dd6134fb",
+    "synthetic_bank/data/final/conduct.csv.gz": "2a8818181ac47f43df8b99e0ead89ddefdfec29c0b16bfcf31ae1d279fea6604",
+    "synthetic_bank/data/final/facilities.csv.gz": "21bbb8356714ece9a242229c783f2e8c9586f9bb48a1060cf6c8a3cb17a75c4d",
+    "synthetic_bank/data/final/targets.csv.gz": "0d3ae2b159deb63ef764a83860ba8e81b3f0e4feeb642929b1262f588df66447",
+    "synthetic_bank/data/final/workouts.csv.gz": "c3462efc2582c69adb0b9d9341442f52c3b146b345d4b745c15b33fd45ec15dc",
+    "synthetic_bank/data/selection/borrowers.csv.gz": "462f8f4a70c6b60392790ea491e03d6083d081c4982f52a3c3a2884b5e498567",
+    "synthetic_bank/data/selection/conduct.csv.gz": "603eae224e41940ca69c38447cae78ead4a4cc7e459a55a26cb197fab4f8c341",
+    "synthetic_bank/data/selection/facilities.csv.gz": "842a002f457d9b237dd2276546be19a5961f38978a096f8cd528c1aea3bb7e7d",
+    "synthetic_bank/data/selection/targets.csv.gz": "7e0d3f693f082a04b3f665cf9b79b59e15791a5c1f76444d1b1d1597b1fe35b5",
+    "synthetic_bank/data/selection/workouts.csv.gz": "d0bdce23aca4b36ac6e3fd36c55aa83b0a9cbab134577d8a72786a4aee9e8398"
+  }
+}
