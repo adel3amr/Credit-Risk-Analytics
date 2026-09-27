@@ -15,8 +15,8 @@ from sqlalchemy import func, select
 from . import audit, schema as s, service
 from .common import ROOT, digest, now, uid
 
-PROMPT_VERSION = "credit-risk-copilot-1"
-PROVIDER_VERSION = "deterministic-1"
+PROMPT_VERSION = "credit-risk-copilot-2"
+PROVIDER_VERSION = "deterministic-2"
 REFUSAL = "I do not have sufficient permitted evidence to answer this."
 INJECTION = re.compile(
     r"(ignore\s+(all|previous|prior)|system\s+prompt|developer\s+message|"
@@ -37,6 +37,21 @@ class DeterministicProvider:
     version = PROVIDER_VERSION
 
     def render(self, question: str, evidence: dict, use_case: str) -> str:
+        if "economic_lgd" in evidence:
+            result = evidence["economic_lgd"]
+            rows = result["metrics"]
+            old = next(r for r in rows if r["cohort"]=="current" and r["model"]=="incumbent" and r["group"]=="all")
+            new = next(r for r in rows if r["cohort"]=="current" and r["model"]=="corrected" and r["group"]=="all")
+            return (
+                f"S2 successor synthetic evidence: same-population current conditional LGD bias "
+                f"{old['bias_pp']:+.2f} pp → {new['bias_pp']:+.2f} pp. "
+                "Output growth, unemployment, collateral-price change and liquidity now link "
+                "reporting-date economics to recoveries and scenario LGD. Hidden state is excluded. "
+                "The historical S1 -12.65 pp result is a different population/DGP. "
+                f"Decision: {result['status']}. Remaining findings: "
+                + "; ".join(result["remaining_deficiencies"])
+                + ". No MoC or booked adjustment. Bank use remains BLOCKED."
+            )
         if use_case in ("borrower", "credit_review"):
             facilities = evidence["facilities"]
             stages = sorted({row["stage"] for row in facilities})
@@ -65,7 +80,7 @@ class DeterministicProvider:
             )
         finding = evidence["lgd_finding"]
         return (
-            "The LGD production gate remains BLOCKED. Current conditional bias is "
+            "The LGD production gate remains BLOCKED. Historical S1 current conditional bias is "
             f"{finding['current_conditional_bias_pp']:.2f} pp. True-state research calibration "
             f"reduced it to {finding['oracle_bias_pp']:+.2f} pp, but that state is unavailable "
             "at prediction time and operational proxies failed. The challenger was therefore "
@@ -217,8 +232,14 @@ def answer(db, request, actor: dict) -> dict:
                     evidence, sources = _portfolio(conn, request.run_id)
                     tool_calls = ["get_portfolio_summary", "get_stage_aggregation"]
                 else:
-                    evidence, sources = _model_risk()
-                    tool_calls = ["get_authoritative_model_risk_finding"]
+                    if re.search(r"\b(s2|economic|observable|successor)\b", request.question, re.IGNORECASE):
+                        from .economic_evidence import get
+                        result, source = get()
+                        evidence, sources = {"economic_lgd": result}, [source]
+                        tool_calls = ["get_economic_lgd_validation"]
+                    else:
+                        evidence, sources = _model_risk()
+                        tool_calls = ["get_authoritative_model_risk_finding"]
             response = selected.render(request.question, evidence, request.use_case)
         except (service.NotFound, service.Conflict):
             status, response = "INSUFFICIENT_EVIDENCE", REFUSAL

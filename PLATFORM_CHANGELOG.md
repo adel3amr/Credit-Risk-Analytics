@@ -73,3 +73,16 @@ classified as a coding fix and has not entered the governed scoring path.
 - VALIDATION: six-case benchmark and API tests cover grounding, numerical consistency, attribution, authorization, tool choice, missing evidence and adversarial input.
 - DOCUMENTATION: final state, architecture, operating guide, risks/controls, readiness and limitations updated.
 - METHODOLOGY: none. No risk model, policy, dataset or booked ECL changed.
+# Observable-economic remediation — 27 September 2026
+
+- DATA / DATA ARCHITECTURE: immutable S2 successor with macro publication vintages,
+  manifests, disjoint cohorts and conditional-on-default cashflows; no S1 rewrite.
+- METHODOLOGY: explicit economic recovery channels and scenario-specific LGD,
+  separately versioned. Existing GB architecture retained; four macro inputs and
+  effective rate added; no calibration uplift or MoC. NOT PROMOTED.
+- MODEL IMPLEMENTATION / VALIDATION: shadow ECL computes lifetime PD per scenario,
+  independently reconciles and separates ordering effects from LGD effects.
+- API / UI / GOVERNANCE: read-only S2 evidence view and hash-checked Copilot retrieval;
+  security/RBAC/audit architecture unchanged; incumbent and bank gates preserved.
+- DOCUMENTATION: decision with actual successor results and precise remaining
+  scenario/support/segment deficiencies; no cross-DGP before/after claim.

@@ -1,5 +1,11 @@
 # API and access contract
 
+Additive S2 endpoint: `GET /api/v1/lgd-economic-validation` requires read permission
+and returns hash-checked frozen comparison rows. It cannot promote or score a model.
+Copilot model-risk requests mentioning S2/observable/economic/successor retrieve
+the latest S2 decision; other LGD requests retain explicitly labelled historical S1
+evidence. `prompt_version=credit-risk-copilot-2`, local provider `deterministic-2`.
+
 Run `python -m uvicorn credit_platform.api:app --host 127.0.0.1 --port 8000`. OpenAPI schemas: `/openapi.json`, interactive schema `/docs` (public schema only; data endpoints require credentials). UI `/` contains no embedded borrower data. Every protected request requires `Authorization: Bearer <credential>`. Credentials are provisioned/revoked locally, not by a client-selected role.
 
 | Resource | Methods / purpose | Authorization |

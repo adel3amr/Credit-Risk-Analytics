@@ -59,3 +59,10 @@ sensitivity control is not a booked MoC, IFRS9 allowance or production approval.
 ## GenAI Copilot limitations
 
 The default Copilot is a deterministic grounded reference provider, not evidence of general language-model quality. Retrieval is intentionally limited to stored run outputs and selected authoritative model-risk evidence. The present platform has a shared institutional access scope and no row-level tenant/portfolio entitlements. Prompt-injection pattern filtering reduces common attacks but is not a substitute for an institutional adversarial assessment. External LLM transmission is disabled by default and remains unqualified for confidential data, privacy, retention, vendor, security and residency requirements. Generated narratives require human review and cannot approve credit decisions.
+# S2 successor limitations
+
+See `economic_lgd/DECISION.md`: scenario extrapolation and -2.32 pp downside bias,
+78 facility ordering exceptions, +4.65 pp final full-guarantee bias, limited macro
+clusters, hypothetical rather than observed-default workouts and assumed economic
+elasticities. Improved S2 aggregate calibration cannot repair historical S1
+evidence or establish bank approval. No challenger promoted and no MoC applied.

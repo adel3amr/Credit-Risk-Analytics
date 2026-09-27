@@ -33,3 +33,10 @@ Artifact/coefficients: `research_diagnostics/downturn_resolution/results/`. True
 version is ORACLE ONLY; proxy variants not promoted. Explicit normal/downturn
 scenario helper preserves original predictions, rejects expected-loss booking, and
 returns a separate risk sensitivity. No active registry or risk-engine replacement.
+# S2 additive inventory entry — 27 September 2026
+
+`s2-observable-gb-1`: CHALLENGER, NOT PROMOTED. Conditional LGD on synthetic S2
+workouts; frozen existing Gradient Boosting architecture plus four economic
+observables and effective interest rate. Registry, hashes, full metrics and
+limitations: `economic_lgd/results/registry.json` and `economic_lgd/DECISION.md`.
+Excluded: latent state, recovery outcomes, unobserved quality. No active replacement.

@@ -54,3 +54,12 @@ Classification: P01 DATA/VALIDATION; P02 MODEL RISK; P03 SECURITY; P04 DATA ARCH
 |---|---|---|---|
 | P22 | True-state calibration works but state is not operationally identified | Current oracle bias +0.55 pp; canonical no-industry state AUC .5001; industry shortcut AUC .2274 | OPEN feature identification/transfer limitation |
 | P23 | Blanket downturn adjustment harms normal-state calibration | Current normal bias +16.85 pp and final aggregate +14.42 pp | REJECTED as expected LGD; sensitivity-only control implemented |
+# S2 additive findings — 27 September 2026
+
+| ID | Component | Severity | Classification | Evidence / root cause | Remediation / retest | Status / residual risk |
+|---|---|---|---|---|---|---|
+| S2-01 | Economic feature architecture | High | DATA ARCHITECTURE / METHODOLOGY | S1 direct latent shifts lacked observables | Versioned observable recovery channels; S2 conditional current bias -6.33 → -0.26 pp | Implemented for S2; S1 finding not retrospectively closed |
+| S2-02 | Scenario shape | Moderate | MODEL IMPLEMENTATION | 78 facility reversals, max .9342 pp | No final-set tuning or forced sorting; promotion blocked | OPEN |
+| S2-03 | Downside support/calibration | High | DATA / VALIDATION | -2.32 pp downside bias; activity/unemployment outside development ranges | Require support-qualified future validation, not another broad algorithm search | OPEN |
+| S2-04 | Guarantee calibration | High | VALIDATION | Final full-guarantee +4.65 pp bias, n=135 | Require segment validation before promotion | OPEN |
+| S2-05 | Evidence independence | Moderate | VALIDATION | Seven current economic clusters; synthetic fixtures only | Macro-cluster SE reported; no institutional inference | OPEN |

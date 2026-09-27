@@ -2,6 +2,7 @@
 let credential='',me=null,resource='runs',offset=0,rows=[],runId='';
 const $=id=>document.getElementById(id);
 const tabs={'runs':'Portfolio & runs','datasets':'Data quality','borrowers':'Borrowers','facilities':'Facilities','models':'Model registry','scenarios':'Scenarios','validation-reference':'Model validation','validation':'Run validation','findings':'Findings','overrides':'Overrides','approvals':'Approvals','audit':'Audit'};
+tabs['lgd-economic-validation']='Economic LGD validation';
 async function api(path,method='GET',body){const r=await fetch('/api/v1/'+path,{method,headers:{Authorization:'Bearer '+credential,'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});const data=await r.json();if(!r.ok)throw new Error(JSON.stringify(data.detail||data));return data;}
 function message(s){$('message').textContent=s;}
 async function guarded(fn){try{message('');await fn();}catch(e){message(e.message);}}

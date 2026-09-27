@@ -1,5 +1,12 @@
 # Final production-readiness assessment
 
+Latest addition: [S2 observable-economic LGD](economic_lgd/DECISION.md). Aggregate
+current bias improves on the successor population, but downside support/calibration,
+78 scenario reversals and full-guarantee segment bias prevent promotion. All
+institutional gates below remain unchanged. New module and read-only API/Copilot
+evidence are locally testable; no deployment/approval claim is added.
+Final local regression after the S2 addition: **136 passed, 0 failed**.
+
 No arbitrary score is assigned. Reference software evidence and institutional production approval are separate.
 
 | Domain | Status | Evidence | Open findings | Residual risk | Production gate |

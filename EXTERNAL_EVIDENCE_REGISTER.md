@@ -32,3 +32,12 @@ LGD_DOWNTURN_FINAL_DECISION.md. Supports distinguishing probability-weighted exp
 loss from a declared stressed sensitivity; no new coefficient or institutional
 accounting-policy approval inferred. EBA 2019 press-release page retrieval failed;
 no numerical prudential MoC requirement was taken from that unavailable page.
+# S2 evidence addition — accessed 27 September 2026
+
+| ID | Author / document / date | Tier and population | Claim and component | Applicability / limitation | Reference |
+|---|---|---|---|---|---|
+| S2-E1 | Galow, Georgescu, Ponte Marques; ECB WP 2954; July 2024 | Primary institutional research, European defaulted-loan cashflows | Macro variables and collateral-dependent LGD sensitivity justify distinct economic channels | Coefficients not imported. Authors found no significant timing moderation in their specifications. This corrects the frozen protocol's imprecise phrase "timing matters"; timing is relevant to modelling, not a demonstrated timing effect in this paper. Research views, not ECB policy | https://www.ecb.europa.eu/pub/pdf/scpwps/ecb.wp2954~1d1f8942c9.en.pdf |
+| S2-E2 | IFRS Foundation; forward-looking information and multiple scenarios; July 2016 | Tier 1 accounting implementation support | Scenario consistency and nonlinear expected-loss assessment | Not a validation of S2 coefficients, forecasts or provisioning suitability | https://www.ifrs.org/news-and-events/news/2016/07/25-webcast-on-ifrs-9/ |
+
+No external dataset was downloaded or redistributed. S2 numeric parameters remain
+explicit synthetic assumptions. No new institutional feed or license is claimed.

@@ -1,4 +1,9 @@
-> Latest downturn decision: [LGD_DOWNTURN_FINAL_DECISION.md](LGD_DOWNTURN_FINAL_DECISION.md).
+> Latest observable-economic remediation: [S2 decision and results](economic_lgd/DECISION.md).
+> Same-S2-population current conditional bias improves -6.33 → -0.26 pp; this is
+> not a retroactive correction of S1 -12.65 pp. Scenario/support and segment findings
+> block promotion. Economic LGD validation and Copilot evidence are available.
+>
+> Historical downturn decision: [LGD_DOWNTURN_FINAL_DECISION.md](LGD_DOWNTURN_FINAL_DECISION.md).
 > Oracle calibration works; operational state proxies fail. Separate guarded scenario
 > sensitivity implemented; no booked adjustment or promotion. 122 tests pass.
 

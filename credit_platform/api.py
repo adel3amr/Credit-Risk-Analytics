@@ -196,6 +196,13 @@ def create_app(db=None):
     def copilot_query(data: CopilotInput, p=Depends(allow("read"))):
         return copilot.answer(app.state.db, data, p)
 
+    @app.get("/api/v1/lgd-economic-validation")
+    def economic_validation(p=Depends(allow("read"))):
+        from .economic_evidence import get
+        evidence, source = get()
+        return [{**row, "status": evidence["status"], "source": source}
+                for row in evidence["metrics"]]
+
     @app.post("/api/v1/datasets", status_code=201)
     def ingest(data: DatasetInput, p=Depends(allow("ingest"))):
         return service.ingest(app.state.db, service.normalized(data), p["id"])

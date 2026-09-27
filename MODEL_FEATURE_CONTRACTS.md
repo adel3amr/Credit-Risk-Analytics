@@ -94,3 +94,10 @@ It remains RESEARCH ONLY in these experiments. No macro/market-series mapping ha
 been validated. A real scoring input requires separately captured dated external
 recovery-environment evidence and validation; no direct production propagation.
 Security/guarantor assessments remain institution-specific capture requirements.
+# S2 observable-economic feature extension
+
+Machine-readable contract: `economic_lgd/FEATURE_CONTRACTS.json`. Four dated,
+as-of-validated sector variables plus existing effective interest rate are added
+only to the S2 challenger. Synthetic sources exist for development/selection/final/
+current; institution sources require capture and validation. Hidden state, quality
+and outcomes remain excluded. Measured scenario support: `economic_lgd/results/support.csv`.

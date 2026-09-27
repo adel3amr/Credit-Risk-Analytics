@@ -74,3 +74,13 @@ point prediction unresolved. True-state bounded calibration changes current bias
 -12.65 to +0.55 pp, but deployable state proxies fail and all-downturn treatment
 overstates normal-state LGD by 16.85 pp. Guarded sensitivity control implemented;
 no allowance adjustment or active model change. 122 tests pass; bank use blocked.
+# Additive S2 validation — 27 September 2026
+
+Frozen data and candidate before final opening. Independent stored-cashflow LGD
+reconstruction; separate recalculation of exported prediction bias; macro-cluster
+uncertainty; independently programmed scenario ECL arithmetic. Maximum facility ECL
+reconciliation difference 2.33e-10, aggregate difference 0.00. 136 tests pass.
+Conditional means are Monte Carlo integrations of the synthetic DGP, not external
+bank observations or organizationally independent sign-off. Promotion blocked:
+78 scenario order exceptions, downside support/-2.32 pp bias and final guarantee
+segment +4.65 pp bias. Detailed evidence: `economic_lgd/DECISION.md`.

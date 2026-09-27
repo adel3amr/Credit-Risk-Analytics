@@ -1,5 +1,14 @@
 # Final state and closeout
 
+## Subsequent S2 remediation — 27 September 2026
+
+Starting from 281f114, protocol commit ffe25da and frozen candidate/data commit
+4a84ae5 precede final evaluation. See `economic_lgd/DECISION.md`. 136 tests pass;
+original 125 retained. Current S2 conditional bias -6.33 → -0.26 pp, but scenario
+and segment findings prevent promotion. Historical S1 -12.65 pp is not a like-for-
+like comparison. Active risk engines, historical datasets and bank gates unchanged.
+New read-only economic-LGD UI/API and Copilot evidence preserve auth/audit controls.
+
 Date: 27 September 2026. Branch: `platform/production-foundation`. Starting commit for this closeout: `ca5826b`.
 
 ## Reconstructed completed state

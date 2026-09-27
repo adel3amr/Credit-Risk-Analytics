@@ -1,5 +1,11 @@
 # GenAI Credit Risk Copilot guide
 
+Version 2 adds an allowlisted S2 economic LGD validation source. Ask "Explain S2
+observable economic LGD and the promotion decision" in Model risk mode. Facts and
+numeric comparisons are read from the frozen decision and checked against source
+hashes. The answer explicitly distinguishes S1 from S2 and retains the no-promotion
+decision. Authentication, permissions, audit and provider controls remain unchanged.
+
 ## Purpose
 
 The Copilot explains existing governed outputs. It answers four controlled use cases: borrower explanation, portfolio summary, model-risk/validation explanation, and a draft credit review. Every narrative is marked for human review and is not an authoritative credit decision.

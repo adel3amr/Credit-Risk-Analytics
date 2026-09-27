@@ -578,3 +578,21 @@ def test_copilot_model_risk_injection_and_provider_control(clients, monkeypatch)
         headers=h["validator"],
     )
     assert blocked.status_code == 422
+
+
+def test_s2_evidence_authorization_and_copilot_consistency(clients):
+    from credit_platform.economic_evidence import get
+    evidence, source = get()
+    c,h = clients
+    assert c.get('/api/v1/lgd-economic-validation').status_code == 401
+    result = c.get('/api/v1/lgd-economic-validation',headers=h['validator'])
+    assert result.status_code == 200
+    assert len(result.json()) == len(evidence['metrics'])
+    response = c.post('/api/v1/copilot/query',headers=h['validator'],json={
+        'question':'Explain S2 observable economic LGD and the promotion decision',
+        'use_case':'model_risk'}).json()
+    assert response['facts']['economic_lgd'] == evidence
+    assert response['sources'] == [source]
+    assert response['tool_calls'] == ['get_economic_lgd_validation']
+    assert 'CHALLENGER_NOT_PROMOTED' in response['answer']
+    assert 'different population/DGP' in response['answer']

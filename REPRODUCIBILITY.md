@@ -1,5 +1,13 @@
 # Reproduce the platform
 
+S2 successor module is additive and NOT PROMOTED. Frozen files are included; do not
+regenerate them. Run `python -m economic_lgd.review` to recalculate exported
+metrics/support, and `python -m pytest -q tests/platform/test_economic_lgd.py` for
+targeted verification. Full suite now contains 136 tests. The UI's Economic LGD
+validation view and Model risk Copilot question "Explain S2 observable economic
+LGD" retrieve the frozen decision. See `economic_lgd/DECISION.md` for full rebuild
+instructions in a separate directory. Active V5 scoring instructions below remain.
+
 Python 3.12. Start from branch `platform/production-foundation`. Historical branches remain unchanged.
 
 ## Local reference (SQLite)
