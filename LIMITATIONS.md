@@ -1,5 +1,17 @@
 # Limitations and blocked gates
 
+## Latest S2-R1 residual limitations
+
+The constrained successor removes scenario reversals but is **not promoted**.
+Current downside uncertainty exceeds the frozen equivalence bound; full-guarantee
+fresh baseline and partial-guarantee current downside fail their bounds. The
+high predicted-LGD band remains overcalibrated. Fresh downside economic support
+rejects 327/6,000 facilities despite complete coverage of the known current
+scenario set. `s2_remediation/DECISION.md` separates these statistical, data and
+model limitations. Unsupported scoring is explicitly blocked. Hidden quality
+composition differs between populations and is not a deployable input. Synthetic
+truth and seven current economic clusters do not establish bank suitability.
+
 ## Data and synthetic evidence
 
 All borrower, facility, default and recovery data are generated. No institution feed, legal security assessment, independently observed recovery vintage or multi-currency portfolio has been qualified. The canonical monetary unit is the single synthetic unit of the source portfolio. Institutions require explicit currency mapping/FX policy before aggregate use. A local research development CSV was truncated; the original workspace is preserved, and this branch uses the intact committed hash.

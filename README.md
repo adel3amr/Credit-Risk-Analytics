@@ -1,4 +1,11 @@
-> Latest observable-economic remediation: [S2 decision and results](economic_lgd/DECISION.md).
+> Latest completed work: [focused S2-R1 decision](s2_remediation/DECISION.md).
+> **151 tests pass; candidate NOT PROMOTED.** Scenario reversals are zero and
+> current conditional bias is +0.10 pp. Downside point bias improves to −0.47 pp,
+> but uncertainty, guarantees, fresh holdout support and prediction-band checks
+> fail the frozen promotion tolerances. Bank use remains BLOCKED.
+> [Verification and reproduction commands](s2_remediation/README.md).
+>
+> Previous observable-economic remediation: [S2 decision and results](economic_lgd/DECISION.md).
 > Same-S2-population current conditional bias improves -6.33 → -0.26 pp; this is
 > not a retroactive correction of S1 -12.65 pp. Scenario/support and segment findings
 > block promotion. Economic LGD validation and Copilot evidence are available.
@@ -7,14 +14,14 @@
 > Oracle calibration works; operational state proxies fail. Separate guarded scenario
 > sensitivity implemented; no booked adjustment or promotion. 122 tests pass.
 
-> Latest LGD disposition: [LGD_FINAL_RESOLUTION.md](LGD_FINAL_RESOLUTION.md).
+> Historical LGD disposition: [LGD_FINAL_RESOLUTION.md](LGD_FINAL_RESOLUTION.md).
 > Severe-realized bias is largely a conditioning effect; a separate current-context
 > transfer deficiency remains. 111 tests pass; no challenger promoted.
 
 > New integrated dataset: [Synthetic Bank S1](synthetic_bank/README.md)—65,000 borrowers,
 > linked facilities/conduct/workouts, frozen cohort comparison, no automatic model promotion.
 
-> Latest LGD follow-up: [remediation and root-cause report](LGD_REMEDIATION_REPORT.md).
+> Historical LGD follow-up: [remediation and root-cause report](LGD_REMEDIATION_REPORT.md).
 > 104 tests pass; scoring-output defects corrected. Conditional simulation explains
 > much of the retrospective severe-loss gap; live-support and calibration findings
 > remain open. No challenger promoted; bank use remains blocked.

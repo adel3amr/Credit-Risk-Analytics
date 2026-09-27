@@ -84,3 +84,15 @@ Conditional means are Monte Carlo integrations of the synthetic DGP, not externa
 bank observations or organizationally independent sign-off. Promotion blocked:
 78 scenario order exceptions, downside support/-2.32 pp bias and final guarantee
 segment +4.65 pp bias. Detailed evidence: `economic_lgd/DECISION.md`.
+# Latest focused validation: S2-R1 — 27 September 2026
+
+See [the complete promotion assessment](s2_remediation/DECISION.md), frozen
+`results/gate_checks.json`, three-model prediction/metric tables and local
+151-test signoff. Fresh baseline MAE/RMSE are 12.27/16.40 pp; conditional bias
++0.24 pp. Current baseline/downside biases are +0.10/−0.47 pp. Zero reversals,
+but guarantee, uncertainty, predicted-band and fresh domain-support failures
+prevent promotion. ECL arithmetic reconciles; shadow total is 92,036,058.42.
+No thresholds or model parameters changed after final opening. Independent
+arithmetic is not independent institutional validation; no external approval.
+
+The earlier validation reports below remain evidence of their historical releases.

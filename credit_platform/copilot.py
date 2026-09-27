@@ -15,8 +15,8 @@ from sqlalchemy import func, select
 from . import audit, schema as s, service
 from .common import ROOT, digest, now, uid
 
-PROMPT_VERSION = "credit-risk-copilot-2"
-PROVIDER_VERSION = "deterministic-2"
+PROMPT_VERSION = "credit-risk-copilot-3"
+PROVIDER_VERSION = "deterministic-3"
 REFUSAL = "I do not have sufficient permitted evidence to answer this."
 INJECTION = re.compile(
     r"(ignore\s+(all|previous|prior)|system\s+prompt|developer\s+message|"
@@ -40,10 +40,10 @@ class DeterministicProvider:
         if "economic_lgd" in evidence:
             result = evidence["economic_lgd"]
             rows = result["metrics"]
-            old = next(r for r in rows if r["cohort"]=="current" and r["model"]=="incumbent" and r["group"]=="all")
-            new = next(r for r in rows if r["cohort"]=="current" and r["model"]=="corrected" and r["group"]=="all")
+            old = next(r for r in rows if r["cohort"]=="current" and r["model"]=="incumbent" and r["group"]=="all" and r.get('scenario','baseline')=='baseline')
+            new = next(r for r in rows if r["cohort"]=="current" and r["model"]=="corrected" and r["group"]=="all" and r.get('scenario','baseline')=='baseline')
             return (
-                f"S2 successor synthetic evidence: same-population current conditional LGD bias "
+                f"{result['model_version']} synthetic evidence: same-population current conditional LGD bias "
                 f"{old['bias_pp']:+.2f} pp → {new['bias_pp']:+.2f} pp. "
                 "Output growth, unemployment, collateral-price change and liquidity now link "
                 "reporting-date economics to recoveries and scenario LGD. Hidden state is excluded. "
@@ -240,6 +240,13 @@ def answer(db, request, actor: dict) -> dict:
                     else:
                         evidence, sources = _model_risk()
                         tool_calls = ["get_authoritative_model_risk_finding"]
+                        # Keep historical facts for lineage, but answer from the
+                        # latest completed validation instead of stale S1 alone.
+                        from .economic_evidence import get
+                        result, source = get()
+                        evidence['economic_lgd']=result
+                        sources.append(source)
+                        tool_calls.append('get_economic_lgd_validation')
             response = selected.render(request.question, evidence, request.use_case)
         except (service.NotFound, service.Conflict):
             status, response = "INSUFFICIENT_EVIDENCE", REFUSAL

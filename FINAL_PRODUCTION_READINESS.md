@@ -1,5 +1,14 @@
 # Final production-readiness assessment
 
+Latest completed assessment: [S2-R1](s2_remediation/DECISION.md). **151 tests pass**;
+current calibration, structural scenario order, ECL reconciliation and local
+engineering gates pass. Scenario equivalence, guarantees, general segment
+calibration and the fresh promotion support domain fail. No successor promotion
+or bank-use approval. Current support has zero exceptions, but fresh downside
+rejects 327/6,000 inputs. All wider institutional/operational gates below remain.
+
+The following paragraph records the preceding S2 assessment:
+
 Latest addition: [S2 observable-economic LGD](economic_lgd/DECISION.md). Aggregate
 current bias improves on the successor population, but downside support/calibration,
 78 scenario reversals and full-guarantee segment bias prevent promotion. All

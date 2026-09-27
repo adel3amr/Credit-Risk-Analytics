@@ -86,3 +86,22 @@ classified as a coding fix and has not entered the governed scoring path.
   security/RBAC/audit architecture unchanged; incumbent and bank gates preserved.
 - DOCUMENTATION: decision with actual successor results and precise remaining
   scenario/support/segment deficiencies; no cross-DGP before/after claim.
+# Focused S2-R1 remediation — 27 September 2026
+
+* METHODOLOGY / MODEL IMPLEMENTATION: one versioned constrained boosted-tree
+  successor; original S2/V5 artifacts, recovery equations and scoring remain frozen.
+* DATA: full-cycle historical economic fixtures with new realized cashflows;
+  fresh promotion borrowers exclude the inspected S2 final set. A pre-fit short-
+  cycle generator defect was corrected and its entire rejected attempt retained.
+* VALIDATION: frozen equivalence tolerances, three-model same-population comparison,
+  macro/borrower uncertainty, joint economic/protection support, invariants,
+  guarantee waterfall checks and independent ECL/metric recalculation.
+* GOVERNANCE: one final opening, artifact/source hashes, explicit blocked scoring
+  boundary, separate synthetic-reference and institutional bank-use gates.
+* API / DOCUMENTATION: latest completed evidence reaches the existing UI/Copilot;
+  historical facts remain available and are not used as the current conclusion.
+* INFRASTRUCTURE: CI path triggers include both S2 modules and the pinned dependency
+  file; frozen candidate integrity verification added. Hosted CI is not claimed run.
+
+See `s2_remediation/DECISION.md`. No final-holdout retuning, numeric bias offset,
+prediction sorting, hidden-state scoring, remote push or booked adjustment.

@@ -44,3 +44,10 @@ Overrides are reference ECL adjustments, bounded 0..EAD, not new PD/LGD/staging 
 | `/api/v1/copilot/requests` | GET immutable request metadata | Audit, admin |
 
 Example body: `{"question":"Why is this borrower Stage 2?","use_case":"borrower","run_id":"...","borrower_id":"..."}`. Portfolio requires `run_id`; borrower and credit-review cases require both IDs; model-risk requires neither. The response separates generated `answer` from retrieved `facts`, `sources` and `tool_calls`, and always sets `human_review_required=true` and `authoritative_decision=false`. The service exposes no generated-SQL or calculation tool.
+# Latest S2-R1 evidence
+
+`GET /api/v1/lgd-economic-validation` now returns the newest completed, hash-
+verified S2-R1 validation rows, including cohort, scenario, model, conditional
+bias interval and disposition. Read authorization is unchanged. It does not
+score or promote a candidate. The original S2 files remain historical evidence.
+The current model is `s2-r1-monotone-gb-1`, `CHALLENGER_NOT_PROMOTED`.

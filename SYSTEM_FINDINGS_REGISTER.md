@@ -63,3 +63,23 @@ Classification: P01 DATA/VALIDATION; P02 MODEL RISK; P03 SECURITY; P04 DATA ARCH
 | S2-03 | Downside support/calibration | High | DATA / VALIDATION | -2.32 pp downside bias; activity/unemployment outside development ranges | Require support-qualified future validation, not another broad algorithm search | OPEN |
 | S2-04 | Guarantee calibration | High | VALIDATION | Final full-guarantee +4.65 pp bias, n=135 | Require segment validation before promotion | OPEN |
 | S2-05 | Evidence independence | Moderate | VALIDATION | Seven current economic clusters; synthetic fixtures only | Macro-cluster SE reported; no institutional inference | OPEN |
+
+## S2-R1 finding events — 27 September 2026
+
+These events supersede disposition for the new candidate only; original S2
+findings and numerical evidence above are preserved. Owner remains the reference
+platform maintainer pending institutional assignment.
+
+| ID | Severity / classification | Retest and evidence | Current disposition / residual risk |
+|---|---|---|---|
+| S2-02 / R1 | Moderate / METHODOLOGY–MODEL IMPLEMENTATION | Constrained response; zero reversals on 8,695 current and 6,000 new promotion facilities, independent invariants | CLOSED for R1; original S2 still has 78 |
+| S2-03 / R1 calibration | High / VALIDATION | Current downside −0.47 pp, equivalence bound 1.15 > 1 pp; upside bound 1.17 | OPEN; mean improvement is insufficient evidence of equivalence |
+| S2-03 / R1 support | High / DATA–GOVERNANCE | Current scenarios all supported; new final 35/81/327 baseline/upside/downside rejections | OPEN release scope; explicit rejection control implemented |
+| S2-04 / R1 | High / VALIDATION | Waterfall caps/continuity pass; fresh full guarantee +1.35 pp, bound 2.06; current partial downside bound 2.90 | OPEN; no target mechanics defect demonstrated, no cosmetic adjustment |
+| S2-05 / R1 | Moderate / VALIDATION | Fresh borrower-disjoint holdout; macro and borrower uncertainty; seven current macro clusters remain | OPEN institutional/sampling limitation |
+| R1-06 | High / MODEL IMPLEMENTATION–VALIDATION | Current baseline predicted 80–100% band +3.62 pp conditional bias; fresh +2.63 pp | OPEN prediction-band calibration defect; blocks general-performance gate |
+| R1-07 | Moderate / DATA | Short generated audit histories omitted cycle phases in first pre-fit attempt | CLOSED before fitting; rejected generator/data preserved, complete phase coverage tested |
+| R1-08 | Low / API–GOVERNANCE | Copilot default could emphasize old S1 evidence; first-row selection could choose upside | CLOSED; latest integrity-checked decision and explicit baseline selection tested |
+
+Final decision: `s2_remediation/results/decision.json`; 29 failed individual
+acceptance checks span four failed promotion gates. Full test suite: 151 passed.

@@ -41,3 +41,13 @@ Responses use retrieved structured facts, deterministic calculations stay outsid
 ## API
 
 `POST /api/v1/copilot/query` accepts `question`, `use_case`, and the required `run_id`/`borrower_id`. `GET /api/v1/copilot/requests` is restricted to audit permission. See `API_DOCUMENTATION.md` for the schema and example.
+# S2-R1 evidence update
+
+Prompt version `credit-risk-copilot-3`, deterministic provider version
+`deterministic-3`: model-risk questions now retrieve the latest completed LGD
+decision while preserving historical S1 facts. The displayed current bias uses
+the **baseline** scenario explicitly, not whichever scenario row comes first.
+Ask “Explain S2 remediation and its promotion blockers.” The answer must identify
+the unpromoted version and the remaining failed gates, not imply bank approval.
+Retrieval validates source hashes and the decision's registered hash; corrupt
+latest evidence is rejected rather than silently replaced with an older result.

@@ -164,3 +164,35 @@ def test_final_calculations_reconcile_independently():
     for scenario,g in predictions.groupby('scenario'):
         row=metrics[(metrics.scenario==scenario)&(metrics.model=='corrected')&(metrics.group=='all')].iloc[0]
         assert row.conditional_bias==pytest.approx((g.corrected-g.conditional_mean).mean())
+
+
+def test_blocked_release_cannot_score():
+    from s2_remediation.runtime import score
+    path=ROOT/'s2_remediation/results/registry.json'
+    if not path.exists(): pytest.skip('Promotion assessment not yet completed')
+    registry=json.loads(path.read_text())
+    if registry['status']!='PROMOTED_SYNTHETIC_REFERENCE':
+        with pytest.raises(ValueError,match='promotion gate is blocked'): score(sample())
+    else:
+        _,support=artifacts(); support.require(sample())
+        assert len(score(sample()))==len(sample())
+
+
+def test_copilot_uses_baseline_not_first_scenario():
+    from credit_platform.copilot import DeterministicProvider
+    from credit_platform.economic_evidence import get
+    evidence,_=get()
+    answer=DeterministicProvider().render('S2 downside',{'economic_lgd':evidence},'model_risk')
+    row=next(r for r in evidence['metrics'] if r['cohort']=='current' and
+             r['model']=='corrected' and r['group']=='all' and r.get('scenario','baseline')=='baseline')
+    assert f"{row['bias_pp']:+.2f} pp" in answer
+    assert evidence['model_version'] in answer
+
+
+def test_latest_evidence_integrity_does_not_fall_back(tmp_path,monkeypatch):
+    from credit_platform import economic_evidence
+    folder=tmp_path/'s2_remediation/results';folder.mkdir(parents=True)
+    (folder/'decision.json').write_text(json.dumps({'source_hashes':{}}))
+    (folder/'registry.json').write_text(json.dumps({'decision_sha256':'bad'}))
+    monkeypatch.setattr(economic_evidence,'ROOT',tmp_path)
+    with pytest.raises(ValueError,match='integrity'): economic_evidence.get()

@@ -1,0 +1,1 @@
+{"final_outcomes_used":false,"frozen_model_sha256":"97808231549db030deb7cf913730a0efb37f79f92f955667e4eaa3326df01739","max_calibration_prediction_difference":0.0,"method":"Identical development data, parameters, features and seed; no refit saved or selected","n":6000,"passed":true,"training_data_manifest_sha256":"7395e72d82ee747049c3a50ca44f4f35f2e4613bb27a9c75e4eb36fbdef8eeec"}

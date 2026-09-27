@@ -41,3 +41,12 @@ no numerical prudential MoC requirement was taken from that unavailable page.
 
 No external dataset was downloaded or redistributed. S2 numeric parameters remain
 explicit synthetic assumptions. No new institutional feed or license is claimed.
+# Focused S2-R1 evidence addendum
+
+| ID | Institution/document/date | Tier/population | Claim and applicability | Limitation | Access |
+|---|---|---|---|---|---|
+| S2R1-E1 | ECB WP2954, July 2024, https://www.ecb.europa.eu/pub/pdf/scpwps/ecb.wp2954~1d1f8942c9.en.pdf | Primary institutional research; large corporate multi-bank recoveries | Collateral-dependent macro sensitivity motivates supporting full cycles; re-reviewed existing source | Does not validate synthetic coefficients, guarantee rules, tolerances or universal monotonicity | 2026-09-27 |
+| S2R1-E2 | Scikit-learn 1.8 HistGradientBoostingRegressor, https://scikit-learn.org/1.8/modules/generated/sklearn.ensemble.HistGradientBoostingRegressor.html | Primary software documentation | Explicit monotonic constraints support structural scenario ordering in the versioned estimator | Technical capability is not model validation or regulatory approval | 2026-09-27 |
+
+No empirical coefficients were imported. The frozen simulator determines which
+scenario directions are economically applicable within this reference exercise.

@@ -3,7 +3,7 @@ on:
   push:
     branches: ['platform/**']
   pull_request:
-    paths: ['credit_platform/**', 'research_diagnostics/**', 'synthetic_bank/**', 'migrations/**', 'tests/platform/**', 'requirements-platform.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
+    paths: ['credit_platform/**', 'research_diagnostics/**', 'synthetic_bank/**', 'economic_lgd/**', 's2_remediation/**', 'migrations/**', 'tests/platform/**', 'requirements-platform*.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
 permissions:
   contents: read
 jobs:
@@ -28,6 +28,8 @@ jobs:
       - run: python -m credit_platform.cli build-models
       - run: python scripts/platform_verify_frozen.py
       - run: python -m synthetic_bank.validate
+      - name: Verify frozen S2 remediation without re-opening holdout
+        run: python -c "from s2_remediation.evaluate import verify, verify_lock; verify(); verify_lock()"
       - run: python -m pytest -q
       - name: PostgreSQL migrations and full shadow calculation
         env:
@@ -37,7 +39,7 @@ jobs:
           python scripts/platform_shadow.py
           python -m credit_platform.cli audit-verify
       - name: Compile modules
-        run: python -m compileall -q credit_platform
+        run: python -m compileall -q credit_platform economic_lgd s2_remediation
       - name: Container build
         run: docker build -t credit-risk-reference .
       - uses: actions/upload-artifact@v4

@@ -40,3 +40,20 @@ workouts; frozen existing Gradient Boosting architecture plus four economic
 observables and effective interest rate. Registry, hashes, full metrics and
 limitations: `economic_lgd/results/registry.json` and `economic_lgd/DECISION.md`.
 Excluded: latent state, recovery outcomes, unobserved quality. No active replacement.
+# S2-R1 inventory addendum — 27 September 2026
+
+| Field | Value |
+|---|---|
+| Model | `s2-r1-monotone-gb-1` |
+| Purpose/target | Conditional-on-default discounted economic LGD |
+| Methodology | Histogram gradient boosting with economic/protection monotonic constraints; squared error; versioned successor |
+| Inputs | Unchanged S2 facility/economic feature contract; no hidden quality or outcomes |
+| Output | Bounded LGD; unsupported-domain rejection before operational scoring |
+| Development | 156,294 independent simulated workouts on 30,000 borrowers across 1,680 economic vintages |
+| Validation | Separate calibration; 6,000 fresh promotion facilities; known 8,695-facility current diagnostics |
+| Status | CHALLENGER, NOT PROMOTED; see authoritative `s2_remediation/results/registry.json` |
+| Limitation | Residual guarantee uncertainty and domain coverage; synthetic assumptions and unavailable institutional qualification |
+| Dependencies | Frozen S2 recovery mechanism, new cycle history, original S2 feature contract, frozen support object |
+| Monitoring | Bias/uncertainty, scenario order, guarantees, local support rejections, segment and tail diagnostics |
+
+Previous V5/S1/S2 inventory entries and artifacts below remain historical evidence.

@@ -1,5 +1,15 @@
 # Reproduce the platform
 
+Latest S2-R1 verification: `python -c "from s2_remediation.evaluate import verify, verify_lock; verify(); verify_lock()"`,
+then `python -m pytest -q` (**151 passed locally**) and
+`python -m s2_remediation.review`. Full commands, isolated regeneration and
+rebuild guidance: [s2_remediation/README.md](s2_remediation/README.md).
+The fixed candidate was independently refitted on development data and reproduced
+all 6,000 calibration predictions exactly (`results/reproducibility.json`).
+No candidate was promoted. The API/Copilot now retrieve this latest decision.
+
+The following S2 paragraph records the preceding 136-test release:
+
 S2 successor module is additive and NOT PROMOTED. Frozen files are included; do not
 regenerate them. Run `python -m economic_lgd.review` to recalculate exported
 metrics/support, and `python -m pytest -q tests/platform/test_economic_lgd.py` for

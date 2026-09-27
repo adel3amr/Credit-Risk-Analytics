@@ -101,3 +101,17 @@ as-of-validated sector variables plus existing effective interest rate are added
 only to the S2 challenger. Synthetic sources exist for development/selection/final/
 current; institution sources require capture and validation. Hidden state, quality
 and outcomes remain excluded. Measured scenario support: `economic_lgd/results/support.csv`.
+# S2-R1 contract addendum — 27 September 2026
+
+`s2-r1-monotone-gb-1` uses exactly the original S2 prediction-time feature list
+(`s2_remediation/results/LOCK.json`), with no new guarantor quality, security
+quality, latent regime or post-outcome fields. Economic as-of validation remains
+unchanged. The same transform is used for fitting and scoring. Unknown categorical
+values and invalid/missing inputs are rejected.
+
+The new deployment boundary additionally requires joint economic/protection
+support (`s2_remediation/support.py`) and a promoted registry status. Out-of-domain
+inputs have no neutral fallback, training-extrema clipping or automatic risk
+approval. Raw predictions retained in validation exports are diagnostic estimates,
+not authorized operational scores. Institutional economic-vintage capture and
+validation remain required. See `s2_remediation/PROTOCOL.md` and `DECISION.md`.

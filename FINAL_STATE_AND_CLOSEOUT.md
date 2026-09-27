@@ -1,5 +1,15 @@
 # Final state and closeout
 
+## Latest focused S2-R1 remediation — 27 September 2026
+
+Baseline `ef5a1c5`; protocol commit `8cb92ef`; frozen candidate/data `e8e9228`.
+One new candidate, one final opening, **151 tests passed**, deterministic refit
+reproduced exactly. See `s2_remediation/DECISION.md`. Scenario shape is corrected;
+current point calibration is preserved; wider promotion checks fail. Challenger
+`s2-r1-monotone-gb-1` remains unpromoted. Active reference engines and institutional
+bank-use gate are unchanged. Latest authenticated UI/API/Copilot evidence includes
+the failed checks. No remote push, final-set retuning or booked adjustment.
+
 ## Subsequent S2 remediation — 27 September 2026
 
 Starting from 281f114, protocol commit ffe25da and frozen candidate/data commit
