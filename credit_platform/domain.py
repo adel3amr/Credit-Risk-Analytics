@@ -122,3 +122,20 @@ class Outcome(Strict):
 
 class OutcomesInput(Strict):
     outcomes: list[Outcome] = Field(min_length=1, max_length=50000)
+
+
+class CopilotInput(Strict):
+    question: str = Field(min_length=3, max_length=1000)
+    use_case: Literal["borrower", "portfolio", "model_risk", "credit_review"]
+    run_id: str | None = Field(default=None, max_length=100)
+    borrower_id: str | None = Field(default=None, max_length=100)
+
+    @model_validator(mode="after")
+    def required_scope(self):
+        if self.use_case in ("borrower", "credit_review") and (
+            not self.run_id or not self.borrower_id
+        ):
+            raise ValueError("Borrower use cases require run_id and borrower_id")
+        if self.use_case == "portfolio" and not self.run_id:
+            raise ValueError("Portfolio use case requires run_id")
+        return self

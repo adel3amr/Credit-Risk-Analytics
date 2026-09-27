@@ -184,6 +184,30 @@ validations = Table(
     c("actor", ForeignKey("principals.id")),
     c("recorded_at"),
 )
+copilot_requests = Table(
+    "copilot_requests",
+    metadata,
+    c("id", primary_key=True),
+    c("request_id", unique=True),
+    c("actor", ForeignKey("principals.id")),
+    c("role"),
+    c("use_case"),
+    Column("run_id", String, ForeignKey("runs.id")),
+    Column("borrower_id", String),
+    c("question_hash"),
+    c("provider"),
+    c("provider_version"),
+    c("prompt_version"),
+    c("status"),
+    c("tool_calls", JSON),
+    c("sources", JSON),
+    c("response_hash"),
+    c("recorded_at"),
+    CheckConstraint(
+        "use_case in ('borrower','portfolio','model_risk','credit_review')"
+    ),
+    CheckConstraint("status in ('ANSWERED','REFUSED','INSUFFICIENT_EVIDENCE')"),
+)
 audit_head = Table(
     "audit_head",
     metadata,

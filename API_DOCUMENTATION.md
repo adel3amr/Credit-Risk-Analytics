@@ -29,3 +29,12 @@ Collection pagination: limit 1..500, offset >=0. Source/schema payloads reject u
 Idempotency: request_key is unique; identical request returns the prior run, conflicting payload returns 409. Failed keys do not silently rerun. Model/config source is controlled server-side. No upload/deserialization endpoint for model binaries. All users share one institution scope; no multi-tenant claim.
 
 Overrides are reference ECL adjustments, bounded 0..EAD, not new PD/LGD/staging methodologies. One proposal per facility result; reject/approve is final. Revised requests require a new reference run. Original ECL, approved adjustment and controlled total are displayed separately. Approval does not waive bank gates.
+
+## Credit Risk Copilot
+
+| Resource | Methods / purpose | Authorization |
+|---|---|---|
+| `/api/v1/copilot/query` | POST a typed borrower, portfolio, credit-review or model-risk question | Any authenticated role with read permission |
+| `/api/v1/copilot/requests` | GET immutable request metadata | Audit, admin |
+
+Example body: `{"question":"Why is this borrower Stage 2?","use_case":"borrower","run_id":"...","borrower_id":"..."}`. Portfolio requires `run_id`; borrower and credit-review cases require both IDs; model-risk requires neither. The response separates generated `answer` from retrieved `facts`, `sources` and `tool_calls`, and always sets `human_review_required=true` and `authoritative_decision=false`. The service exposes no generated-SQL or calculation tool.

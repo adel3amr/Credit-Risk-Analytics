@@ -16,9 +16,9 @@
 
 # Credit Risk Analytics, Decisioning & Model-Risk Platform
 
-**Production-oriented reference implementation on transparent synthetic credit data. Institutional production use remains BLOCKED.**
+**Production-oriented reference implementation of an end-to-end Credit Risk analytics and decisioning platform.** It uses transparent synthetic credit data; institutional model, accounting, security and deployment approval remain blocked.
 
-This branch adds a governed platform foundation to the preserved V5/research system: canonical dated data, PostgreSQL-compatible persistence, traceable reference runs, authenticated API, backend permissions, validation, findings, controlled overrides and an audit trail.
+The platform traces borrower and facility data through PD, EWS/watchlist, SICR/staging, LGD, EAD, scenarios and ECL into portfolio analytics, validation, monitoring, findings and management evidence. It includes canonical dated data, PostgreSQL-compatible persistence, traceable reference runs, authenticated APIs, backend permissions, controlled overrides, audit evidence, and a grounded Credit Risk Copilot that explains existing outputs without replacing risk engines.
 
 - [Reproduce and run](REPRODUCIBILITY.md)
 - [Executive architecture summary](EXECUTIVE_ARCHITECTURE_SUMMARY.md)
@@ -27,8 +27,11 @@ This branch adds a governed platform foundation to the preserved V5/research sys
 - [Production-readiness matrix](FINAL_PRODUCTION_READINESS.md)
 - [Architecture](TARGET_ARCHITECTURE.md) · [Database](DATABASE_SCHEMA.md) · [API](API_DOCUMENTATION.md)
 - [Feature contracts](MODEL_FEATURE_CONTRACTS.md) · [Model inventory](MODEL_INVENTORY.md) · [Limitations](LIMITATIONS.md)
+- [GenAI Copilot](GENAI_COPILOT_GUIDE.md) · [GenAI controls](GENAI_RISK_AND_CONTROLS.md) · [Final closeout](FINAL_STATE_AND_CLOSEOUT.md)
 
-93 tests pass locally. Full shadow scoring covers 5,172 facilities. New PostgreSQL/container execution and browser qualification remain unverified. LGD research improves aggregate error but does not close severe-loss/feature-availability gates. No challenger was promoted.
+The reference UI provides portfolio/run analysis, facility evidence, model validation/governance views and an **Ask Risk Copilot** panel for portfolio, borrower and model-risk explanations. Run `python -m alembic upgrade head`, issue a local credential with the CLI, start `uvicorn credit_platform.api:app`, and open `http://localhost:8000`. Full commands and reproducibility evidence are in [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
+
+The final test suite passes locally. Full shadow scoring covers 5,172 facilities and the S1 reference covers 8,695 current facilities. PostgreSQL/container execution and browser qualification remain unverified in the current environment. LGD research does not close the prediction-time downturn/support gate. No challenger was promoted.
 
 ## Historical V5 release documentation
 

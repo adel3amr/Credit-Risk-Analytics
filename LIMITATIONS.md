@@ -55,3 +55,7 @@ Calibration with hidden S1 state reduces the shortfall, but canonical predictors
 do not identify its arbitrary current sector assignment. Blanket stressed LGD
 materially overstates normal outcomes. See LGD_DOWNTURN_FINAL_DECISION.md; a
 sensitivity control is not a booked MoC, IFRS9 allowance or production approval.
+
+## GenAI Copilot limitations
+
+The default Copilot is a deterministic grounded reference provider, not evidence of general language-model quality. Retrieval is intentionally limited to stored run outputs and selected authoritative model-risk evidence. The present platform has a shared institutional access scope and no row-level tenant/portfolio entitlements. Prompt-injection pattern filtering reduces common attacks but is not a substitute for an institutional adversarial assessment. External LLM transmission is disabled by default and remains unqualified for confidential data, privacy, retention, vendor, security and residency requirements. Generated narratives require human review and cannot approve credit decisions.

@@ -25,5 +25,5 @@ def require_schema(db):
         version = conn.execute(
             text("SELECT version_num FROM alembic_version")
         ).scalar_one()
-        if version != "0001":
+        if version != "0002":
             raise RuntimeError("Unsupported schema version; apply migrations")

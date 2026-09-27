@@ -21,6 +21,7 @@ No arbitrary score is assigned. Reference software evidence and institutional pr
 | Security | Controls tested; qualification incomplete | RBAC, expiry/revocation, immutable evidence, dependency scan | TLS/SSO/MFA/pentest/perimeter absent | Trusted operator and single scope | BLOCKED public production |
 | Governance | Implemented reference controls | Registry, blocked challengers, findings, approvals, audit | External approval/audit anchoring absent | Not WORM or institutional sign-off | REFERENCE ONLY |
 | UI | Implemented; browser QA incomplete | Static assets/API tested; legacy AppTest passes | Chromium download failed | Layout/interactivity unverified | PARTIAL |
+| GenAI Copilot | Reference validated | Grounded tools, immutable audit metadata, 6-case benchmark, API/UI tests | External provider and institution data controls unqualified | Human review; narrow retrieval corpus | REFERENCE ONLY |
 | CI/CD | Configured | New PostgreSQL workflow; prior V5 hosted runs passed | New hosted run not executed | Container/runtime differences | UNVERIFIED |
 | Deployment | Configured, not deployed | Compose, migrations, role grants, loopback binding | Docker/PostgreSQL environment absent | Operational qualification | BLOCKED |
 | Observability | Implemented baseline | Readiness, request IDs, JSON status/latency logs | No deployed alerts/traces/dashboard service | Operational response untested | PARTIAL |
@@ -31,6 +32,12 @@ No arbitrary score is assigned. Reference software evidence and institutional pr
 Foundation and service code are implemented and locally tested. Reference deployment packaging is implemented but not operationally qualified. Institutional qualification remains blocked. The complete productionization mandate is therefore **not fully complete**, and no deployment/model approval is inferred.
 
 Next required evidence: execute PostgreSQL/container CI and restore rehearsal; complete real-browser QA; configure TLS/identity/perimeter controls; acquire institution-approved inputs/outcomes and independently validate model/policy suitability. Existing LGD R&D must not be repeated merely to seek a favorable score.
+
+## Final closeout — 27 September 2026
+
+The final local suite passes **125 tests** with zero failures and one upstream TestClient deprecation warning. Fresh SQLite migration to schema `0002`, audit verification, file copy restore and integrity check pass. The malformed former default database is retained in Git history and its hash is recorded; the release default is a clean schema-`0002` database and reports READY. PostgreSQL/container/browser execution remains unverified in this environment.
+
+The Copilot benchmark passes all six curated cases using the deterministic local provider. This establishes reference behavior for grounding, numerical consistency, tool selection, source attribution, authorization, missing evidence and injection refusal. It does not qualify an external LLM or confer institutional approval.
 
 ## LGD follow-up validation — 24 September 2026
 

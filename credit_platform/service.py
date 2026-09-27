@@ -170,7 +170,7 @@ def execute(db, request, actor):
             "started_at": now(),
             "ended_at": None,
             "versions": {
-                "application": "0.3.0",
+                "application": "0.4.0",
                 "application_source_hash": application_hash(),
                 "schema": "0001",
                 "contract": "canonical-1",

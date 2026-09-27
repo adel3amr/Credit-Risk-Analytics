@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from . import schema as s, service, audit, validation, artifacts, risk
+from . import schema as s, service, audit, validation, artifacts, risk, copilot
 from .db import engine, require_schema
 from .security import allow, principal
 from .domain import (
@@ -19,6 +19,7 @@ from .domain import (
     FindingInput,
     FindingEventInput,
     OutcomesInput,
+    CopilotInput,
 )
 from .common import now, uid, digest
 
@@ -28,7 +29,7 @@ log = logging.getLogger("credit_platform")
 def create_app(db=None):
     app = FastAPI(
         title="Credit Risk Reference Platform",
-        version="0.3.0",
+        version="0.4.0",
         description="Synthetic reference use. Bank production gate BLOCKED.",
     )
     app.state.db = db or engine()
@@ -122,7 +123,7 @@ def create_app(db=None):
 
     @app.get("/health/live")
     def live():
-        return {"status": "UP", "version": "0.3.0"}
+        return {"status": "UP", "version": "0.4.0"}
 
     @app.get("/health/ready")
     def ready():
@@ -190,6 +191,10 @@ def create_app(db=None):
                 "No institution qualification or independent deployment approval",
             ],
         }
+
+    @app.post("/api/v1/copilot/query")
+    def copilot_query(data: CopilotInput, p=Depends(allow("read"))):
+        return copilot.answer(app.state.db, data, p)
 
     @app.post("/api/v1/datasets", status_code=201)
     def ingest(data: DatasetInput, p=Depends(allow("ingest"))):
@@ -436,6 +441,11 @@ def create_app(db=None):
         )
     app.add_api_route(
         "/api/v1/audit", collection(s.audit_events, "audit"), methods=["GET"]
+    )
+    app.add_api_route(
+        "/api/v1/copilot/requests",
+        collection(s.copilot_requests, "audit"),
+        methods=["GET"],
     )
     return app
 

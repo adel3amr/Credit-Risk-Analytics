@@ -63,3 +63,13 @@ scenario weights. Eleven additional tests; 122 pass; all historical data retaine
 Change-control clarification: fractional-logistic regime calibration is a new
 METHODOLOGY in RESEARCH ONLY, identified as `s1-regime-calibration-1`. It is not
 classified as a coding fix and has not entered the governed scoring path.
+
+## Release closeout and Credit Risk Copilot — 27 September 2026
+
+- API / UI/UX: added borrower, portfolio, credit-review and model-risk Copilot workflows grounded in existing run and validation evidence.
+- SECURITY / GOVERNANCE: allowlisted tools only, no generated SQL, inherited RBAC, injection refusal, fail-closed missing evidence, immutable metadata audit, explicit human-review status and external-provider opt-in.
+- DATABASE: additive migration `0002` stores request/provider/prompt/tool/source hashes and metadata without raw question/answer retention.
+- BUG FIX / DATABASE: replaced the malformed default development database with a clean schema-`0002` initialization; preserved the retired file hash and Git history.
+- VALIDATION: six-case benchmark and API tests cover grounding, numerical consistency, attribution, authorization, tool choice, missing evidence and adversarial input.
+- DOCUMENTATION: final state, architecture, operating guide, risks/controls, readiness and limitations updated.
+- METHODOLOGY: none. No risk model, policy, dataset or booked ECL changed.
