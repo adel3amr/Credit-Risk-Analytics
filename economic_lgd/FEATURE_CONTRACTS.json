@@ -1,0 +1,24 @@
+{
+  "contract_version": "s2-economics-1",
+  "model_version": "s2-observable-gb-1",
+  "availability": "SYNTHETIC_REFERENCE_AVAILABLE; INSTITUTION_REQUIRES_NEW_DATA_CAPTURE",
+  "entity": "sector_economic_vintage",
+  "join_keys": ["industry", "reporting_date"],
+  "source": "versioned synthetic macro history, no paid or institutional feed",
+  "cadence": "quarterly historical vintages; one current reporting snapshot",
+  "as_of_rule": "economic_period <= published_at <= reporting_date",
+  "revision_rule": "immutable vintage; revised releases require new data version",
+  "missing_behavior": "reject; no neutral economic fallback",
+  "historical_development_validation_current_parity": true,
+  "fields": [
+    {"name":"output_growth_pct","unit":"annual percentage points","range":[-10,8],"definition":"synthetic sector activity growth","source_field":"output_growth_pct","transformation":"identity","mechanism":"collections, guarantee recoveries, cure"},
+    {"name":"unemployment_pct","unit":"percent","range":[2,20],"definition":"synthetic sector labour-market unemployment","source_field":"unemployment_pct","transformation":"identity","mechanism":"cure, unsecured recovery, costs, delays"},
+    {"name":"collateral_change_pct","unit":"annual percent change","range":[-35,25],"definition":"synthetic collateral-market price change","source_field":"collateral_change_pct","transformation":"identity","mechanism":"property and other collateral proceeds; cash unaffected directly"},
+    {"name":"liquidity","unit":"index 0–1","range":[0.05,1],"definition":"synthetic recovery-market liquidity; higher means easier realization","source_field":"liquidity","transformation":"identity","mechanism":"collateral and guarantee realization, delays, costs"},
+    {"name":"interest_rate","unit":"annual fraction","definition":"facility effective interest rate already present in S1 borrower records","source_field":"borrower.interest_rate","transformation":"many-to-one borrower/facility join","mechanism":"discounting; never replaced by scenario policy rate"}
+  ],
+  "excluded": ["latent_regime","downturn_at_default","security_quality","guarantor_strength","economic_lgd","recovery_cashflows","resolved_at"],
+  "support_evidence": "results/support.csv",
+  "lineage": "S1 source hash → facility_id/customer_id → S2 economic vintage → feature contract → locked model → scenario LGD → shadow ECL",
+  "data_classification": "PUBLIC_SYNTHETIC"
+}
