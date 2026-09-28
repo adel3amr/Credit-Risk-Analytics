@@ -115,3 +115,11 @@ inputs have no neutral fallback, training-extrema clipping or automatic risk
 approval. Raw predictions retained in validation exports are diagnostic estimates,
 not authorized operational scores. Institutional economic-vintage capture and
 validation remain required. See `s2_remediation/PROTOCOL.md` and `DECISION.md`.
+# Post-R1 capture/domain event — 28 September 2026
+
+The existing model feature list is unchanged. `lgd_hardening/capture.py` defines
+future dated source evidence for security/guarantors and rejects hidden simulator
+quality fields; a captured document alone cannot authorize a numeric feature
+without an independently validated derivation. No such derivation or populated
+capture dataset exists. The explicit mechanical/support/scenario contract is
+`lgd_hardening/ECONOMIC_DOMAIN_CONTRACT.json`. See the accompanying decision.

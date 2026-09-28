@@ -51,3 +51,9 @@ Ask “Explain S2 remediation and its promotion blockers.” The answer must ide
 the unpromoted version and the remaining failed gates, not imply bank approval.
 Retrieval validates source hashes and the decision's registered hash; corrupt
 latest evidence is rejected rather than silently replaced with an older result.
+# Latest preflight evidence — 28 September 2026
+
+Prompt/provider versions `credit-risk-copilot-4` / `deterministic-4` retrieve the
+post-R1 hardening disposition. R1 remains the retained model; the calibration is
+rejected and no new final holdout was opened. Ask “Explain the latest LGD
+hardening decision.” Original source findings remain linked and unchanged.

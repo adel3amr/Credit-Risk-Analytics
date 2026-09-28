@@ -57,3 +57,11 @@ Excluded: latent state, recovery outcomes, unobserved quality. No active replace
 | Monitoring | Bias/uncertainty, scenario order, guarantees, local support rejections, segment and tail diagnostics |
 
 Previous V5/S1/S2 inventory entries and artifacts below remain historical evidence.
+# Post-R1 inventory event — 28 September 2026
+
+`s2-r1-continuous-calibration-1`: DEVELOPMENT candidate **REJECTED**, not promoted.
+Global continuous monotone calibration of frozen R1 using 6,000 matured
+calibration realized outcomes. Known engineering validation worsened downside
+and high-band errors. Artifacts and fit-source hashes are retained in
+`lgd_hardening/results`. The retained candidate stays `s2-r1-monotone-gb-1`,
+CHALLENGER_NOT_PROMOTED. No new final independent holdout opened.

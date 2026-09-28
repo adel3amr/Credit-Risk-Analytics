@@ -1,5 +1,10 @@
 # Reproduce the platform
 
+Latest: [post-R1 hardening commands](lgd_hardening/README.md), 168 tests passing.
+Use `python -m pytest -q` and `python -m lgd_hardening.decision` to verify/read
+the latest disposition. R1 remains retained and unpromoted; do not interpret the
+additional engineering data as another independent final validation.
+
 Latest S2-R1 verification: `python -c "from s2_remediation.evaluate import verify, verify_lock; verify(); verify_lock()"`,
 then `python -m pytest -q` (**151 passed locally**) and
 `python -m s2_remediation.review`. Full commands, isolated regeneration and

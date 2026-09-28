@@ -1,0 +1,19 @@
+cohort,scenario,group,bias,tolerance,current_clusters,illustrative_required_clusters,classification
+current,upside,all,-0.0036170198783386,0.01,7,12.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+current,upside,guarantee:full,-0.0055420859961578,0.02,7,6.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+current,upside,predicted:0.8,0.0306157646308703,0.02,4,,MODEL BIAS: sample size cannot fix
+current,baseline,all,0.0010144839055381,0.01,7,4.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+current,baseline,guarantee:full,0.0030506240154882,0.02,7,5.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+current,baseline,predicted:0.8,0.0362219617740915,0.02,5,,MODEL BIAS: sample size cannot fix
+current,downside,all,-0.004700208854054,0.01,7,12.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+current,downside,guarantee:full,-0.0067643017874777,0.02,7,3.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+current,downside,predicted:0.8,0.0248359190265125,0.02,6,,MODEL BIAS: sample size cannot fix
+promotion,upside,all,0.002717970883775,0.01,84,7.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+promotion,upside,guarantee:full,0.0119651500220608,0.02,72,69.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+promotion,upside,predicted:0.8,0.029825918384328,0.02,25,,MODEL BIAS: sample size cannot fix
+promotion,baseline,all,0.0023972238293375,0.01,84,6.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+promotion,baseline,guarantee:full,0.0134540339823228,0.02,72,87.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+promotion,baseline,predicted:0.8,0.0262650683517765,0.02,33,,MODEL BIAS: sample size cannot fix
+promotion,downside,all,0.002498008569541,0.01,84,7.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+promotion,downside,guarantee:full,0.0128086557487408,0.02,72,60.0,PRECISION POSSIBLE ONLY WITH NEW INDEPENDENT ECONOMIES; stationarity unproven
+promotion,downside,predicted:0.8,0.0215489326256709,0.02,55,,MODEL BIAS: sample size cannot fix

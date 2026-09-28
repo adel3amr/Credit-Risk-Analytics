@@ -1,5 +1,12 @@
 # Limitations and blocked gates
 
+Latest hardening (28 September): **no new final validation was opened**. R1's
+results remain unchanged after a continuous calibration worsened key errors and
+was rejected. Imported S1 latent quality shifts remain in S2 recovery targets;
+validated prediction-time capture/derivation is absent. Explicit domain, OOD and
+capture controls improve safety but do not constitute model remediation or
+approval. See `lgd_hardening/DECISION.md`; 168 local tests pass.
+
 ## Latest S2-R1 residual limitations
 
 The constrained successor removes scenario reversals but is **not promoted**.

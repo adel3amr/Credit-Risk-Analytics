@@ -1,5 +1,11 @@
 # Final state and closeout
 
+Latest post-R1 hardening: `lgd_hardening/DECISION.md`. Baseline `14b8c4d`,
+preflight protocol `fe2f245`; 168 tests pass. Continuous calibration rejected,
+R1 retained, unavailable recovery-information requirement documented and enforced
+through new capture/domain/release boundaries. No new independent holdout,
+promotion, booked ECL movement, historical rewrite or remote push.
+
 ## Latest focused S2-R1 remediation — 27 September 2026
 
 Baseline `ef5a1c5`; protocol commit `8cb92ef`; frozen candidate/data `e8e9228`.

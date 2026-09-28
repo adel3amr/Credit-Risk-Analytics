@@ -51,3 +51,11 @@ verified S2-R1 validation rows, including cohort, scenario, model, conditional
 bias interval and disposition. Read authorization is unchanged. It does not
 score or promote a candidate. The original S2 files remain historical evidence.
 The current model is `s2-r1-monotone-gb-1`, `CHALLENGER_NOT_PROMOTED`.
+# Latest hardening evidence
+
+The existing authenticated economic-LGD validation endpoint and Copilot now use
+`lgd_hardening/results/decision.json`, with linked immutable R1 evidence. Its
+`hardening.final_independent_validation` is `NOT_RUN_PREFLIGHT_BLOCKED`; displayed
+R1 metrics are retained historical results. No new candidate is scoreable or
+promoted. The additional `lgd_hardening.runtime.score` boundary checks both the
+registry and complete decision gates; historical research helpers stay frozen.

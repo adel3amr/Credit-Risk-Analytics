@@ -105,3 +105,15 @@ classified as a coding fix and has not entered the governed scoring path.
 
 See `s2_remediation/DECISION.md`. No final-holdout retuning, numeric bias offset,
 prediction sorting, hidden-state scoring, remote push or booked adjustment.
+# Post-R1 hardening — 28 September 2026
+
+* VALIDATION: source-quality lineage, all-band composition, precision planning
+  using economic clusters; frozen baseline reproduced; 168 tests pass.
+* METHODOLOGY / MODEL IMPLEMENTATION: one continuous monotone calibration,
+  trained on matured calibration actuals only; rejected after deterioration.
+* DATA ARCHITECTURE / GOVERNANCE: dated recovery-evidence capture schema and
+  explicit shared mechanical/model domain contract; no invented observations.
+* GOVERNANCE: non-bookable OOD bounds, decision/hash/gate release boundary,
+  retained source hashes and representative facility explanations.
+* API / DOCUMENTATION: latest preflight disposition available to evidence and
+  Copilot; no old holdout relabelled independent, no model promotion or ECL change.

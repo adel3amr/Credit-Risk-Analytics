@@ -1,5 +1,11 @@
 # Final production-readiness assessment
 
+28 September addendum: [post-R1 preflight decision](lgd_hardening/DECISION.md).
+168 tests pass; R1 model gates remain unchanged and blocked. Recovery evidence
+capture/derivation is not available; the new contracts are controls, not captured
+data. No new final independent validation is claimed. Platform bank-use gate
+remains BLOCKED. Historical readiness statements below retain their release scope.
+
 Latest completed assessment: [S2-R1](s2_remediation/DECISION.md). **151 tests pass**;
 current calibration, structural scenario order, ECL reconciliation and local
 engineering gates pass. Scenario equivalence, guarantees, general segment

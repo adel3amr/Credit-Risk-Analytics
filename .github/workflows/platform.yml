@@ -3,7 +3,7 @@ on:
   push:
     branches: ['platform/**']
   pull_request:
-    paths: ['credit_platform/**', 'research_diagnostics/**', 'synthetic_bank/**', 'economic_lgd/**', 's2_remediation/**', 'migrations/**', 'tests/platform/**', 'requirements-platform*.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
+    paths: ['credit_platform/**', 'research_diagnostics/**', 'synthetic_bank/**', 'economic_lgd/**', 's2_remediation/**', 'lgd_hardening/**', 'migrations/**', 'tests/platform/**', 'requirements-platform*.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
 permissions:
   contents: read
 jobs:
@@ -39,7 +39,7 @@ jobs:
           python scripts/platform_shadow.py
           python -m credit_platform.cli audit-verify
       - name: Compile modules
-        run: python -m compileall -q credit_platform economic_lgd s2_remediation
+        run: python -m compileall -q credit_platform economic_lgd s2_remediation lgd_hardening
       - name: Container build
         run: docker build -t credit-risk-reference .
       - uses: actions/upload-artifact@v4

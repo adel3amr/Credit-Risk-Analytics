@@ -15,8 +15,8 @@ from sqlalchemy import func, select
 from . import audit, schema as s, service
 from .common import ROOT, digest, now, uid
 
-PROMPT_VERSION = "credit-risk-copilot-3"
-PROVIDER_VERSION = "deterministic-3"
+PROMPT_VERSION = "credit-risk-copilot-4"
+PROVIDER_VERSION = "deterministic-4"
 REFUSAL = "I do not have sufficient permitted evidence to answer this."
 INJECTION = re.compile(
     r"(ignore\s+(all|previous|prior)|system\s+prompt|developer\s+message|"
@@ -50,6 +50,8 @@ class DeterministicProvider:
                 "The historical S1 -12.65 pp result is a different population/DGP. "
                 f"Decision: {result['status']}. Remaining findings: "
                 + "; ".join(result["remaining_deficiencies"])
+                + (". Latest hardening stopped before a new final holdout; R1 remains the retained candidate."
+                   if 'hardening' in result else '')
                 + ". No MoC or booked adjustment. Bank use remains BLOCKED."
             )
         if use_case in ("borrower", "credit_review"):

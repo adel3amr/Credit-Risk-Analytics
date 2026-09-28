@@ -50,3 +50,10 @@ explicit synthetic assumptions. No new institutional feed or license is claimed.
 
 No empirical coefficients were imported. The frozen simulator determines which
 scenario directions are economically applicable within this reference exercise.
+# Post-R1 evidence addendum — accessed 28 September 2026
+
+| ID | Primary source / tier | Claim supported | Applicability and limits |
+|---|---|---|---|
+| H-E1 | BIS CRI10 general credit risk management, https://www.bis.org/committees/bcbs/basel-consolidated-guidelines/module/cri/10 / primary supervisory guidance | Guarantor quality/legal capacity and collateral valuation/enforceability are relevant source evidence | Capture design only; no synthetic feature mapping or IFRS 9 coefficients inferred |
+| H-E2 | BIS CRE22, effective 2023, https://www.bis.org/committees/bcbs/basel-framework/standard/cre/22/inforce/2023-01-01/published/2020-11-26 / primary prudential standard | Documentary coverage and enforceability conditions | Not substituted for IFRS 9 or internal staging/watchlist policy |
+| H-E3 | Scikit-learn 1.8 IsotonicRegression, https://scikit-learn.org/1.8/modules/generated/sklearn.isotonic.IsotonicRegression.html / primary technical documentation | Monotonic fit and interpolation implementation | Not evidence that the rejected calibration is economically sufficient |

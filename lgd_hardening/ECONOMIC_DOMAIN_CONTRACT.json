@@ -1,0 +1,15 @@
+{
+  "version": "lgd-economic-domain-1",
+  "origin": "Existing S2 mechanical economic bounds, not fitted to rejected holdout rows",
+  "mechanical_domain": {"output_growth_pct":[-10,8],"unemployment_pct":[2,20],"collateral_change_pct":[-35,25],"liquidity":[0.05,1]},
+  "scenario_mapping": {"output_growth_pct":"+dg","unemployment_pct":"+du","collateral_change_pct":"+2*dg-du","liquidity":"+0.035*dg-0.025*du"},
+  "silent_clipping": false,
+  "model_domain": "Frozen development extrema AND local support in macro/collateral/guarantee space",
+  "local_support": {"same_collateral_type":true,"minimum_observations":20,"minimum_sector_quarter_clusters":3,"maximum_chebyshev_distance_in_development_iqr":0.75},
+  "pipeline_requirement": "DGP output -> history -> features -> every scenario -> support -> promotion -> score",
+  "engineering_check": "Every declared operational scenario must be assessed; declared DGP bounds alone do not confer model eligibility",
+  "ood_action":"REJECT_EXPECTED_LGD; expose only non-bookable [0,1] sensitivity interval",
+  "coverage_status":"NOT VALIDATED FOR FULL DECLARED DOMAIN; no generated training extension or narrower relabelled holdout",
+  "institutional_feature_derivation":"BLOCKED_PENDING_CAPTURE_AND_VALIDATION",
+  "final_holdout_action":"DO_NOT_OPEN_UNTIL_ENGINEERING_AND_DATA_GATES_PASS"
+}

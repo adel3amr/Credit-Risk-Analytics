@@ -96,3 +96,11 @@ No thresholds or model parameters changed after final opening. Independent
 arithmetic is not independent institutional validation; no external approval.
 
 The earlier validation reports below remain evidence of their historical releases.
+# Post-R1 preflight assessment — 28 September 2026
+
+The latest work reproduced the 151-test baseline and ends with 168 passing tests.
+See `lgd_hardening/DECISION.md` for the rejected calibration, quality lineage,
+prediction-band audit, independent-unit precision planning and explicit domain
+controls. **No new final independent holdout was generated or opened.** Old R1
+promotion data are now known engineering evidence. No new model validation PASS
+or promotion is asserted.

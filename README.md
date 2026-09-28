@@ -1,4 +1,11 @@
-> Latest completed work: [focused S2-R1 decision](s2_remediation/DECISION.md).
+> Latest completed work: [post-R1 hardening decision](lgd_hardening/DECISION.md).
+> **168 tests pass. R1 remains unpromoted.** A calibration trial was rejected;
+> residual recovery-quality lineage, domain and validation issues remain. New
+> domain/capture/release controls are implemented. No new final holdout was opened
+> and no missing prediction-time information was fabricated.
+> [Commands and evidence](lgd_hardening/README.md).
+>
+> Previous completed work: [focused S2-R1 decision](s2_remediation/DECISION.md).
 > **151 tests pass; candidate NOT PROMOTED.** Scenario reversals are zero and
 > current conditional bias is +0.10 pp. Downside point bias improves to −0.47 pp,
 > but uncertainty, guarantees, fresh holdout support and prediction-band checks

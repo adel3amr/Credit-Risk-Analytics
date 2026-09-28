@@ -83,3 +83,15 @@ platform maintainer pending institutional assignment.
 
 Final decision: `s2_remediation/results/decision.json`; 29 failed individual
 acceptance checks span four failed promotion gates. Full test suite: 151 passed.
+# Latest finding events — 28 September 2026
+
+| ID | Classification / severity | Evidence and action | Disposition |
+|---|---|---|---|
+| H1 | DATA ARCHITECTURE / High | S2/R1 retain imported S1 quality-state pathways; exact source join and development sensitivity in `lgd_hardening/results` | OPEN: capture and validated derivation unavailable; no hidden state introduced |
+| H2 | MODEL IMPLEMENTATION / High | Global continuous calibration worsens downside −0.47→−1.59 pp and original high-band errors | REJECTED candidate; R1 retained; no new final holdout |
+| H3 | GOVERNANCE / Moderate | Declared physical bounds, scenario saturation and empirical support were not distinct at the new scoring boundary | Explicit domain contract, non-clipping flags and non-bookable OOD bounds implemented; coverage finding still OPEN |
+| H4 | GOVERNANCE / Moderate | A status string alone was insufficient release evidence in frozen research helper | New controlled runtime requires decision hash, identity and all eight gates; historical helper frozen |
+| H5 | VALIDATION / High | High prediction-band bias exceeds tolerance before uncertainty; extra facility rows cannot repair it | OPEN; full band composition and independent-unit precision audit retained |
+
+See `lgd_hardening/DECISION.md`. These events do not erase previous failures or
+claim the information gap proves every alternative statistical method impossible.
