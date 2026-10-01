@@ -251,6 +251,7 @@ def _borrower(conn, run_id: str, borrower_id: str) -> tuple[dict, list[dict]]:
     run = service.one(conn, s.runs, run_id)
     if run["status"] != "SUCCEEDED":
         raise service.Conflict("Successful run required")
+
     rows = [
         dict(row)
         for row in conn.execute(
@@ -262,103 +263,277 @@ def _borrower(conn, run_id: str, borrower_id: str) -> tuple[dict, list[dict]]:
     ]
     if not rows:
         raise service.NotFound("Borrower decision not found in run")
-    facilities = [
-        {
-            "facility_id": row["facility_id"],
-            "stage": row["stage"],
-            "pd": row["pd"],
-            "lgd": row["lgd"],
-            "ead": row["ead"],
-            "ecl": row["ecl"],
-            "stage_reasons": row["trace"].get("stage_reasons", []),
-            "watchlist": row["trace"].get("watchlist"),
-            "sicr": row["trace"].get("sicr"),
-        }
-        for row in rows
-    ]
-    return {"run_id": run_id, "borrower_id": borrower_id, "facilities": facilities}, [
-        {"type": "decision_trace", "run_id": run_id, "borrower_id": borrower_id}
+
+    dataset_id = run["dataset_id"]
+    borrower = (
+        conn.execute(
+            select(s.borrowers).where(
+                s.borrowers.c.dataset_id == dataset_id,
+                s.borrowers.c.id == borrower_id,
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if borrower is None:
+        raise service.NotFound("Borrower source record not found")
+
+    source = dict(borrower["payload"])
+    features = dict(source.get("features", {}))
+
+    facilities = []
+    for row in rows:
+        trace = row["trace"]
+        facility_source = dict(trace.get("source_facility", {}))
+        facilities.append(
+            {
+                "facility_id": row["facility_id"],
+                "product": facility_source.get("product"),
+                "stage": row["stage"],
+                "stage_reasons": trace.get("stage_reasons", []),
+                "sicr": trace.get("sicr"),
+                "watchlist": trace.get("watchlist"),
+                "risk_rating": trace.get("risk_rating"),
+                "risk_direction": trace.get("risk_direction"),
+                "ews": trace.get("ews", []),
+                "pit_pd": trace.get("pit_pd"),
+                "forward_pd": row["pd"],
+                "scenario_pd": trace.get("scenario_pd", {}),
+                "lifetime_pd": trace.get("lifetime_pd"),
+                "effective_pd": trace.get("effective_pd"),
+                "lgd": row["lgd"],
+                "ead": row["ead"],
+                "ecl": row["ecl"],
+                "remaining_months": trace.get("remaining_months"),
+                "collateral_type": facility_source.get("collateral_type"),
+                "collateral_coverage": facility_source.get("collateral_coverage"),
+                "guarantee_coverage": facility_source.get("guarantee_coverage"),
+                "lien_rank": facility_source.get("lien_rank"),
+                "drawn": facility_source.get("drawn"),
+                "limit": facility_source.get("limit"),
+                "face": facility_source.get("face"),
+            }
+        )
+
+    stages = sorted({f["stage"] for f in facilities})
+    total_ead = sum(float(f["ead"] or 0) for f in facilities)
+    total_ecl = sum(float(f["ecl"] or 0) for f in facilities)
+
+    evidence = {
+        "run_id": run_id,
+        "borrower_id": borrower_id,
+        "industry": borrower["industry"],
+        "stages": stages,
+        "total_ead": total_ead,
+        "total_ecl": total_ecl,
+        "source_profile": {
+            "collateral_type": source.get("collateral_type"),
+            "observed_at": source.get("observed_at"),
+            "features": features,
+        },
+        "facilities": facilities,
+        "bank_gate": "BLOCKED",
+    }
+    return evidence, [
+        {"type": "decision_trace", "run_id": run_id, "borrower_id": borrower_id},
+        {"type": "borrower_source", "dataset_id": dataset_id, "borrower_id": borrower_id},
     ]
 
 
 def _portfolio(conn, run_id: str) -> tuple[dict, list[dict]]:
     base = service.portfolio(conn, run_id)
     run = service.one(conn, s.runs, run_id)
-    dataset_id = run["dataset_id"]
+    dataset = service.one(conn, s.datasets, run["dataset_id"])
+    traces = service.traces(conn, run_id)
 
-    grouped = conn.execute(
-        select(
-            s.decisions.c.stage,
-            func.count().label("facilities"),
-            func.sum(s.decisions.c.ead).label("ead"),
-            func.sum(s.decisions.c.ecl).label("ecl"),
-        )
-        .where(s.decisions.c.run_id == run_id)
-        .group_by(s.decisions.c.stage)
-    ).mappings()
-
-    industry_rows = conn.execute(
-        select(
-            s.borrowers.c.industry,
-            func.count(s.decisions.c.facility_id).label("facilities"),
-            func.count(func.distinct(s.decisions.c.borrower_id)).label("borrowers"),
-            func.sum(s.decisions.c.ead).label("ead"),
-            func.sum(s.decisions.c.ecl).label("ecl"),
-            func.avg(s.decisions.c.pd).label("mean_pd"),
-            func.avg(s.decisions.c.lgd).label("mean_lgd"),
-        )
-        .select_from(
-            s.decisions.join(
-                s.borrowers,
-                (s.borrowers.c.dataset_id == dataset_id)
-                & (s.borrowers.c.id == s.decisions.c.borrower_id),
+    def bucket(key_fn):
+        out = {}
+        for t in traces:
+            key = str(key_fn(t))
+            row = out.setdefault(
+                key,
+                {"facilities": 0, "borrowers": set(), "ead": 0.0, "ecl": 0.0, "pd_sum": 0.0, "lgd_sum": 0.0},
             )
-        )
-        .where(s.decisions.c.run_id == run_id)
-        .group_by(s.borrowers.c.industry)
-        .order_by(func.sum(s.decisions.c.ecl).desc())
-    ).mappings()
-
-    industries = [
-        {
-            "industry": row["industry"],
-            "facilities": int(row["facilities"] or 0),
-            "borrowers": int(row["borrowers"] or 0),
-            "ead": float(row["ead"] or 0.0),
-            "ecl": float(row["ecl"] or 0.0),
-            "mean_pd": float(row["mean_pd"] or 0.0),
-            "mean_lgd": float(row["mean_lgd"] or 0.0),
-        }
-        for row in industry_rows
-    ]
+            row["facilities"] += 1
+            row["borrowers"].add(t["borrower_id"])
+            row["ead"] += float(t["ead"])
+            row["ecl"] += float(t["ecl"])
+            row["pd_sum"] += float(t["pd"])
+            row["lgd_sum"] += float(t["lgd"])
+        result = []
+        for key, row in out.items():
+            n = row["facilities"]
+            result.append(
+                {
+                    "name": key,
+                    "facilities": n,
+                    "borrowers": len(row["borrowers"]),
+                    "ead": row["ead"],
+                    "ecl": row["ecl"],
+                    "mean_pd": row["pd_sum"] / n if n else 0.0,
+                    "mean_lgd": row["lgd_sum"] / n if n else 0.0,
+                }
+            )
+        return result
 
     total_ead = float(base["ead"] or 0.0)
     total_ecl = float(base["ecl"] or 0.0)
-    for row in industries:
-        row["ead_share"] = row["ead"] / total_ead if total_ead else 0.0
-        row["ecl_share"] = row["ecl"] / total_ecl if total_ecl else 0.0
-        row["loss_intensity"] = row["ecl"] / row["ead"] if row["ead"] else 0.0
+
+    def enrich(rows):
+        for row in rows:
+            row["ead_share"] = row["ead"] / total_ead if total_ead else 0.0
+            row["ecl_share"] = row["ecl"] / total_ecl if total_ecl else 0.0
+            row["loss_intensity"] = row["ecl"] / row["ead"] if row["ead"] else 0.0
+        return rows
+
+    by_stage = enrich(bucket(lambda t: t["stage"]))
+    by_industry = enrich(bucket(lambda t: t["source_borrower"]["industry"]))
+    by_product = enrich(bucket(lambda t: t["source_facility"]["product"]))
+    by_rating = enrich(bucket(lambda t: t.get("risk_rating")))
+    by_direction = enrich(bucket(lambda t: t.get("risk_direction")))
+    by_collateral = enrich(bucket(lambda t: t["source_facility"].get("collateral_type")))
+
+    borrower_rollup = {}
+    for t in traces:
+        bid = t["borrower_id"]
+        row = borrower_rollup.setdefault(
+            bid,
+            {
+                "borrower_id": bid,
+                "industry": t["source_borrower"]["industry"],
+                "stage": t["stage"],
+                "risk_rating": t.get("risk_rating"),
+                "risk_direction": t.get("risk_direction"),
+                "watchlist": bool(t.get("watchlist")),
+                "sicr": bool(t.get("sicr")),
+                "facilities": 0,
+                "ead": 0.0,
+                "ecl": 0.0,
+                "max_pd": 0.0,
+                "max_lgd": 0.0,
+            },
+        )
+        row["facilities"] += 1
+        row["ead"] += float(t["ead"])
+        row["ecl"] += float(t["ecl"])
+        row["max_pd"] = max(row["max_pd"], float(t["pd"]))
+        row["max_lgd"] = max(row["max_lgd"], float(t["lgd"]))
+        if t["stage"] == "Stage 3" or (t["stage"] == "Stage 2" and row["stage"] == "Stage 1"):
+            row["stage"] = t["stage"]
+
+    top_borrowers_ecl = sorted(borrower_rollup.values(), key=lambda x: x["ecl"], reverse=True)[:15]
+    top_borrowers_ead = sorted(borrower_rollup.values(), key=lambda x: x["ead"], reverse=True)[:15]
+    top_facilities_ecl = sorted(
+        [
+            {
+                "facility_id": t["facility_id"],
+                "borrower_id": t["borrower_id"],
+                "industry": t["source_borrower"]["industry"],
+                "product": t["source_facility"]["product"],
+                "stage": t["stage"],
+                "risk_rating": t.get("risk_rating"),
+                "risk_direction": t.get("risk_direction"),
+                "pd": float(t["pd"]),
+                "lgd": float(t["lgd"]),
+                "ead": float(t["ead"]),
+                "ecl": float(t["ecl"]),
+                "collateral_type": t["source_facility"].get("collateral_type"),
+                "guarantee_coverage": t["source_facility"].get("guarantee_coverage"),
+            }
+            for t in traces
+        ],
+        key=lambda x: x["ecl"],
+        reverse=True,
+    )[:15]
+
+    stage_counts = {r["name"]: r["facilities"] for r in by_stage}
+    watchlist_count = len({t["borrower_id"] for t in traces if t.get("watchlist")})
+    sicr_count = len({t["borrower_id"] for t in traces if t.get("sicr")})
+    deteriorating_count = len({t["borrower_id"] for t in traces if t.get("risk_direction") == "Deteriorating"})
+    unsecured_ead = sum(
+        float(t["ead"])
+        for t in traces
+        if t["source_facility"].get("collateral_type") == "Unsecured"
+    )
+    guaranteed_ead = sum(
+        float(t["ead"])
+        for t in traces
+        if float(t["source_facility"].get("guarantee_coverage") or 0) > 0
+    )
+
+    ews_counts = {}
+    stage_reason_counts = {}
+    for t in traces:
+        for signal in t.get("ews", []):
+            if signal.get("triggered"):
+                ews_counts[signal.get("id", "unknown")] = ews_counts.get(signal.get("id", "unknown"), 0) + 1
+        for reason in t.get("stage_reasons", []):
+            stage_reason_counts[reason] = stage_reason_counts.get(reason, 0) + 1
+
+    scenarios = {}
+    for t in traces:
+        for name, value in t.get("scenario_pd", {}).items():
+            row = scenarios.setdefault(name, {"count": 0, "pd_sum": 0.0})
+            row["count"] += 1
+            row["pd_sum"] += float(value)
+    scenario_pd = {
+        name: row["pd_sum"] / row["count"] if row["count"] else 0.0
+        for name, row in scenarios.items()
+    }
 
     evidence = {
-        "run_id": run_id,
-        "facility_count": base["facility_count"],
-        "ead": total_ead,
-        "ecl": total_ecl,
-        "bank_gate": base["bank_gate"],
-        "by_stage": {
-            row["stage"]: {
-                "facilities": row["facilities"],
-                "ead": row["ead"],
-                "ecl": row["ecl"],
-            }
-            for row in grouped
+        "run": {
+            "run_id": run_id,
+            "purpose": run["purpose"],
+            "status": run["status"],
+            "effective_date": dataset["effective_date"],
+            "dataset_name": dataset["name"],
+            "dataset_status": dataset["status"],
+            "dataset_dq": dataset["dq"],
+            "bank_gate": base["bank_gate"],
         },
-        "by_industry": industries,
-        "top_industries_by_ecl": industries[:10],
+        "portfolio": {
+            "borrowers": len(borrower_rollup),
+            "facilities": base["facility_count"],
+            "ead": total_ead,
+            "ecl": total_ecl,
+            "ecl_to_ead": total_ecl / total_ead if total_ead else 0.0,
+            "reference_ecl": float(base.get("reference_ecl", total_ecl)),
+            "controlled_reference_ecl": float(base.get("controlled_reference_ecl", total_ecl)),
+            "override_adjustment": float(base.get("override_adjustment", 0.0)),
+            "approved_override_count": len(base.get("approved_overrides", [])),
+            "watchlist_borrowers": watchlist_count,
+            "sicr_borrowers": sicr_count,
+            "deteriorating_borrowers": deteriorating_count,
+            "unsecured_ead": unsecured_ead,
+            "unsecured_ead_share": unsecured_ead / total_ead if total_ead else 0.0,
+            "guaranteed_ead": guaranteed_ead,
+            "guaranteed_ead_share": guaranteed_ead / total_ead if total_ead else 0.0,
+            "stage_counts": stage_counts,
+        },
+        "by_stage": sorted(by_stage, key=lambda x: x["ecl"], reverse=True),
+        "by_industry": sorted(by_industry, key=lambda x: x["ecl"], reverse=True),
+        "by_product": sorted(by_product, key=lambda x: x["ecl"], reverse=True),
+        "by_risk_rating": sorted(by_rating, key=lambda x: (x["name"] == "None", x["name"])),
+        "by_risk_direction": sorted(by_direction, key=lambda x: x["ecl"], reverse=True),
+        "by_collateral_type": sorted(by_collateral, key=lambda x: x["ecl"], reverse=True),
+        "scenario_mean_pd": scenario_pd,
+        "ews_trigger_counts": ews_counts,
+        "stage_reason_counts": stage_reason_counts,
+        "top_borrowers_by_ecl": top_borrowers_ecl,
+        "top_borrowers_by_ead": top_borrowers_ead,
+        "top_facilities_by_ecl": top_facilities_ecl,
+        "concentrations": base.get("concentrations", {}),
+        "interpretation_note": (
+            "All values are governed outputs from the selected successful synthetic reference run. "
+            "Rankings are descriptive portfolio analytics, not credit decisions."
+        ),
     }
+
     return evidence, [
         {"type": "portfolio_run", "run_id": run_id},
-        {"type": "portfolio_industry_aggregation", "run_id": run_id},
+        {"type": "portfolio_aggregations", "run_id": run_id},
+        {"type": "governed_decision_traces", "run_id": run_id},
     ]
 
 
