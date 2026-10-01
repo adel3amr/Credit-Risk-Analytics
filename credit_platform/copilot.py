@@ -71,14 +71,21 @@ class DeterministicProvider:
                 "These are retrieved run outputs; this narrative does not change the decision."
             )
         if use_case == "portfolio":
+            portfolio = evidence["portfolio"]
             stages = ", ".join(
-                f"{k}: {v['facilities']} facilities / ECL {v['ecl']:,.2f}"
-                for k, v in sorted(evidence["by_stage"].items())
+                f"{row['name']}: {row['facilities']} facilities / ECL {row['ecl']:,.2f}"
+                for row in evidence["by_stage"]
+            )
+            top = evidence.get("by_industry", [])[:3]
+            industries = ", ".join(
+                f"{row['name']} (ECL {row['ecl']:,.2f})" for row in top
             )
             return (
-                f"Run {evidence['run_id']} contains {evidence['facility_count']} facilities, "
-                f"EAD {evidence['ead']:,.2f}, and governed ECL {evidence['ecl']:,.2f}. "
-                f"Stage composition: {stages}. Bank-use gate: {evidence['bank_gate']}."
+                f"Run {evidence['run']['run_id']} contains {portfolio['facilities']} facilities, "
+                f"EAD {portfolio['ead']:,.2f}, and governed ECL {portfolio['ecl']:,.2f}. "
+                f"Stage composition: {stages}. "
+                f"Highest-ECL industries: {industries or 'not available'}. "
+                f"Bank-use gate: {evidence['run']['bank_gate']}."
             )
         finding = evidence["lgd_finding"]
         return (
@@ -158,12 +165,17 @@ class OllamaProvider:
 
     def render(self, question: str, evidence: dict, use_case: str) -> str:
         instruction = (
-            "You are a governed Credit Risk Copilot. Answer the user's question using only "
-            "the supplied governed evidence. Do not invent facts, do not recalculate or replace "
-            "PD/LGD/EAD/ECL/SICR/staging, do not approve overrides, do not promote models, and "
-            "do not imply bank approval. Distinguish evidence from interpretation and mention "
-            "material limitations when relevant. Be concise but directly answer the question. "
-            "Human review is required."
+            "You are a governed Credit Risk Copilot for a synthetic reference portfolio. "
+            "Answer the user's descriptive or analytical credit-risk question directly using only "
+            "the supplied governed evidence. Questions about industries, products, stages, ratings, "
+            "concentrations, ECL, EAD, PD, LGD, watchlist, SICR, EWS, collateral, guarantees and "
+            "borrower/facility rankings are permitted and should be answered when the evidence contains them. "
+            "Do not invent facts, do not alter or replace governed PD/LGD/EAD/ECL/SICR/staging, "
+            "do not approve overrides, do not promote models, and do not imply bank approval. "
+            "You may compare, rank, summarize and calculate simple ratios from supplied values. "
+            "If the requested field is absent, say specifically which evidence is missing instead of giving "
+            "a generic refusal. Distinguish evidence from interpretation and mention material limitations "
+            "when relevant. Be concise and directly answer the question. Human review is required."
         )
         prompt = (
             f"{instruction}\n\nUse case: {use_case}\n"
@@ -175,7 +187,11 @@ class OllamaProvider:
                 "model": self.model,
                 "prompt": prompt,
                 "stream": False,
-                "options": {"temperature": 0.2},
+                "keep_alive": "30m",
+                "options": {
+                    "temperature": 0.15,
+                    "num_predict": 420,
+                },
             }
         ).encode()
         req = Request(
@@ -470,6 +486,48 @@ def _portfolio(conn, run_id: str) -> tuple[dict, list[dict]]:
         for reason in t.get("stage_reasons", []):
             stage_reason_counts[reason] = stage_reason_counts.get(reason, 0) + 1
 
+    borrower_features = {}
+    for t in traces:
+        bid = t["borrower_id"]
+        if bid not in borrower_features:
+            borrower_features[bid] = dict(t["source_borrower"].get("features", {}))
+
+    def borrower_count(predicate):
+        return sum(1 for features in borrower_features.values() if predicate(features))
+
+    risk_indicators = {
+        "high_utilization_ge_80pct_borrowers": borrower_count(
+            lambda f: float(f.get("credit_utilization", 0)) >= 0.80
+        ),
+        "days_past_due_gt_0_borrowers": borrower_count(
+            lambda f: float(f.get("days_past_due", 0)) > 0
+        ),
+        "days_past_due_ge_30_borrowers": borrower_count(
+            lambda f: float(f.get("days_past_due", 0)) >= 30
+        ),
+        "days_past_due_ge_90_borrowers": borrower_count(
+            lambda f: float(f.get("days_past_due", 0)) >= 90
+        ),
+        "recent_delinquency_borrowers": borrower_count(
+            lambda f: float(f.get("delinquencies_12m", 0)) > 0
+        ),
+        "previous_default_borrowers": borrower_count(
+            lambda f: float(f.get("previous_defaults", 0)) > 0
+        ),
+        "current_credit_impaired_borrowers": borrower_count(
+            lambda f: float(f.get("current_credit_impaired", 0)) == 1
+        ),
+        "limit_breach_borrowers": borrower_count(
+            lambda f: float(f.get("limit_breach_count", 0)) > 0
+        ),
+        "persistent_high_utilization_borrowers": borrower_count(
+            lambda f: float(f.get("months_above_80_utilization", 0)) > 0
+        ),
+        "high_leverage_ge_3x_borrowers": borrower_count(
+            lambda f: float(f.get("leverage_ratio", 0)) >= 3.0
+        ),
+    }
+
     scenarios = {}
     for t in traces:
         for name, value in t.get("scenario_pd", {}).items():
@@ -520,6 +578,7 @@ def _portfolio(conn, run_id: str) -> tuple[dict, list[dict]]:
         "scenario_mean_pd": scenario_pd,
         "ews_trigger_counts": ews_counts,
         "stage_reason_counts": stage_reason_counts,
+        "risk_indicator_counts": risk_indicators,
         "top_borrowers_by_ecl": top_borrowers_ecl,
         "top_borrowers_by_ead": top_borrowers_ead,
         "top_facilities_by_ecl": top_facilities_ecl,
