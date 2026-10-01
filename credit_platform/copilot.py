@@ -184,7 +184,9 @@ class ExternalJSONProvider:
 
 
 def provider() -> Provider:
-    configured = os.getenv("COPILOT_PROVIDER", "deterministic").lower()
+    configured = os.getenv("COPILOT_PROVIDER", "auto").lower()
+    if configured == "auto":
+        return OpenAIResponsesProvider() if os.getenv("OPENAI_API_KEY") else DeterministicProvider()
     if configured == "deterministic":
         return DeterministicProvider()
     if configured == "openai":
