@@ -224,6 +224,8 @@ class OllamaProvider:
                 "by_risk_direction": evidence.get("by_risk_direction", []),
                 "by_collateral_type": evidence.get("by_collateral_type", []),
                 "risk_indicator_counts": evidence.get("risk_indicator_counts", {}),
+                "risk_patterns": evidence.get("risk_patterns", []),
+                "portfolio_review_actions": evidence.get("portfolio_review_actions", []),
                 "ews_trigger_counts": evidence.get("ews_trigger_counts", {}),
                 "stage_reason_counts": evidence.get("stage_reason_counts", {}),
                 "top_borrowers_by_ecl": evidence.get("top_borrowers_by_ecl", [])[:5],
@@ -613,6 +615,127 @@ def _portfolio(conn, run_id: str) -> tuple[dict, list[dict]]:
         for name, row in scenarios.items()
     }
 
+    # Reproduce the original Portfolio Cockpit's transparent review logic
+    # as governed evidence for the Copilot rather than asking the LLM to invent it.
+    borrower_level = list(borrower_rollup.values())
+    borrower_count_total = max(len(borrower_level), 1)
+
+    portfolio_pd = (
+        sum(float(t["pd"]) for t in traces) / len(traces) if traces else 0.0
+    )
+    portfolio_loss = total_ecl / total_ead if total_ead else 0.0
+    min_group = max(30, int(borrower_count_total * 0.01))
+
+    risk_patterns = []
+    borrower_trace = {}
+    for t in traces:
+        borrower_trace.setdefault(t["borrower_id"], t)
+
+    def borrower_subset(predicate):
+        ids = []
+        for bid, t in borrower_trace.items():
+            features = t["source_borrower"].get("features", {})
+            if predicate(t, features):
+                ids.append(bid)
+        return ids
+
+    checks = [
+        ("High utilization", borrower_subset(lambda t, f: float(f.get("credit_utilization", 0)) >= 0.80)),
+        ("Recent delinquency", borrower_subset(lambda t, f: float(f.get("delinquencies_12m", 0)) > 0)),
+        ("Previous default", borrower_subset(lambda t, f: float(f.get("previous_defaults", 0)) > 0)),
+        ("Deteriorating EWS", borrower_subset(lambda t, f: t.get("risk_direction") == "Deteriorating")),
+        ("Unsecured", borrower_subset(lambda t, f: t["source_facility"].get("collateral_type") == "Unsecured")),
+        (
+            "High utilization + deterioration",
+            borrower_subset(
+                lambda t, f: float(f.get("credit_utilization", 0)) >= 0.80
+                and t.get("risk_direction") == "Deteriorating"
+            ),
+        ),
+    ]
+
+    for label, ids in checks:
+        if len(ids) < min_group:
+            continue
+        idset = set(ids)
+        subset = [t for t in traces if t["borrower_id"] in idset]
+        ead_sum = sum(float(t["ead"]) for t in subset)
+        ecl_sum = sum(float(t["ecl"]) for t in subset)
+        pd_values = [float(t["pd"]) for t in subset]
+        mean_pd = sum(pd_values) / len(pd_values) if pd_values else 0.0
+        loss_intensity = ecl_sum / ead_sum if ead_sum else 0.0
+        risk_patterns.append(
+            {
+                "pattern": label,
+                "borrowers": len(idset),
+                "ead": ead_sum,
+                "mean_pd": mean_pd,
+                "pd_vs_portfolio": mean_pd / portfolio_pd if portfolio_pd else 0.0,
+                "ecl_to_ead": loss_intensity,
+                "loss_vs_portfolio": loss_intensity / portfolio_loss if portfolio_loss else 0.0,
+            }
+        )
+
+    risk_patterns.sort(key=lambda x: x["loss_vs_portfolio"], reverse=True)
+
+    portfolio_review_actions = []
+
+    # Industry concentration rule from the original Portfolio Cockpit:
+    # mean PD >= 1.25x portfolio mean and sufficient group size.
+    for row in by_industry:
+        if row["borrowers"] >= min_group and row["mean_pd"] >= portfolio_pd * 1.25:
+            portfolio_review_actions.append(
+                {
+                    "type": "industry_concentration",
+                    "industry": row["name"],
+                    "borrowers": row["borrowers"],
+                    "ead": row["ead"],
+                    "mean_pd": row["mean_pd"],
+                    "portfolio_mean_pd": portfolio_pd,
+                    "reason": "Mean PD is at least 1.25x the portfolio mean with sufficient population.",
+                }
+            )
+
+    det_ids = borrower_subset(
+        lambda t, f: t.get("risk_direction") == "Deteriorating"
+        and float(f.get("credit_utilization", 0)) >= 0.80
+    )
+    if len(det_ids) >= min_group:
+        idset = set(det_ids)
+        ead_sum = sum(float(t["ead"]) for t in traces if t["borrower_id"] in idset)
+        portfolio_review_actions.append(
+            {
+                "type": "deteriorating_high_utilization",
+                "borrowers": len(idset),
+                "ead": ead_sum,
+                "reason": "Deteriorating borrowers with utilization at or above 80%.",
+            }
+        )
+
+    s2u_ids = borrower_subset(
+        lambda t, f: t["stage"] in ("Stage 2", "Stage 3")
+        and t["source_facility"].get("collateral_type") == "Unsecured"
+    )
+    if s2u_ids:
+        idset = set(s2u_ids)
+        ead_sum = sum(float(t["ead"]) for t in traces if t["borrower_id"] in idset)
+        portfolio_review_actions.append(
+            {
+                "type": "unsecured_stage_2_3",
+                "borrowers": len(idset),
+                "ead": ead_sum,
+                "reason": "Unsecured Stage 2/3 borrowers require collateral/recovery review.",
+            }
+        )
+
+    if not portfolio_review_actions:
+        portfolio_review_actions.append(
+            {
+                "type": "routine_monitoring",
+                "reason": "No broad portfolio trigger exceeds the current review thresholds.",
+            }
+        )
+
     evidence = {
         "run": {
             "run_id": run_id,
@@ -653,6 +776,8 @@ def _portfolio(conn, run_id: str) -> tuple[dict, list[dict]]:
         "ews_trigger_counts": ews_counts,
         "stage_reason_counts": stage_reason_counts,
         "risk_indicator_counts": risk_indicators,
+        "risk_patterns": risk_patterns,
+        "portfolio_review_actions": portfolio_review_actions,
         "top_borrowers_by_ecl": top_borrowers_ecl,
         "top_borrowers_by_ead": top_borrowers_ead,
         "top_facilities_by_ecl": top_facilities_ecl,
