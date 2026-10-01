@@ -283,6 +283,9 @@ def _borrower(conn, run_id: str, borrower_id: str) -> tuple[dict, list[dict]]:
 
 def _portfolio(conn, run_id: str) -> tuple[dict, list[dict]]:
     base = service.portfolio(conn, run_id)
+    run = service.one(conn, s.runs, run_id)
+    dataset_id = run["dataset_id"]
+
     grouped = conn.execute(
         select(
             s.decisions.c.stage,
@@ -293,11 +296,54 @@ def _portfolio(conn, run_id: str) -> tuple[dict, list[dict]]:
         .where(s.decisions.c.run_id == run_id)
         .group_by(s.decisions.c.stage)
     ).mappings()
+
+    industry_rows = conn.execute(
+        select(
+            s.borrowers.c.industry,
+            func.count(s.decisions.c.facility_id).label("facilities"),
+            func.count(func.distinct(s.decisions.c.borrower_id)).label("borrowers"),
+            func.sum(s.decisions.c.ead).label("ead"),
+            func.sum(s.decisions.c.ecl).label("ecl"),
+            func.avg(s.decisions.c.pd).label("mean_pd"),
+            func.avg(s.decisions.c.lgd).label("mean_lgd"),
+        )
+        .select_from(
+            s.decisions.join(
+                s.borrowers,
+                (s.borrowers.c.dataset_id == dataset_id)
+                & (s.borrowers.c.id == s.decisions.c.borrower_id),
+            )
+        )
+        .where(s.decisions.c.run_id == run_id)
+        .group_by(s.borrowers.c.industry)
+        .order_by(func.sum(s.decisions.c.ecl).desc())
+    ).mappings()
+
+    industries = [
+        {
+            "industry": row["industry"],
+            "facilities": int(row["facilities"] or 0),
+            "borrowers": int(row["borrowers"] or 0),
+            "ead": float(row["ead"] or 0.0),
+            "ecl": float(row["ecl"] or 0.0),
+            "mean_pd": float(row["mean_pd"] or 0.0),
+            "mean_lgd": float(row["mean_lgd"] or 0.0),
+        }
+        for row in industry_rows
+    ]
+
+    total_ead = float(base["ead"] or 0.0)
+    total_ecl = float(base["ecl"] or 0.0)
+    for row in industries:
+        row["ead_share"] = row["ead"] / total_ead if total_ead else 0.0
+        row["ecl_share"] = row["ecl"] / total_ecl if total_ecl else 0.0
+        row["loss_intensity"] = row["ecl"] / row["ead"] if row["ead"] else 0.0
+
     evidence = {
         "run_id": run_id,
         "facility_count": base["facility_count"],
-        "ead": base["ead"],
-        "ecl": base["ecl"],
+        "ead": total_ead,
+        "ecl": total_ecl,
         "bank_gate": base["bank_gate"],
         "by_stage": {
             row["stage"]: {
@@ -307,8 +353,13 @@ def _portfolio(conn, run_id: str) -> tuple[dict, list[dict]]:
             }
             for row in grouped
         },
+        "by_industry": industries,
+        "top_industries_by_ecl": industries[:10],
     }
-    return evidence, [{"type": "portfolio_run", "run_id": run_id}]
+    return evidence, [
+        {"type": "portfolio_run", "run_id": run_id},
+        {"type": "portfolio_industry_aggregation", "run_id": run_id},
+    ]
 
 
 def _model_risk() -> tuple[dict, list[dict]]:
