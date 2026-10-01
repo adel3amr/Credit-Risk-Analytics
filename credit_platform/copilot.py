@@ -233,8 +233,81 @@ class OllamaProvider:
         )
         return base
 
+    @staticmethod
+    def _verified_portfolio_facts(question: str, evidence: dict) -> str:
+        """Return exact governed facts for common portfolio questions.
+
+        The local LLM may explain these facts, but it must not be the source of
+        numerical truth.
+        """
+        q = question.lower()
+        p = evidence.get("portfolio", {})
+        lines = []
+
+        if any(k in q for k in ("review action", "main risk", "biggest risk", "key risk", "portfolio risk")):
+            actions = evidence.get("portfolio_review_actions", [])
+            if actions:
+                lines.append("Governed portfolio review actions:")
+                for a in actions:
+                    if a["type"] == "industry_concentration":
+                        lines.append(
+                            f"- Review {a['industry']} concentration: mean PD {a['mean_pd']:.2%} "
+                            f"versus portfolio {a['portfolio_mean_pd']:.2%}, across "
+                            f"{a['borrowers']:,} borrowers and €{a['ead']:,.2f} EAD."
+                        )
+                    elif a["type"] == "deteriorating_high_utilization":
+                        lines.append(
+                            f"- Prioritize {a['borrowers']:,} deteriorating borrowers with utilization "
+                            f"at or above 80%, representing €{a['ead']:,.2f} EAD."
+                        )
+                    elif a["type"] == "unsecured_stage_2_3":
+                        lines.append(
+                            f"- Review collateral/recovery strategy for {a['borrowers']:,} unsecured "
+                            f"Stage 2/3 borrowers representing €{a['ead']:,.2f} EAD."
+                        )
+                    else:
+                        lines.append(f"- {a['reason']}")
+
+        if any(k in q for k in ("industry", "industries", "sector", "sectors")):
+            rows = evidence.get("by_industry", [])
+            if rows:
+                lines.append("Governed industry view (sorted by ECL):")
+                for r in rows[:7]:
+                    lines.append(
+                        f"- {r['name']}: ECL €{r['ecl']:,.2f}; EAD €{r['ead']:,.2f}; "
+                        f"mean PD {r['mean_pd']:.2%}; mean LGD {r['mean_lgd']:.2%}; "
+                        f"loss intensity {r['loss_intensity']:.2%}."
+                    )
+
+        if any(k in q for k in ("stage", "staging")):
+            rows = evidence.get("by_stage", [])
+            if rows:
+                lines.append("Governed stage view:")
+                for r in rows:
+                    lines.append(
+                        f"- {r['name']}: {r['facilities']:,} facilities, {r['borrowers']:,} borrowers, "
+                        f"EAD €{r['ead']:,.2f}, ECL €{r['ecl']:,.2f}."
+                    )
+
+        if any(k in q for k in ("unsecured", "collateral", "guarantee", "guaranteed")) and p:
+            lines.append(
+                f"Governed security view: unsecured EAD €{p.get('unsecured_ead',0):,.2f} "
+                f"({p.get('unsecured_ead_share',0):.2%} of portfolio EAD); guaranteed EAD "
+                f"€{p.get('guaranteed_ead',0):,.2f} ({p.get('guaranteed_ead_share',0):.2%})."
+            )
+
+        if p and not lines:
+            lines.append(
+                f"Governed portfolio totals: {p.get('borrowers',0):,} borrowers, "
+                f"{p.get('facilities',0):,} facilities, EAD €{p.get('ead',0):,.2f}, "
+                f"ECL €{p.get('ecl',0):,.2f}, ECL/EAD {p.get('ecl_to_ead',0):.2%}."
+            )
+
+        return "\n".join(lines)
+
     def render(self, question: str, evidence: dict, use_case: str) -> str:
         evidence = self._focused_evidence(question, evidence, use_case)
+        verified = self._verified_portfolio_facts(question, evidence) if use_case == "portfolio" else ""
         instruction = (
             "You are a governed Credit Risk Copilot for a synthetic reference portfolio. "
             "Answer the user's descriptive or analytical credit-risk question directly using only "
@@ -255,8 +328,9 @@ class OllamaProvider:
         )
         prompt = (
             f"{instruction}\n\nUse case: {use_case}\n"
-            f"Question: {question}\n\nGoverned evidence:\n"
-            f"{json.dumps(evidence, sort_keys=True)}"
+            f"Question: {question}\n\n"
+            + (f"VERIFIED GOVERNED FACTS — copy all numbers exactly; do not recompute or alter them:\n{verified}\n\n" if verified else "")
+            + f"Governed evidence:\n{json.dumps(evidence, sort_keys=True)}"
         )
         body = json.dumps(
             {
@@ -280,7 +354,10 @@ class OllamaProvider:
         answer = result.get("response")
         if not isinstance(answer, str) or not answer.strip():
             raise ValueError("Ollama returned no answer")
-        return answer.strip()
+        answer = answer.strip()
+        if verified:
+            return verified + "\n\nCopilot interpretation:\n" + answer
+        return answer
 
 
 class ExternalJSONProvider:
