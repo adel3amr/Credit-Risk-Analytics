@@ -427,8 +427,8 @@ with tabs[3]:
         "Auditor": "audit",
         "Admin": "admin",
     }
-    actor = {"id": user, "name": user, "role": role_map[role]}
 
+    actor = None
     try:
         db = platform_engine()
         with db.connect() as conn:
@@ -439,11 +439,31 @@ with tabs[3]:
                     .order_by(platform_schema.runs.c.ended_at.desc())
                 ).mappings()
             ]
+            principal_row = (
+                conn.execute(
+                    select(platform_schema.principals)
+                    .where(
+                        platform_schema.principals.c.role == role_map[role],
+                        platform_schema.principals.c.active == 1,
+                    )
+                    .order_by(platform_schema.principals.c.created_at.desc())
+                )
+                .mappings()
+                .first()
+            )
+            if principal_row is not None:
+                actor = dict(principal_row)
     except Exception as exc:
         successful_runs = []
         st.warning(
             "The governed platform database is not ready. Run the platform migrations, "
             "governance seed and reference calculation first."
+        )
+
+    if actor is None:
+        st.warning(
+            f"No active governed principal exists for role '{role_map[role]}'. "
+            "Create one with the platform CLI before using Copilot in this role."
         )
 
     provider_name = "OpenAI GenAI" if __import__("os").environ.get("COPILOT_PROVIDER", "").lower() == "openai" else "Deterministic governed fallback"
@@ -493,7 +513,7 @@ with tabs[3]:
     if use_case in ("borrower", "credit_review"):
         scope_ok = scope_ok and bool(borrower_id)
 
-    if st.button("Ask Risk Copilot", type="primary", disabled=not scope_ok):
+    if st.button("Ask Risk Copilot", type="primary", disabled=(not scope_ok or actor is None)):
         try:
             request = CopilotInput(
                 question=question,
