@@ -90,6 +90,62 @@ class DeterministicProvider:
         )
 
 
+class OpenAIResponsesProvider:
+    """Optional OpenAI Responses API provider. Governed evidence remains the only context."""
+
+    name = "openai-responses"
+    version = "responses-v1"
+
+    def __init__(self):
+        self.key = os.environ.get("OPENAI_API_KEY", "")
+        self.model = os.environ.get("OPENAI_COPILOT_MODEL", "gpt-5.6-luna")
+        if not self.key:
+            raise ValueError("OPENAI_API_KEY is required for the OpenAI Copilot provider")
+
+    def render(self, question: str, evidence: dict, use_case: str) -> str:
+        instruction = (
+            "You are a governed Credit Risk Copilot. Use only the supplied evidence. "
+            "Do not invent facts, recalculate or replace PD/LGD/EAD/ECL/SICR/staging, "
+            "approve overrides, promote models, or imply bank approval. "
+            "Clearly distinguish observed evidence, validation findings and limitations. "
+            "If the evidence is insufficient, say so. Keep the answer concise and useful "
+            "for a credit-risk professional. Human review is required."
+        )
+        body = json.dumps(
+            {
+                "model": self.model,
+                "instructions": instruction,
+                "input": (
+                    f"Use case: {use_case}\\nQuestion: {question}\\n"
+                    f"Governed evidence:\\n{json.dumps(evidence, sort_keys=True)}"
+                ),
+                "max_output_tokens": 700,
+                "store": False,
+            }
+        ).encode()
+        req = Request(
+            "https://api.openai.com/v1/responses",
+            data=body,
+            headers={
+                "Authorization": f"Bearer {self.key}",
+                "Content-Type": "application/json",
+            },
+        )
+        with urlopen(req, timeout=30) as response:  # nosec: fixed HTTPS OpenAI endpoint
+            result = json.loads(response.read(2_000_000))
+        parts = [
+            part.get("text", "")
+            for item in result.get("output", [])
+            if item.get("type") == "message"
+            for part in item.get("content", [])
+            if part.get("type") == "output_text"
+        ]
+        answer = "\\n".join(p.strip() for p in parts if p and p.strip()).strip()
+        if not answer:
+            raise ValueError("OpenAI Responses API returned no text answer")
+        return answer
+
+
 class ExternalJSONProvider:
     """Optional provider. Disabled unless explicit endpoint, key and opt-in are supplied."""
 
@@ -131,6 +187,8 @@ def provider() -> Provider:
     configured = os.getenv("COPILOT_PROVIDER", "deterministic").lower()
     if configured == "deterministic":
         return DeterministicProvider()
+    if configured == "openai":
+        return OpenAIResponsesProvider()
     if configured == "external-json":
         return ExternalJSONProvider()
     raise ValueError("Unsupported Copilot provider")
