@@ -146,6 +146,51 @@ class OpenAIResponsesProvider:
         return answer
 
 
+class OllamaProvider:
+    """Local conversational provider using Ollama. Governed evidence stays on the machine."""
+
+    name = "ollama-local"
+    version = "ollama-v1"
+
+    def __init__(self):
+        self.endpoint = os.environ.get("OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/generate")
+        self.model = os.environ.get("OLLAMA_MODEL", "llama3.2")
+
+    def render(self, question: str, evidence: dict, use_case: str) -> str:
+        instruction = (
+            "You are a governed Credit Risk Copilot. Answer the user's question using only "
+            "the supplied governed evidence. Do not invent facts, do not recalculate or replace "
+            "PD/LGD/EAD/ECL/SICR/staging, do not approve overrides, do not promote models, and "
+            "do not imply bank approval. Distinguish evidence from interpretation and mention "
+            "material limitations when relevant. Be concise but directly answer the question. "
+            "Human review is required."
+        )
+        prompt = (
+            f"{instruction}\n\nUse case: {use_case}\n"
+            f"Question: {question}\n\nGoverned evidence:\n"
+            f"{json.dumps(evidence, sort_keys=True)}"
+        )
+        body = json.dumps(
+            {
+                "model": self.model,
+                "prompt": prompt,
+                "stream": False,
+                "options": {"temperature": 0.2},
+            }
+        ).encode()
+        req = Request(
+            self.endpoint,
+            data=body,
+            headers={"Content-Type": "application/json"},
+        )
+        with urlopen(req, timeout=120) as response:  # nosec: local configurable endpoint
+            result = json.loads(response.read(2_000_000))
+        answer = result.get("response")
+        if not isinstance(answer, str) or not answer.strip():
+            raise ValueError("Ollama returned no answer")
+        return answer.strip()
+
+
 class ExternalJSONProvider:
     """Optional provider. Disabled unless explicit endpoint, key and opt-in are supplied."""
 
@@ -186,9 +231,15 @@ class ExternalJSONProvider:
 def provider() -> Provider:
     configured = os.getenv("COPILOT_PROVIDER", "auto").lower()
     if configured == "auto":
-        return OpenAIResponsesProvider() if os.getenv("OPENAI_API_KEY") else DeterministicProvider()
+        if os.getenv("OPENAI_API_KEY"):
+            return OpenAIResponsesProvider()
+        if os.getenv("OLLAMA_MODEL"):
+            return OllamaProvider()
+        return DeterministicProvider()
     if configured == "deterministic":
         return DeterministicProvider()
+    if configured == "ollama":
+        return OllamaProvider()
     if configured == "openai":
         return OpenAIResponsesProvider()
     if configured == "external-json":
