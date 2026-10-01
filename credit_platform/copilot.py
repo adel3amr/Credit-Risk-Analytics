@@ -157,13 +157,82 @@ class OllamaProvider:
     """Local conversational provider using Ollama. Governed evidence stays on the machine."""
 
     name = "ollama-local"
-    version = "ollama-v1"
+    version = "ollama-v2"
 
     def __init__(self):
         self.endpoint = os.environ.get("OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/generate")
         self.model = os.environ.get("OLLAMA_MODEL", "llama3.2")
 
+    @staticmethod
+    def _focused_evidence(question: str, evidence: dict, use_case: str) -> dict:
+        """Reduce prompt noise for small local models while preserving governed facts."""
+        if use_case != "portfolio":
+            return evidence
+
+        q = question.lower()
+        base = {
+            "run": evidence.get("run"),
+            "portfolio": evidence.get("portfolio"),
+            "interpretation_note": evidence.get("interpretation_note"),
+        }
+
+        if any(k in q for k in ("industry", "industries", "sector", "sectors")):
+            base["by_industry"] = evidence.get("by_industry", [])
+            return base
+        if any(k in q for k in ("product", "products", "facility type", "facilities type")):
+            base["by_product"] = evidence.get("by_product", [])
+            return base
+        if any(k in q for k in ("stage", "staging", "stage 1", "stage 2", "stage 3")):
+            base["by_stage"] = evidence.get("by_stage", [])
+            base["stage_reason_counts"] = evidence.get("stage_reason_counts", {})
+            return base
+        if any(k in q for k in ("rating", "ratings", "risk rating")):
+            base["by_risk_rating"] = evidence.get("by_risk_rating", [])
+            return base
+        if any(k in q for k in ("collateral", "unsecured", "guarantee", "guaranteed")):
+            base["by_collateral_type"] = evidence.get("by_collateral_type", [])
+            return base
+        if any(k in q for k in ("watchlist", "sicr", "ews", "early warning")):
+            base["by_risk_direction"] = evidence.get("by_risk_direction", [])
+            base["ews_trigger_counts"] = evidence.get("ews_trigger_counts", {})
+            base["risk_indicator_counts"] = evidence.get("risk_indicator_counts", {})
+            return base
+        if any(k in q for k in ("borrower", "borrowers", "customer", "customers")):
+            base["top_borrowers_by_ecl"] = evidence.get("top_borrowers_by_ecl", [])
+            base["top_borrowers_by_ead"] = evidence.get("top_borrowers_by_ead", [])
+            return base
+        if any(k in q for k in ("facility", "facilities")):
+            base["top_facilities_by_ecl"] = evidence.get("top_facilities_by_ecl", [])
+            return base
+        if any(k in q for k in ("scenario", "upside", "downside", "macro")):
+            base["scenario_mean_pd"] = evidence.get("scenario_mean_pd", {})
+            return base
+        if any(k in q for k in ("concentration", "concentrations")):
+            base["concentrations"] = evidence.get("concentrations", {})
+            base["by_industry"] = evidence.get("by_industry", [])
+            base["by_product"] = evidence.get("by_product", [])
+            return base
+
+        # Broad portfolio-risk questions get the main aggregate dimensions, but not
+        # every borrower/facility row. This keeps local inference responsive.
+        base.update(
+            {
+                "by_stage": evidence.get("by_stage", []),
+                "by_industry": evidence.get("by_industry", []),
+                "by_product": evidence.get("by_product", []),
+                "by_risk_rating": evidence.get("by_risk_rating", []),
+                "by_risk_direction": evidence.get("by_risk_direction", []),
+                "by_collateral_type": evidence.get("by_collateral_type", []),
+                "risk_indicator_counts": evidence.get("risk_indicator_counts", {}),
+                "ews_trigger_counts": evidence.get("ews_trigger_counts", {}),
+                "stage_reason_counts": evidence.get("stage_reason_counts", {}),
+                "top_borrowers_by_ecl": evidence.get("top_borrowers_by_ecl", [])[:5],
+            }
+        )
+        return base
+
     def render(self, question: str, evidence: dict, use_case: str) -> str:
+        evidence = self._focused_evidence(question, evidence, use_case)
         instruction = (
             "You are a governed Credit Risk Copilot for a synthetic reference portfolio. "
             "Answer the user's descriptive or analytical credit-risk question directly using only "
@@ -173,6 +242,11 @@ class OllamaProvider:
             "Do not invent facts, do not alter or replace governed PD/LGD/EAD/ECL/SICR/staging, "
             "do not approve overrides, do not promote models, and do not imply bank approval. "
             "You may compare, rank, summarize and calculate simple ratios from supplied values. "
+            "Answer the category the user actually asked about: if they ask for industries, rank industries; "
+            "if they ask for products, rank products; if they ask for borrowers, rank borrowers. "
+            "Do not substitute facilities for industries or another entity type. "
+            "Do not describe high ECL as necessarily meaning higher probability of default; ECL reflects "
+            "exposure, probability of default and loss severity together. "
             "If the requested field is absent, say specifically which evidence is missing instead of giving "
             "a generic refusal. Distinguish evidence from interpretation and mention material limitations "
             "when relevant. Be concise and directly answer the question. Human review is required."
