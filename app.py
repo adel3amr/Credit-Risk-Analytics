@@ -2,7 +2,11 @@
 import pandas as pd
 import streamlit as st
 from pathlib import Path
+from sqlalchemy import select
 from src.governance import has_permission, validate_macro_scenarios, OverrideRequest, approve_override, append_audit_event
+from credit_platform.db import engine as platform_engine
+from credit_platform import schema as platform_schema, copilot as governed_copilot
+from credit_platform.domain import CopilotInput
 
 ROOT = Path(__file__).resolve().parent
 AUDIT = ROOT / "outputs" / "borrower_audit_trace.csv"
@@ -17,7 +21,7 @@ FACILITY_ECL = ROOT / "outputs" / "facility_ecl_predictions.csv"
 
 st.set_page_config(page_title="Credit Risk Analytics — V5", layout="wide")
 st.title("Credit Risk Analytics & IFRS 9 Decisioning System — V5")
-st.caption("PD • LGD • EWS • IFRS 9-style staging • ECL • governed interventions")
+st.caption("PD • LGD • EWS • IFRS 9-style staging • ECL • governed interventions • GenAI Copilot")
 
 def pct(v, decimals=2):
     return f"{float(v):.{decimals}%}"
@@ -52,7 +56,7 @@ if not AUDIT.exists():
 df = pd.read_csv(AUDIT)
 
 # Three task-oriented workspaces keep the demo focused.
-tab_names = ["Portfolio Cockpit","Borrower Credit File","Risk Management"]
+tab_names = ["Portfolio Cockpit","Borrower Credit File","Risk Management","Risk Copilot"]
 if role == "Model Validation":
     tab_names.append("Model Validation")
 tabs = st.tabs(tab_names)
@@ -409,8 +413,117 @@ with tabs[2]:
     st.dataframe(pd.DataFrame({"Permission":perms,"Allowed":[has_permission(role,p) for p in perms]}),hide_index=True)
 
 
+with tabs[3]:
+    st.subheader("Risk Copilot")
+    st.caption(
+        "Grounded narrative assistant over governed platform evidence. "
+        "It does not calculate or change PD, LGD, EAD, ECL, staging, ratings or approvals."
+    )
+
+    role_map = {
+        "Credit Analyst": "analyst",
+        "Risk Manager": "manager",
+        "Model Validation": "validator",
+        "Auditor": "audit",
+        "Admin": "admin",
+    }
+    actor = {"id": user, "name": user, "role": role_map[role]}
+
+    try:
+        db = platform_engine()
+        with db.connect() as conn:
+            successful_runs = [
+                dict(r) for r in conn.execute(
+                    select(platform_schema.runs)
+                    .where(platform_schema.runs.c.status == "SUCCEEDED")
+                    .order_by(platform_schema.runs.c.ended_at.desc())
+                ).mappings()
+            ]
+    except Exception as exc:
+        successful_runs = []
+        st.warning(
+            "The governed platform database is not ready. Run the platform migrations, "
+            "governance seed and reference calculation first."
+        )
+
+    provider_name = "OpenAI GenAI" if __import__("os").environ.get("COPILOT_PROVIDER", "").lower() == "openai" else "Deterministic governed fallback"
+    st.caption(f"Provider: {provider_name}")
+
+    use_label = st.selectbox(
+        "Copilot mode",
+        ["Portfolio", "Borrower", "Credit review", "Model risk"],
+        key="copilot_mode",
+    )
+    use_case = {
+        "Portfolio": "portfolio",
+        "Borrower": "borrower",
+        "Credit review": "credit_review",
+        "Model risk": "model_risk",
+    }[use_label]
+
+    selected_run = None
+    borrower_id = None
+    if use_case != "model_risk":
+        if successful_runs:
+            run_labels = {
+                f"{r['id']} · {r['purpose']} · {r['ended_at']}": r["id"]
+                for r in successful_runs
+            }
+            selected_label = st.selectbox("Governed calculation run", list(run_labels))
+            selected_run = run_labels[selected_label]
+        else:
+            st.info("No successful governed calculation run is available yet.")
+
+    if use_case in ("borrower", "credit_review"):
+        borrower_id = st.text_input(
+            "Borrower ID",
+            value=str(st.session_state.get("copilot_borrower", "")),
+            placeholder="e.g. SME11286",
+        )
+
+    default_questions = {
+        "portfolio": "Summarize the portfolio risk profile and the most important areas for human review.",
+        "borrower": "Explain this borrower's governed credit-risk decision and the main drivers.",
+        "credit_review": "Draft a concise credit review from the governed evidence.",
+        "model_risk": "Explain the latest LGD hardening decision and remaining promotion blockers.",
+    }
+    question = st.text_area("Question", value=default_questions[use_case], height=110)
+
+    scope_ok = use_case == "model_risk" or bool(selected_run)
+    if use_case in ("borrower", "credit_review"):
+        scope_ok = scope_ok and bool(borrower_id)
+
+    if st.button("Ask Risk Copilot", type="primary", disabled=not scope_ok):
+        try:
+            request = CopilotInput(
+                question=question,
+                use_case=use_case,
+                run_id=selected_run,
+                borrower_id=borrower_id or None,
+            )
+            result = governed_copilot.answer(db, request, actor)
+            if result["status"] == "ANSWERED":
+                st.markdown(result["answer"])
+            else:
+                st.warning(result["answer"])
+            st.caption(
+                f"{result['provider']} · {result['provider_version']} · "
+                "Human review required · Not an authoritative credit decision"
+            )
+            with st.expander("Evidence and tool calls"):
+                st.json(
+                    {
+                        "facts": result["facts"],
+                        "sources": result["sources"],
+                        "tool_calls": result["tool_calls"],
+                    }
+                )
+        except Exception as exc:
+            st.error(f"Copilot request failed: {exc}")
+
+
 if role == "Model Validation":
-    with tabs[3]:
+    with tabs[4]:
         st.subheader("Model Validation")
         st.caption("Independent validation view — hidden from Credit Analyst, Risk Manager, Auditor and Admin roles.")
 
