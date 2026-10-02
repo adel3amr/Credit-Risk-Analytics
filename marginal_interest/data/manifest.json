@@ -1,0 +1,38 @@
+{
+  "generator_commit": "ce34078fbbaf34c44178ff0eeb6bd754f2b18b09",
+  "version": "MI-1",
+  "source_sha256": "48991e7353707773079e567748a208170fd45f2b3367e1ebb868b3e14037b6b7",
+  "historical_data_modified": false,
+  "pd_rating_control": "Absent in source borrower schema; financial proxies retained; no invented PD/rating",
+  "cohorts": {
+    "development": {
+      "facilities": 12416,
+      "borrowers": 7200,
+      "seed": 10102027,
+      "clusters": 279
+    },
+    "validation": {
+      "facilities": 4170,
+      "borrowers": 2400,
+      "seed": 10102028,
+      "clusters": 138
+    },
+    "final": {
+      "facilities": 4161,
+      "borrowers": 2400,
+      "seed": 10102029,
+      "clusters": 138
+    }
+  },
+  "files": {
+    "validation_ledger.csv.gz": "baa6fffb985ba8e8e71454cd4e4c1e0673bb4861e67d210488bb69302dbcf833",
+    "validation_outcomes.csv.gz": "01193c7ccefd63bb974356f3ef523964c0e6a7819fc558df2734453bd57fb79f",
+    "final_ledger.csv.gz": "40d06f909e955e2950d75b8687f5c05d189f396811c6b2d0b816197df80d115e",
+    "development_ledger.csv.gz": "01956026308f8b9d88af65f7e2ba9f7e1c1e463c52d79564072ce659b73fd030",
+    "final_outcomes.csv.gz": "44238a792b02510733e1c1b2d3c19fb1b6b85ef06a86443e27ae53b556efb70c",
+    "development_outcomes.csv.gz": "66d519b112585440c0af862ab8e7026884002b03b0999a13f29997fbdcdb3a3b",
+    "final_inputs.csv.gz": "8ac869e357e4d3264f64aea11e090d8b0fe618bba2f60a2804c65261acc820e8",
+    "development_inputs.csv.gz": "dced535ad74b473a1e4a676d8118df706581ec9bb0f84411ef3ac5434237d2c8",
+    "validation_inputs.csv.gz": "3fcfe9f66fe026d7758ccff8c1666c8074d8254ac25287d9a1a80bc757bfe48e"
+  }
+}
