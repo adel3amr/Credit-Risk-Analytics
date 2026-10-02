@@ -11,7 +11,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install dependencies
-        run: pip install -r requirements-v5.txt
+        run: pip install -r requirements-platform-lock.txt
       - name: Compile Python
         run: python -m compileall -q src notebooks scripts
       - name: Generate calibrated synthetic portfolio
@@ -35,10 +35,12 @@ jobs:
           assert df["consecutive_ews_months"].between(0, 30).all()
           print(f"Generated {len(df):,} borrowers; default rate={df['default'].mean():.2%}")
           PY
-      - name: Run regression tests
-        run: python -m pytest -q
       - name: Run original pipeline
         run: python notebooks/credit_risk_pipeline.py
+      - name: Build trusted platform reference artifacts
+        run: python -m credit_platform.cli build-models
+      - name: Run regression tests
+        run: python -m pytest -q
       - name: Run LGD governance diagnostics
         run: python notebooks/lgd_governance_diagnostics.py
       - name: Audit accounting identities

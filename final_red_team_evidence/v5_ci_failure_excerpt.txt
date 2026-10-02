@@ -1,0 +1,13 @@
+Source: GitHub Actions run 36838731545, job 110292375714, retrieved 2026-10-02.
+2026-10-01T08:50:18.5933045Z _________ ERROR collecting tests/platform/test_downturn_resolution.py __________
+2026-10-01T08:50:18.5944814Z E   ModuleNotFoundError: No module named 'pydantic'
+2026-10-01T08:50:18.5945551Z ____________ ERROR collecting tests/platform/test_lgd_hardening.py _____________
+2026-10-01T08:50:18.5956719Z E   ModuleNotFoundError: No module named 'pydantic'
+2026-10-01T08:50:18.5957488Z _______________ ERROR collecting tests/platform/test_platform.py _______________
+2026-10-01T08:50:18.5962819Z E   ModuleNotFoundError: No module named 'alembic'
+2026-10-01T08:50:18.5963332Z ____________ ERROR collecting tests/platform/test_s1_resolution.py _____________
+2026-10-01T08:50:18.5969910Z E   ModuleNotFoundError: No module named 'pydantic'
+2026-10-01T08:50:18.5970380Z ____________ ERROR collecting tests/platform/test_s2_remediation.py ____________
+2026-10-01T08:50:18.5978499Z E   ModuleNotFoundError: No module named 'pydantic'
+2026-10-01T08:50:18.5978920Z ____________ ERROR collecting tests/platform/test_synthetic_bank.py ____________
+2026-10-01T08:50:18.5986785Z E   ModuleNotFoundError: No module named 'pydantic'

@@ -20,7 +20,7 @@
     "borrower_aggregation_error": 0.0
   },
   "reference": {
-    "run_id": "a61a4401-d066-4eaf-b202-377c07dfb44e",
+    "run_id": "971e4bef-3010-4c7e-830b-cb9c11483a16",
     "dataset_hash": "979cabea288e127d7736c5a56d58d9bf804a2393f27f2479a3dd010899d8397b",
     "facility_count": 5172,
     "max_errors": {
@@ -33,7 +33,7 @@
     "portfolio_ecl": 45265972.043210395,
     "audit": {
       "events": 4,
-      "head": "9404b3d36355717cdcbff9b9a2f1b6b48994e05ef1fb7bed1356343100392dd0",
+      "head": "1657b97902a934c03fe618a996f6a5431dd9ba39180892edfbf8288e43c098e9",
       "status": "VERIFIED"
     },
     "versions": {

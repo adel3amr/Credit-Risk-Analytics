@@ -1,5 +1,7 @@
 # Limitations and blocked gates
 
+> Final red-team review: see [CURRENT_SYSTEM_STATE.md](CURRENT_SYSTEM_STATE.md), [FINAL_RED_TEAM_REPORT.md](FINAL_RED_TEAM_REPORT.md), and [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md). Historical results below retain their original scope. No model promotion, methodological change, or dataset regeneration occurred in this review.
+
 Latest hardening (28 September): **no new final validation was opened**. R1's
 results remain unchanged after a continuous calibration worsened key errors and
 was rejected. Imported S1 latent quality shifts remain in S2 recovery targets;

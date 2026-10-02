@@ -1,5 +1,7 @@
 # Governed model inventory
 
+> Final red-team review: see [CURRENT_SYSTEM_STATE.md](CURRENT_SYSTEM_STATE.md), [FINAL_RED_TEAM_REPORT.md](FINAL_RED_TEAM_REPORT.md), and [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md). Historical results below retain their original scope. No model promotion, methodological change, or dataset regeneration occurred in this review.
+
 | ID / version | Purpose / target | Inputs / outputs | Implementation / data | Validation / limitations | Status / monitoring |
 |---|---|---|---|---|---|
 | PD / V5 0dfe4c8 | Twelve-month default probability | Contracted borrower ratios/qualitative drivers and sector → PD | Logistic imputer/scaler, 9k training / 3k holdout, seed42; trusted model hash | AUC .759455, Brier .030003; synthetic population, no bank calibration | REFERENCE; calibration/discrimination and source support |

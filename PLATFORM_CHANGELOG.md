@@ -1,5 +1,7 @@
 # Classified change log
 
+> Final red-team review: see [CURRENT_SYSTEM_STATE.md](CURRENT_SYSTEM_STATE.md), [FINAL_RED_TEAM_REPORT.md](FINAL_RED_TEAM_REPORT.md), and [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md). Historical results below retain their original scope. No model promotion, methodological change, or dataset regeneration occurred in this review.
+
 | Class | Change | Evidence / scope |
 |---|---|---|
 | DOCUMENTATION | Baseline reconciliation, architecture, roadmap and full-platform reports | d50d6f8 precedes implementation |

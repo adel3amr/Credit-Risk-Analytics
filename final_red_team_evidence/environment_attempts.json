@@ -34,5 +34,22 @@
     "exit_code": 127,
     "stdout": "",
     "stderr": "/bin/sh: 1: playwright: not found\n"
+  },
+  {
+    "command": "apt-get install -y postgresql",
+    "exit_code": 100,
+    "stderr": "E: Unable to locate package postgresql",
+    "classification": "ENVIRONMENT: package metadata unavailable; no local PostgreSQL server"
+  },
+  {
+    "command": "PLAYWRIGHT_BROWSERS_PATH=/tmp/credit-red-team-browsers node /opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/cli.js install chromium",
+    "exit_code": 1,
+    "stderr": "End of central directory record signature not found. Either not a zip file, or file is truncated. Failed to install browsers.",
+    "classification": "ENVIRONMENT: browser download failed; rendered UI not verified"
+  },
+  {
+    "command": "Cloud Browser open http://127.0.0.1:8765",
+    "error": "net::ERR_BLOCKED_BY_CLIENT",
+    "classification": "ENVIRONMENT; rendered UI unavailable"
   }
 ]

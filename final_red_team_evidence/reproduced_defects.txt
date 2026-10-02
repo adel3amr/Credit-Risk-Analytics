@@ -2,7 +2,7 @@ FFFFF.......                                                             [100%]
 =================================== FAILURES ===================================
 ________________________ test_run_records_actual_schema ________________________
 
-clients = (<starlette.testclient.TestClient object at 0x7fb76d26d9a0>, {'analyst': {'Authorization': 'Bearer LbF4UTW1HsR6p3WVHDd...ymvRS4h'}, 'audit': {'Authorization': 'Bearer JBmlSJJAqdYlVv6fv8UY6uwCUmoNrsZazUcKMCReJ21suWavA87jV9RxiKZRIPVn'}, ...})
+clients = (<starlette.testclient.TestClient object at 0x7fb76d26d9a0>, {'analyst': {'Authorization': 'Bearer LbF4UTW1HsR6p3WVHDd...ymvRS4h'}, 'audit': {'Authorization': 'Bearer [REDACTED_EPHEMERAL_TEST_CREDENTIAL]'}, ...})
 
     def test_run_records_actual_schema(clients):
         c, h = clients
@@ -18,7 +18,7 @@ E         ?    ^
 tests/platform/test_red_team.py:11: AssertionError
 _____________ test_unknown_run_copilot_is_audited_without_fk_error _____________
 
-clients = (<starlette.testclient.TestClient object at 0x7fb76d283020>, {'analyst': {'Authorization': 'Bearer iHh32etcDpBSPh2DdUa..._XtdVqm'}, 'audit': {'Authorization': 'Bearer NQM6bl6xQHiECoew1-nTDOA5vkrh1Y29Zg3oBEyUq29Uhk3objNkTtWUQYnzT2L4'}, ...})
+clients = (<starlette.testclient.TestClient object at 0x7fb76d283020>, {'analyst': {'Authorization': 'Bearer iHh32etcDpBSPh2DdUa..._XtdVqm'}, 'audit': {'Authorization': 'Bearer [REDACTED_EPHEMERAL_TEST_CREDENTIAL]'}, ...})
 
     def test_unknown_run_copilot_is_audited_without_fk_error(clients):
         c, h = clients
@@ -33,7 +33,7 @@ tests/platform/test_red_team.py:18: AssertionError
 __________ test_decision_views_reject_corrupted_projection[decisions] __________
 
 db = Engine(sqlite:////tmp/pytest-of-root/pytest-1/test_decision_views_reject_cor0/test.db)
-clients = (<starlette.testclient.TestClient object at 0x7fb767f91af0>, {'analyst': {'Authorization': 'Bearer ng1lfysCymo6E6m1sK7...LkUmaLy'}, 'audit': {'Authorization': 'Bearer xmG9yhLFK9GJrdRJI9APFWcY27MzuZf66RMAgvlrgdLPsO6oJitOzdnytvDhkLdW'}, ...})
+clients = (<starlette.testclient.TestClient object at 0x7fb767f91af0>, {'analyst': {'Authorization': 'Bearer ng1lfysCymo6E6m1sK7...LkUmaLy'}, 'audit': {'Authorization': 'Bearer [REDACTED_EPHEMERAL_TEST_CREDENTIAL]'}, ...})
 endpoint = 'decisions'
 
     @pytest.mark.parametrize('endpoint', ['decisions', 'facilities/F1', 'copilot'])
@@ -58,7 +58,7 @@ tests/platform/test_red_team.py:37: AssertionError
 ________ test_decision_views_reject_corrupted_projection[facilities/F1] ________
 
 db = Engine(sqlite:////tmp/pytest-of-root/pytest-1/test_decision_views_reject_cor1/test.db)
-clients = (<starlette.testclient.TestClient object at 0x7fb767d058e0>, {'analyst': {'Authorization': 'Bearer jKpnUFwSADvuQJN_kTM...k-DLgVw'}, 'audit': {'Authorization': 'Bearer 2aKqt3YR4VosUrLHueNZ23ZoYZJpWMm57N8_vKQonv1MU-7TD6cl9X1ftipVHh_L'}, ...})
+clients = (<starlette.testclient.TestClient object at 0x7fb767d058e0>, {'analyst': {'Authorization': 'Bearer jKpnUFwSADvuQJN_kTM...k-DLgVw'}, 'audit': {'Authorization': 'Bearer [REDACTED_EPHEMERAL_TEST_CREDENTIAL]'}, ...})
 endpoint = 'facilities/F1'
 
     @pytest.mark.parametrize('endpoint', ['decisions', 'facilities/F1', 'copilot'])
@@ -83,7 +83,7 @@ tests/platform/test_red_team.py:37: AssertionError
 ___________ test_decision_views_reject_corrupted_projection[copilot] ___________
 
 db = Engine(sqlite:////tmp/pytest-of-root/pytest-1/test_decision_views_reject_cor2/test.db)
-clients = (<starlette.testclient.TestClient object at 0x7fb767c06660>, {'analyst': {'Authorization': 'Bearer gsPuY8G94-uQLWQODzQ...whpSrh_'}, 'audit': {'Authorization': 'Bearer jjI_7533Ot2ygkieHtmVWSGeE0nEQf0NQbUHgmAYHgCh8qqVDLRJLgkPOy4-RUOg'}, ...})
+clients = (<starlette.testclient.TestClient object at 0x7fb767c06660>, {'analyst': {'Authorization': 'Bearer gsPuY8G94-uQLWQODzQ...whpSrh_'}, 'audit': {'Authorization': 'Bearer [REDACTED_EPHEMERAL_TEST_CREDENTIAL]'}, ...})
 endpoint = 'copilot'
 
     @pytest.mark.parametrize('endpoint', ['decisions', 'facilities/F1', 'copilot'])

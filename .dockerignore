@@ -10,3 +10,6 @@ outputs
 data/raw
 data/processed
 platform_evidence/worked_cases.json
+.venv
+venv
+.ruff_cache
