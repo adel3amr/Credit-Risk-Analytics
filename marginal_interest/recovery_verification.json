@@ -1,0 +1,21 @@
+{
+  "repairs": {
+    "development_ledger.csv.gz": {
+      "old": "01956026308f8b9d88af65f7e2ba9f7e1c1e463c52d79564072ce659b73fd030",
+      "new": "0517c7c3a5e9c104a47e3d8e6aa55aa19bf60068c6cfe2d7a20b39aee04d6bbc",
+      "exact_prefix": true,
+      "old_bytes": 904204,
+      "new_bytes": 976046
+    },
+    "final_outcomes.csv.gz": {
+      "old": "cd9b9bf4fbcc3cc1c5c29ada39a43dcabdfb608e7b1c1768e6a8bfa69fa0d550",
+      "new": "44238a792b02510733e1c1b2d3c19fb1b6b85ef06a86443e27ae53b556efb70c",
+      "exact_prefix": true,
+      "old_bytes": 673370,
+      "new_bytes": 785871
+    }
+  },
+  "no_model_fitted": true,
+  "final_archive_matches_original_frozen_hash": true,
+  "reason": "Both damaged streams are exact prefixes of deterministic reconstruction. Development ledger was already truncated when hashed; complete ledger hash corrected before fitting. All input snapshots and outcomes identical to original hashes. Root cause unknown."
+}
