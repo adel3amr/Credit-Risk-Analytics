@@ -1,0 +1,1 @@
+Initial invocation failed before any outcome generation: required scenario name metadata absent. Preserved partial development input/ledger under pre_outcome_failed_attempt. Corrected API metadata only; seeds, population and economics unchanged. No model fitted or performance inspected. Restart is deterministic recovery from an implementation error, not selection on results.

@@ -26,6 +26,8 @@ MI=['marginal_interest_amount','marginal_interest_to_principal']
 STATE=['cumulative_recovery_ratio','recent_recovery_ratio','months_since_last_recovery','restructured','default_principal']
 EXTRA={'M0':[], 'M1':['months_since_default'],'M2':MI,'M3':['months_since_default']+MI,'M4':['months_since_default']+MI+STATE,'M4_without_mi':['months_since_default']+STATE}
 SCENARIOS={'upside':{'real_gdp_growth_pct':3.,'unemployment_rate_pct':5.},'baseline':{'real_gdp_growth_pct':2.,'unemployment_rate_pct':6.},'downside':{'real_gdp_growth_pct':0.,'unemployment_rate_pct':8.}}
+for _name, _scenario in SCENARIOS.items():
+    _scenario['scenario'] = _name
 WEIGHTS={'upside':.2,'baseline':.6,'downside':.2}
 
 def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
