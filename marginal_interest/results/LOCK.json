@@ -1,0 +1,47 @@
+{
+  "selected": "M4",
+  "commit": "a37f9e292ab1f26762b0dfefa4100b2571f030fb",
+  "data_manifest_sha256": "f9609e3e8311700508f280608f4c681f1e1db6d957e56ea1199d54bace451308",
+  "models": {
+    "M1.joblib": "fbf08ef1647265ea1258bfd7dc6ac11841a99371a57e79bbebc85c29c9f9f303",
+    "M2.joblib": "eabd6cfdb210146c0d5f2d2caac337c03266061ddfef615b8080b88603d7d854",
+    "M4.joblib": "0a6052fc28abeb95f1b49c51b596ea603980ab456f92aa032fa65a34c49226ae",
+    "M3.joblib": "0a8b4a4c9704daf443759109d613b5ff61fbbd556c6b87d39aa0428aeec2855c",
+    "M4_without_mi.joblib": "7e46120880e60cc4069efc5a3e2e65d04b6ede918ee7e63451eab7cb9a44c5d7",
+    "M0.joblib": "6e26fc9dd791f6ea5ac168c3d3ff3ef22aa07b931ad30dbc3a9fe73c95bce046"
+  },
+  "feature_spec": {
+    "M0": [],
+    "M1": [
+      "months_since_default"
+    ],
+    "M2": [
+      "marginal_interest_amount",
+      "marginal_interest_to_principal"
+    ],
+    "M3": [
+      "months_since_default",
+      "marginal_interest_amount",
+      "marginal_interest_to_principal"
+    ],
+    "M4": [
+      "months_since_default",
+      "marginal_interest_amount",
+      "marginal_interest_to_principal",
+      "cumulative_recovery_ratio",
+      "recent_recovery_ratio",
+      "months_since_last_recovery",
+      "restructured",
+      "default_principal"
+    ],
+    "M4_without_mi": [
+      "months_since_default",
+      "cumulative_recovery_ratio",
+      "recent_recovery_ratio",
+      "months_since_last_recovery",
+      "restructured",
+      "default_principal"
+    ]
+  },
+  "final_opened": false
+}
