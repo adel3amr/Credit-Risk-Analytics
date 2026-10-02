@@ -37,6 +37,8 @@ COLLATERAL = ["Cash", "Mortgage", "Other", "Unsecured"]
 
 
 def check_features(features):
+    if not isinstance(features, dict):
+        raise ValueError("Feature mapping required")
     missing = set(BORROWER_FEATURES) - set(features)
     extra = set(features) - set(BORROWER_FEATURES)
     if missing or extra:

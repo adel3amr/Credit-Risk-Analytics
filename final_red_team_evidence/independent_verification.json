@@ -1,0 +1,150 @@
+{
+  "historical_r1_hashes": "VERIFIED",
+  "new_final_holdout_opened": false,
+  "models_fitted": false,
+  "bank_gate": "BLOCKED",
+  "pd": {
+    "n": 3000,
+    "defaults": 102,
+    "observed_default_rate": 0.034,
+    "predicted_mean": 0.03438768859645263,
+    "auc": 0.7594554730104601,
+    "gini": 0.5189109460209202,
+    "ks": 0.40849673202614384,
+    "brier": 0.030002534586613554,
+    "log_loss": 0.12856211473794532
+  },
+  "r1_ecl": {
+    "max_weighting_error": 1.1641532182693481e-10,
+    "portfolio": 92036058.41877422,
+    "borrower_aggregation_error": 0.0
+  },
+  "reference": {
+    "run_id": "a61a4401-d066-4eaf-b202-377c07dfb44e",
+    "dataset_hash": "979cabea288e127d7736c5a56d58d9bf804a2393f27f2479a3dd010899d8397b",
+    "facility_count": 5172,
+    "max_errors": {
+      "ead": 0.0,
+      "scenario_pd": 1.1102230246251565e-16,
+      "ecl": 7.275957614183426e-11
+    },
+    "stage_mismatches": 0,
+    "rating_mismatches": 0,
+    "portfolio_ecl": 45265972.043210395,
+    "audit": {
+      "events": 4,
+      "head": "9404b3d36355717cdcbff9b9a2f1b6b48994e05ef1fb7bed1356343100392dd0",
+      "status": "VERIFIED"
+    },
+    "versions": {
+      "application": "0.4.0",
+      "application_source_hash": "c7117a106949c37ac2f1b3baa563d470ec46a36bd98c2c24cc32acabf4d76ec4",
+      "schema": "0002",
+      "contract": "canonical-1",
+      "models": {
+        "artifacts": {
+          "lgd": "c221d27bb2aace1f675a6e45562c2e4a4fedc037a85eda8668da018db5558e21",
+          "pd": "7eef9f8dbd0b2d530edaf5fc7c0a04d9a2f387f6b0b262e7bc138241aa0976eb"
+        },
+        "bank_gate": "BLOCKED",
+        "data": {
+          "data/raw/lgd_workout_history.csv": "d1ff68a25593693039ee00b0d6b7a1f84b226d2d0995d9e6a54a897fcf5de220",
+          "data/raw/sme_credit_portfolio.csv": "2312db398a92c242abec665af6e1e7535b18e47349cfaf0cdf48e8ed3f83c8cd"
+        },
+        "industries": [
+          "Construction",
+          "Hospitality",
+          "Manufacturing",
+          "Retail",
+          "Services",
+          "Technology",
+          "Transport"
+        ],
+        "pd_columns": [
+          "ebitda_margin",
+          "leverage_ratio",
+          "current_ratio",
+          "debt_to_income",
+          "collateral_coverage",
+          "years_in_business",
+          "credit_utilization",
+          "delinquencies_12m",
+          "previous_defaults",
+          "days_past_due",
+          "management_quality",
+          "governance_quality",
+          "financial_reporting_quality",
+          "market_position",
+          "sponsor_support",
+          "customer_concentration",
+          "supplier_concentration",
+          "key_person_dependency",
+          "audit_quality",
+          "industry_Hospitality",
+          "industry_Manufacturing",
+          "industry_Retail",
+          "industry_Services",
+          "industry_Technology",
+          "industry_Transport"
+        ],
+        "sources": {
+          "src/early_warning.py": "a132079f61ec93de0ede460a64c87296040d708ac7f98898686b4ab41eaf5235",
+          "src/ecl.py": "1e916d76ff16d5190bac31e1ad6f7727ff1bcaeafc7952c543657197f14ae536",
+          "src/facility_ecl.py": "e9fc44d8c36a822f8cdaca9d057a44d659f526324b05e9dadb5c0c4ba8cf84b4",
+          "src/lgd_model.py": "3a3977fb489ee289e0ccb8360ac9527c8e3258854069b95f7d0294f4a601efb5",
+          "src/pd_model.py": "0ac40c569835e18de818a2bbb647d6094485f50fd41d275a4ada0582ad9a921b",
+          "src/scorecard.py": "98994fb76610aba38dba60794d1912ae147d1f305bede1e739289fb2d05d5679"
+        },
+        "status": "REFERENCE",
+        "version": "reference-v5-0dfe4c8"
+      },
+      "configuration": {
+        "id": "v5-reference-policy-1",
+        "staging": "v5-internal-nine-month",
+        "ead": "v5-ccf-1",
+        "ews": "v5-three-signals",
+        "ecl": "v5-facility-hazard-1",
+        "rating": "v5-rating-1",
+        "ccf": {
+          "Import LC": 0.2,
+          "Performance Guarantee": 0.5,
+          "Financial Guarantee": 1.0
+        },
+        "scenarios": [
+          {
+            "scenario": "upside",
+            "weight": 0.2,
+            "real_gdp_growth_pct": 2.0,
+            "unemployment_rate_pct": 5.5,
+            "policy_rate_pct": 2.0,
+            "inflation_pct": 1.8
+          },
+          {
+            "scenario": "baseline",
+            "weight": 0.6,
+            "real_gdp_growth_pct": 1.0,
+            "unemployment_rate_pct": 6.0,
+            "policy_rate_pct": 2.5,
+            "inflation_pct": 2.0
+          },
+          {
+            "scenario": "downside",
+            "weight": 0.2,
+            "real_gdp_growth_pct": -1.0,
+            "unemployment_rate_pct": 7.5,
+            "policy_rate_pct": 3.5,
+            "inflation_pct": 3.2
+          }
+        ],
+        "scenario_source_hash": "9c6e76b524f91d7817c6131b5cefa2ba222565fa80c8c993843a1340ea96c908"
+      },
+      "configuration_hash": "4ddedda1d30e70154cfcf325c0bf7914f09526d0bdee42f2cdb32a6737076e3d"
+    }
+  },
+  "input_hashes": {
+    "outputs/borrower_audit_trace.csv": "2bf6a070afc82d61e868397604bf6eeebd4c89c79ae021dfbcaaaced820bc70c",
+    "s2_remediation/results/current_predictions.csv": "c6200aa41e34052e91d836e750e46b2776e56727ec8db57d9665654c60a7171a",
+    "s2_remediation/results/promotion_predictions.csv": "73a0e8543300195d9559f0fa279ea1b358339b10fe6d8448cdb2e6d9b01d2ad6",
+    "s2_remediation/results/scenario_ecl.csv": "8f65ed002104b064142f3c84beffad84c85eaec3090b45cc2e0fd9dc26a0d65f"
+  }
+}

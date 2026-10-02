@@ -229,34 +229,19 @@ def create_app(db=None):
         p=Depends(allow("read")),
     ):
         with app.state.db.connect() as conn:
-            service.one(conn, s.runs, id)
-            return [
-                dict(r)
-                for r in conn.execute(
-                    select(s.decisions)
-                    .where(s.decisions.c.run_id == id)
-                    .order_by(s.decisions.c.facility_id)
-                    .limit(limit)
-                    .offset(offset)
-                ).mappings()
-            ]
+            run = service.one(conn, s.runs, id)
+            if run['status'] != 'SUCCEEDED':
+                return []
+            return service.decision_rows(conn, id)[offset:offset + limit]
 
     @app.get("/api/v1/runs/{id}/facilities/{facility_id}")
     def trace(id: str, facility_id: str, p=Depends(allow("read"))):
         with app.state.db.connect() as conn:
-            row = (
-                conn.execute(
-                    select(s.decisions).where(
-                        s.decisions.c.run_id == id,
-                        s.decisions.c.facility_id == facility_id,
-                    )
-                )
-                .mappings()
-                .first()
-            )
+            rows = service.decision_rows(conn, id)
+            row = next((r for r in rows if r['facility_id'] == facility_id), None)
             if row is None:
                 raise service.NotFound("Decision not found")
-            return dict(row)
+            return row
 
     @app.get("/api/v1/borrowers/{borrower_id}/history")
     def history(

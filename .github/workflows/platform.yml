@@ -1,7 +1,7 @@
 name: Platform reference validation
 on:
   push:
-    branches: ['platform/**']
+    branches: ['platform/**', 'review/final-red-team-release', 'feature/final-platform-closeout']
   pull_request:
     paths: ['credit_platform/**', 'research_diagnostics/**', 'synthetic_bank/**', 'economic_lgd/**', 's2_remediation/**', 'lgd_hardening/**', 'migrations/**', 'tests/platform/**', 'requirements-platform*.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
 permissions:

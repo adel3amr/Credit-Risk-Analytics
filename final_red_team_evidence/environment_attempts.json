@@ -1,0 +1,38 @@
+[
+  {
+    "command": "psql --version",
+    "exit_code": 127,
+    "stdout": "",
+    "stderr": "/bin/sh: 1: psql: not found\n"
+  },
+  {
+    "command": "postgres --version",
+    "exit_code": 127,
+    "stdout": "",
+    "stderr": "/bin/sh: 1: postgres: not found\n"
+  },
+  {
+    "command": "docker build -t credit-risk-red-team .",
+    "exit_code": 127,
+    "stdout": "",
+    "stderr": "/bin/sh: 1: docker: not found\n"
+  },
+  {
+    "command": "docker compose config",
+    "exit_code": 127,
+    "stdout": "",
+    "stderr": "/bin/sh: 1: docker: not found\n"
+  },
+  {
+    "command": "pg_dump --version",
+    "exit_code": 127,
+    "stdout": "",
+    "stderr": "/bin/sh: 1: pg_dump: not found\n"
+  },
+  {
+    "command": "playwright --version",
+    "exit_code": 127,
+    "stdout": "",
+    "stderr": "/bin/sh: 1: playwright: not found\n"
+  }
+]

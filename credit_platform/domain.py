@@ -22,7 +22,7 @@ class Borrower(Strict):
             raise ValueError("Unsupported industry")
         return v
 
-    @field_validator("features")
+    @field_validator("features", mode="before")
     @classmethod
     def features_valid(cls, v):
         return check_features(v)

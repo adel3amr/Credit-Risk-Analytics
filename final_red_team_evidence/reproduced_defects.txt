@@ -1,0 +1,120 @@
+FFFFF.......                                                             [100%]
+=================================== FAILURES ===================================
+________________________ test_run_records_actual_schema ________________________
+
+clients = (<starlette.testclient.TestClient object at 0x7fb76d26d9a0>, {'analyst': {'Authorization': 'Bearer LbF4UTW1HsR6p3WVHDd...ymvRS4h'}, 'audit': {'Authorization': 'Bearer JBmlSJJAqdYlVv6fv8UY6uwCUmoNrsZazUcKMCReJ21suWavA87jV9RxiKZRIPVn'}, ...})
+
+    def test_run_records_actual_schema(clients):
+        c, h = clients
+        run = create_run(c, h).json()
+>       assert run['versions']['schema'] == '0002'
+E       AssertionError: assert '0001' == '0002'
+E         
+E         - 0002
+E         ?    ^
+E         + 0001
+E         ?    ^
+
+tests/platform/test_red_team.py:11: AssertionError
+_____________ test_unknown_run_copilot_is_audited_without_fk_error _____________
+
+clients = (<starlette.testclient.TestClient object at 0x7fb76d283020>, {'analyst': {'Authorization': 'Bearer iHh32etcDpBSPh2DdUa..._XtdVqm'}, 'audit': {'Authorization': 'Bearer NQM6bl6xQHiECoew1-nTDOA5vkrh1Y29Zg3oBEyUq29Uhk3objNkTtWUQYnzT2L4'}, ...})
+
+    def test_unknown_run_copilot_is_audited_without_fk_error(clients):
+        c, h = clients
+        response = c.post('/api/v1/copilot/query', headers=h['analyst'], json={
+            'question': 'Explain this portfolio', 'use_case': 'portfolio', 'run_id': 'missing-run'})
+>       assert response.status_code == 200, response.text
+E       AssertionError: {"detail":"Uniqueness or relationship conflict"}
+E       assert 409 == 200
+E        +  where 409 = <Response [409 Conflict]>.status_code
+
+tests/platform/test_red_team.py:18: AssertionError
+__________ test_decision_views_reject_corrupted_projection[decisions] __________
+
+db = Engine(sqlite:////tmp/pytest-of-root/pytest-1/test_decision_views_reject_cor0/test.db)
+clients = (<starlette.testclient.TestClient object at 0x7fb767f91af0>, {'analyst': {'Authorization': 'Bearer ng1lfysCymo6E6m1sK7...LkUmaLy'}, 'audit': {'Authorization': 'Bearer xmG9yhLFK9GJrdRJI9APFWcY27MzuZf66RMAgvlrgdLPsO6oJitOzdnytvDhkLdW'}, ...})
+endpoint = 'decisions'
+
+    @pytest.mark.parametrize('endpoint', ['decisions', 'facilities/F1', 'copilot'])
+    def test_decision_views_reject_corrupted_projection(db, clients, endpoint):
+        c, h = clients
+        rid = create_run(c, h).json()['id']
+        # Privileged corruption simulates a restored/tampered database, outside API grants.
+        with db.begin() as conn:
+            conn.execute(text('DROP TRIGGER immutable_decisions_UPDATE'))
+            conn.execute(update(s.decisions).where(s.decisions.c.run_id == rid).values(ecl=99))
+        if endpoint == 'copilot':
+            response = c.post('/api/v1/copilot/query', headers=h['analyst'], json={
+                'question': 'Explain borrower', 'use_case': 'borrower', 'run_id': rid, 'borrower_id': 'B1'})
+        else:
+            response = c.get(f'/api/v1/runs/{rid}/{endpoint}', headers=h['analyst'])
+>       assert response.status_code == 422, response.text
+E       AssertionError: [{"run_id":"774906e8-2ae2-403f-a4e1-1282cf1266c8","facility_id":"F1","borrower_id":"B1","stage":"Stage 1","pd":0.020566667927984675,"lgd":0.6665197589280093,"ead":100.0,"ecl":99.0,"trace":{"facility_id":"F1","borrower_id":"B1","reporting_date":"2026-09-24","stage":"Stage 1","stage_reasons":["no_stage2_or_stage3_trigger"],"sicr":false,"watchlist":false,"risk_rating":4,"risk_direction":"Stable","ews":[{"id":"ews_rising_utilization","triggered":false,"effective_date":"2026-09-24","source":"borrower conduct","policy_version":"v5-three-signals"},{"id":"ews_persistent_high_utilization","triggered":false,"effective_date":"2026-09-24","source":"borrower conduct","policy_version":"v5-three-signals"},{"id":"ews_limit_breach","triggered":false,"effective_date":"2026-09-24","source":"borrower conduct","policy_version":"v5-three-signals"}],"pd":0.020566667927984675,"pit_pd":0.019249206827351744,"scenario_pd":{"upside":0.016193034279785308,"baseline":0.019249206827351744,"downside":0.02889268487808283},"remaining_months":24.0,"lifetime_pd":0.04071034802630935,"effective_pd":0.020566667927984675,"lgd":0.6665197589280093,"ead":100.0,"ecl":1.3708090549312766,"lgd_features":{"facility_id":"F1","customer_id":"B1","ead_at_default":100.0,"collateral_type":"Unsecured","collateral_coverage":0.0,"guarantee_coverage":0.0,"product_type":"Term Loan","lien_rank":"Unsecured","industry":"Retail","leverage_at_default":2.0,"current_ratio_at_default":1.3,"management_quality":3.0},"source_facility":{"id":"F1","borrower_id":"B1","observed_at":"2026-09-24","product":"Term Loan","drawn":100.0,"limit":100.0,"face":0.0,"remaining_months":24.0,"collateral_type":"Unsecured","collateral_coverage":0.0,"guarantee_coverage":0.0,"lien_rank":"Unsecured"},"source_borrower":{"id":"B1","industry":"Retail","observed_at":"2026-09-24","collateral_type":"Unsecured","features":{"ebitda_margin":0.2,"leverage_ratio":2.0,"current_ratio":1.3,"debt_to_income":0.4,"collateral_coverage":0.0,"years_in_business":8.0,"credit_utilization":0.5,"delinquencies_12m":0.0,"previous_defaults":0.0,"days_past_due":0.0,"management_quality":3.0,"governance_quality":3.0,"financial_reporting_quality":3.0,"market_position":3.0,"sponsor_support":3.0,"customer_concentration":0.3,"supplier_concentration":0.2,"key_person_dependency":0.0,"audit_quality":3.0,"utilization_6m_change":0.0,"avg_utilization_6m":0.0,"months_above_80_utilization":0.0,"limit_breach_count":0.0,"consecutive_ews_months":0.0,"current_credit_impaired":0.0,"write_off_flag":0.0,"recognized_collateral_coverage":0.0}},"model_version":"reference-v5-0dfe4c8","artifact_hashes":{"lgd":"c221d27bb2aace1f675a6e45562c2e4a4fedc037a85eda8668da018db5558e21","pd":"7eef9f8dbd0b2d530edaf5fc7c0a04d9a2f387f6b0b262e7bc138241aa0976eb"},"configuration_hash":"4ddedda1d30e70154cfcf325c0bf7914f09526d0bdee42f2cdb32a6737076e3d","use":"REFERENCE ONLY; bank gate BLOCKED"},"hash":"5edeaf7b6f9d98ec76bffb8c55b46a61cd7fd74f133873007591d3aad53451fc"}]
+E       assert 200 == 422
+E        +  where 200 = <Response [200 OK]>.status_code
+
+tests/platform/test_red_team.py:37: AssertionError
+________ test_decision_views_reject_corrupted_projection[facilities/F1] ________
+
+db = Engine(sqlite:////tmp/pytest-of-root/pytest-1/test_decision_views_reject_cor1/test.db)
+clients = (<starlette.testclient.TestClient object at 0x7fb767d058e0>, {'analyst': {'Authorization': 'Bearer jKpnUFwSADvuQJN_kTM...k-DLgVw'}, 'audit': {'Authorization': 'Bearer 2aKqt3YR4VosUrLHueNZ23ZoYZJpWMm57N8_vKQonv1MU-7TD6cl9X1ftipVHh_L'}, ...})
+endpoint = 'facilities/F1'
+
+    @pytest.mark.parametrize('endpoint', ['decisions', 'facilities/F1', 'copilot'])
+    def test_decision_views_reject_corrupted_projection(db, clients, endpoint):
+        c, h = clients
+        rid = create_run(c, h).json()['id']
+        # Privileged corruption simulates a restored/tampered database, outside API grants.
+        with db.begin() as conn:
+            conn.execute(text('DROP TRIGGER immutable_decisions_UPDATE'))
+            conn.execute(update(s.decisions).where(s.decisions.c.run_id == rid).values(ecl=99))
+        if endpoint == 'copilot':
+            response = c.post('/api/v1/copilot/query', headers=h['analyst'], json={
+                'question': 'Explain borrower', 'use_case': 'borrower', 'run_id': rid, 'borrower_id': 'B1'})
+        else:
+            response = c.get(f'/api/v1/runs/{rid}/{endpoint}', headers=h['analyst'])
+>       assert response.status_code == 422, response.text
+E       AssertionError: {"run_id":"eed1b664-29ac-4dc0-8b69-0e9241c8029c","facility_id":"F1","borrower_id":"B1","stage":"Stage 1","pd":0.020566667927984675,"lgd":0.6665197589280093,"ead":100.0,"ecl":99.0,"trace":{"facility_id":"F1","borrower_id":"B1","reporting_date":"2026-09-24","stage":"Stage 1","stage_reasons":["no_stage2_or_stage3_trigger"],"sicr":false,"watchlist":false,"risk_rating":4,"risk_direction":"Stable","ews":[{"id":"ews_rising_utilization","triggered":false,"effective_date":"2026-09-24","source":"borrower conduct","policy_version":"v5-three-signals"},{"id":"ews_persistent_high_utilization","triggered":false,"effective_date":"2026-09-24","source":"borrower conduct","policy_version":"v5-three-signals"},{"id":"ews_limit_breach","triggered":false,"effective_date":"2026-09-24","source":"borrower conduct","policy_version":"v5-three-signals"}],"pd":0.020566667927984675,"pit_pd":0.019249206827351744,"scenario_pd":{"upside":0.016193034279785308,"baseline":0.019249206827351744,"downside":0.02889268487808283},"remaining_months":24.0,"lifetime_pd":0.04071034802630935,"effective_pd":0.020566667927984675,"lgd":0.6665197589280093,"ead":100.0,"ecl":1.3708090549312766,"lgd_features":{"facility_id":"F1","customer_id":"B1","ead_at_default":100.0,"collateral_type":"Unsecured","collateral_coverage":0.0,"guarantee_coverage":0.0,"product_type":"Term Loan","lien_rank":"Unsecured","industry":"Retail","leverage_at_default":2.0,"current_ratio_at_default":1.3,"management_quality":3.0},"source_facility":{"id":"F1","borrower_id":"B1","observed_at":"2026-09-24","product":"Term Loan","drawn":100.0,"limit":100.0,"face":0.0,"remaining_months":24.0,"collateral_type":"Unsecured","collateral_coverage":0.0,"guarantee_coverage":0.0,"lien_rank":"Unsecured"},"source_borrower":{"id":"B1","industry":"Retail","observed_at":"2026-09-24","collateral_type":"Unsecured","features":{"ebitda_margin":0.2,"leverage_ratio":2.0,"current_ratio":1.3,"debt_to_income":0.4,"collateral_coverage":0.0,"years_in_business":8.0,"credit_utilization":0.5,"delinquencies_12m":0.0,"previous_defaults":0.0,"days_past_due":0.0,"management_quality":3.0,"governance_quality":3.0,"financial_reporting_quality":3.0,"market_position":3.0,"sponsor_support":3.0,"customer_concentration":0.3,"supplier_concentration":0.2,"key_person_dependency":0.0,"audit_quality":3.0,"utilization_6m_change":0.0,"avg_utilization_6m":0.0,"months_above_80_utilization":0.0,"limit_breach_count":0.0,"consecutive_ews_months":0.0,"current_credit_impaired":0.0,"write_off_flag":0.0,"recognized_collateral_coverage":0.0}},"model_version":"reference-v5-0dfe4c8","artifact_hashes":{"lgd":"c221d27bb2aace1f675a6e45562c2e4a4fedc037a85eda8668da018db5558e21","pd":"7eef9f8dbd0b2d530edaf5fc7c0a04d9a2f387f6b0b262e7bc138241aa0976eb"},"configuration_hash":"4ddedda1d30e70154cfcf325c0bf7914f09526d0bdee42f2cdb32a6737076e3d","use":"REFERENCE ONLY; bank gate BLOCKED"},"hash":"5edeaf7b6f9d98ec76bffb8c55b46a61cd7fd74f133873007591d3aad53451fc"}
+E       assert 200 == 422
+E        +  where 200 = <Response [200 OK]>.status_code
+
+tests/platform/test_red_team.py:37: AssertionError
+___________ test_decision_views_reject_corrupted_projection[copilot] ___________
+
+db = Engine(sqlite:////tmp/pytest-of-root/pytest-1/test_decision_views_reject_cor2/test.db)
+clients = (<starlette.testclient.TestClient object at 0x7fb767c06660>, {'analyst': {'Authorization': 'Bearer gsPuY8G94-uQLWQODzQ...whpSrh_'}, 'audit': {'Authorization': 'Bearer jjI_7533Ot2ygkieHtmVWSGeE0nEQf0NQbUHgmAYHgCh8qqVDLRJLgkPOy4-RUOg'}, ...})
+endpoint = 'copilot'
+
+    @pytest.mark.parametrize('endpoint', ['decisions', 'facilities/F1', 'copilot'])
+    def test_decision_views_reject_corrupted_projection(db, clients, endpoint):
+        c, h = clients
+        rid = create_run(c, h).json()['id']
+        # Privileged corruption simulates a restored/tampered database, outside API grants.
+        with db.begin() as conn:
+            conn.execute(text('DROP TRIGGER immutable_decisions_UPDATE'))
+            conn.execute(update(s.decisions).where(s.decisions.c.run_id == rid).values(ecl=99))
+        if endpoint == 'copilot':
+            response = c.post('/api/v1/copilot/query', headers=h['analyst'], json={
+                'question': 'Explain borrower', 'use_case': 'borrower', 'run_id': rid, 'borrower_id': 'B1'})
+        else:
+            response = c.get(f'/api/v1/runs/{rid}/{endpoint}', headers=h['analyst'])
+>       assert response.status_code == 422, response.text
+E       AssertionError: {"request_id":"1237acdd-530b-4c35-8e6e-925e055ca89a","status":"ANSWERED","answer":"Borrower B1 has 1 facility/facilities in Stage 1. Governed EAD is 100.00 and ECL is 99.00. Recorded stage reason(s): no_stage2_or_stage3_trigger. These are retrieved run outputs; this narrative does not change the decision.","facts":{"run_id":"0cb5d2d8-fff5-4e1d-a9df-1121b2994ff3","borrower_id":"B1","facilities":[{"facility_id":"F1","stage":"Stage 1","pd":0.020566667927984675,"lgd":0.6665197589280093,"ead":100.0,"ecl":99.0,"stage_reasons":["no_stage2_or_stage3_trigger"],"watchlist":false,"sicr":false}]},"sources":[{"type":"decision_trace","run_id":"0cb5d2d8-fff5-4e1d-a9df-1121b2994ff3","borrower_id":"B1"}],"tool_calls":["get_borrower_decision_trace"],"provider":"deterministic-local","provider_version":"deterministic-4","prompt_version":"credit-risk-copilot-4","human_review_required":true,"authoritative_decision":false}
+E       assert 200 == 422
+E        +  where 200 = <Response [200 OK]>.status_code
+
+tests/platform/test_red_team.py:37: AssertionError
+=============================== warnings summary ===============================
+../../../../tmp/credit-red-team-venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /tmp/credit-red-team-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/platform/test_red_team.py::test_run_records_actual_schema - Asse...
+FAILED tests/platform/test_red_team.py::test_unknown_run_copilot_is_audited_without_fk_error
+FAILED tests/platform/test_red_team.py::test_decision_views_reject_corrupted_projection[decisions]
+FAILED tests/platform/test_red_team.py::test_decision_views_reject_corrupted_projection[facilities/F1]
+FAILED tests/platform/test_red_team.py::test_decision_views_reject_corrupted_projection[copilot]
+5 failed, 7 passed, 1 warning in 2.86s

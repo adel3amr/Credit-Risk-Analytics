@@ -4,6 +4,7 @@ from sqlalchemy import select, update
 from . import schema as s, audit, artifacts, risk, validation
 from .common import now, uid, digest, application_hash
 from .domain import DatasetInput
+from .db import require_schema
 
 
 class Conflict(ValueError):
@@ -144,6 +145,7 @@ def normalized(payload):
 
 
 def execute(db, request, actor):
+    require_schema(db)
     req = request.model_dump()
     rh = digest(req)
     with db.begin() as conn:
@@ -172,7 +174,7 @@ def execute(db, request, actor):
             "versions": {
                 "application": "0.4.0",
                 "application_source_hash": application_hash(),
-                "schema": "0001",
+                "schema": "0002",
                 "contract": "canonical-1",
             },
             "summary": {},
@@ -301,7 +303,7 @@ def execute(db, request, actor):
     return run
 
 
-def traces(conn, run_id):
+def decision_rows(conn, run_id):
     run = one(conn, s.runs, run_id)
     if run["status"] != "SUCCEEDED":
         raise Conflict("A successful run is required for validated results")
@@ -309,10 +311,18 @@ def traces(conn, run_id):
     for row in rows:
         if digest(row["trace"]) != row["hash"]:
             raise ValueError("Decision hash mismatch")
+    for row in rows:
+        for field in ("facility_id", "borrower_id", "stage", "pd", "lgd", "ead", "ecl"):
+            if row[field] != row["trace"][field]:
+                raise ValueError("Decision projection mismatch")
     result = sorted((row["trace"] for row in rows), key=lambda t: t["facility_id"])
     if digest(result) != run["output_hash"]:
         raise ValueError("Run output hash mismatch")
-    return result
+    return sorted((dict(row) for row in rows), key=lambda row: row["facility_id"])
+
+
+def traces(conn, run_id):
+    return [row["trace"] for row in decision_rows(conn, run_id)]
 
 
 def propose(db, payload, actor):

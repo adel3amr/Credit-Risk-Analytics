@@ -1,0 +1,479 @@
+{
+  "Stage 1": {
+    "facility_id": "SME00002-000142",
+    "borrower_id": "SME00002",
+    "reporting_date": "2026-09-24",
+    "stage": "Stage 1",
+    "stage_reasons": [
+      "no_stage2_or_stage3_trigger"
+    ],
+    "sicr": false,
+    "watchlist": false,
+    "risk_rating": 6,
+    "risk_direction": "Stable",
+    "ews": [
+      {
+        "id": "ews_rising_utilization",
+        "triggered": false,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      },
+      {
+        "id": "ews_persistent_high_utilization",
+        "triggered": false,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      },
+      {
+        "id": "ews_limit_breach",
+        "triggered": false,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      }
+    ],
+    "pd": 0.07129299787321614,
+    "pit_pd": 0.06709335363725337,
+    "scenario_pd": {
+      "upside": 0.05688158745244079,
+      "baseline": 0.06709335363725337,
+      "downside": 0.09830334100187979
+    },
+    "remaining_months": 22.0,
+    "lifetime_pd": 0.1268055098584493,
+    "effective_pd": 0.07129299787321614,
+    "lgd": 0.4176416769042053,
+    "ead": 162469.78,
+    "ecl": 4837.525868986434,
+    "lgd_features": {
+      "facility_id": "SME00002-000142",
+      "customer_id": "SME00002",
+      "ead_at_default": 162469.78,
+      "collateral_type": "Other",
+      "collateral_coverage": 0.9666,
+      "guarantee_coverage": 0.0,
+      "product_type": "Term Loan",
+      "lien_rank": "First",
+      "industry": "Hospitality",
+      "leverage_at_default": 3.0848,
+      "current_ratio_at_default": 1.4943,
+      "management_quality": 4.0
+    },
+    "source_facility": {
+      "id": "SME00002-000142",
+      "borrower_id": "SME00002",
+      "observed_at": "2026-09-24",
+      "product": "Term Loan",
+      "drawn": 162469.78,
+      "limit": 248086.31,
+      "face": 0.0,
+      "remaining_months": 22.0,
+      "collateral_type": "Other",
+      "collateral_coverage": 0.9666,
+      "guarantee_coverage": 0.0,
+      "lien_rank": "First"
+    },
+    "source_borrower": {
+      "id": "SME00002",
+      "industry": "Hospitality",
+      "observed_at": "2026-09-24",
+      "collateral_type": "Other",
+      "features": {
+        "ebitda_margin": 0.172,
+        "leverage_ratio": 3.0848,
+        "current_ratio": 1.4943,
+        "debt_to_income": 0.4212,
+        "collateral_coverage": 0.9666,
+        "years_in_business": 5.0,
+        "credit_utilization": 0.5848,
+        "delinquencies_12m": 1.0,
+        "previous_defaults": 0.0,
+        "days_past_due": 0.0,
+        "management_quality": 4.0,
+        "governance_quality": 1.0,
+        "financial_reporting_quality": 4.0,
+        "market_position": 2.0,
+        "sponsor_support": 5.0,
+        "customer_concentration": 0.2887,
+        "supplier_concentration": 0.6454,
+        "key_person_dependency": 0.0,
+        "audit_quality": 2.0,
+        "utilization_6m_change": 0.0184,
+        "avg_utilization_6m": 0.5748,
+        "months_above_80_utilization": 0.0,
+        "limit_breach_count": 0.0,
+        "consecutive_ews_months": 0.0,
+        "current_credit_impaired": 0.0,
+        "write_off_flag": 0.0,
+        "recognized_collateral_coverage": 0.6283
+      }
+    },
+    "model_version": "reference-v5-0dfe4c8",
+    "artifact_hashes": {
+      "lgd": "c221d27bb2aace1f675a6e45562c2e4a4fedc037a85eda8668da018db5558e21",
+      "pd": "7eef9f8dbd0b2d530edaf5fc7c0a04d9a2f387f6b0b262e7bc138241aa0976eb"
+    },
+    "configuration_hash": "4ddedda1d30e70154cfcf325c0bf7914f09526d0bdee42f2cdb32a6737076e3d",
+    "use": "REFERENCE ONLY; bank gate BLOCKED"
+  },
+  "Stage 2": {
+    "facility_id": "SME00006-005033",
+    "borrower_id": "SME00006",
+    "reporting_date": "2026-09-24",
+    "stage": "Stage 2",
+    "stage_reasons": [
+      "persistent_ews_9_months"
+    ],
+    "sicr": true,
+    "watchlist": true,
+    "risk_rating": 7,
+    "risk_direction": "Deteriorating",
+    "ews": [
+      {
+        "id": "ews_rising_utilization",
+        "triggered": false,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      },
+      {
+        "id": "ews_persistent_high_utilization",
+        "triggered": true,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      },
+      {
+        "id": "ews_limit_breach",
+        "triggered": true,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      }
+    ],
+    "pd": 0.013764563241839564,
+    "pit_pd": 0.012873103320503763,
+    "scenario_pd": {
+      "upside": 0.010818090392137315,
+      "baseline": 0.012873103320503763,
+      "downside": 0.01938541585554922
+    },
+    "remaining_months": 29.0,
+    "lifetime_pd": 0.032940658282436974,
+    "effective_pd": 0.032940658282436974,
+    "lgd": 0.20770469980138942,
+    "ead": 1060816.25,
+    "ecl": 7258.030037189421,
+    "lgd_features": {
+      "facility_id": "SME00006-005033",
+      "customer_id": "SME00006",
+      "ead_at_default": 1060816.25,
+      "collateral_type": "Mortgage",
+      "collateral_coverage": 1.5479,
+      "guarantee_coverage": 0.0,
+      "product_type": "Term Loan",
+      "lien_rank": "First",
+      "industry": "Manufacturing",
+      "leverage_at_default": 0.7009,
+      "current_ratio_at_default": 1.4543,
+      "management_quality": 5.0
+    },
+    "source_facility": {
+      "id": "SME00006-005033",
+      "borrower_id": "SME00006",
+      "observed_at": "2026-09-24",
+      "product": "Term Loan",
+      "drawn": 1060816.25,
+      "limit": 1544093.46,
+      "face": 0.0,
+      "remaining_months": 29.0,
+      "collateral_type": "Mortgage",
+      "collateral_coverage": 1.5479,
+      "guarantee_coverage": 0.0,
+      "lien_rank": "First"
+    },
+    "source_borrower": {
+      "id": "SME00006",
+      "industry": "Manufacturing",
+      "observed_at": "2026-09-24",
+      "collateral_type": "Mortgage",
+      "features": {
+        "ebitda_margin": 0.004,
+        "leverage_ratio": 0.7009,
+        "current_ratio": 1.4543,
+        "debt_to_income": 0.1888,
+        "collateral_coverage": 1.5479,
+        "years_in_business": 6.0,
+        "credit_utilization": 0.8451,
+        "delinquencies_12m": 0.0,
+        "previous_defaults": 0.0,
+        "days_past_due": 0.0,
+        "management_quality": 5.0,
+        "governance_quality": 5.0,
+        "financial_reporting_quality": 4.0,
+        "market_position": 4.0,
+        "sponsor_support": 3.0,
+        "customer_concentration": 0.175,
+        "supplier_concentration": 0.2765,
+        "key_person_dependency": 0.0,
+        "audit_quality": 2.0,
+        "utilization_6m_change": -0.0064,
+        "avg_utilization_6m": 0.8441,
+        "months_above_80_utilization": 4.0,
+        "limit_breach_count": 3.0,
+        "consecutive_ews_months": 17.0,
+        "current_credit_impaired": 0.0,
+        "write_off_flag": 0.0,
+        "recognized_collateral_coverage": 1.0
+      }
+    },
+    "model_version": "reference-v5-0dfe4c8",
+    "artifact_hashes": {
+      "lgd": "c221d27bb2aace1f675a6e45562c2e4a4fedc037a85eda8668da018db5558e21",
+      "pd": "7eef9f8dbd0b2d530edaf5fc7c0a04d9a2f387f6b0b262e7bc138241aa0976eb"
+    },
+    "configuration_hash": "4ddedda1d30e70154cfcf325c0bf7914f09526d0bdee42f2cdb32a6737076e3d",
+    "use": "REFERENCE ONLY; bank gate BLOCKED"
+  },
+  "Watchlist": {
+    "facility_id": "SME00006-005033",
+    "borrower_id": "SME00006",
+    "reporting_date": "2026-09-24",
+    "stage": "Stage 2",
+    "stage_reasons": [
+      "persistent_ews_9_months"
+    ],
+    "sicr": true,
+    "watchlist": true,
+    "risk_rating": 7,
+    "risk_direction": "Deteriorating",
+    "ews": [
+      {
+        "id": "ews_rising_utilization",
+        "triggered": false,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      },
+      {
+        "id": "ews_persistent_high_utilization",
+        "triggered": true,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      },
+      {
+        "id": "ews_limit_breach",
+        "triggered": true,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      }
+    ],
+    "pd": 0.013764563241839564,
+    "pit_pd": 0.012873103320503763,
+    "scenario_pd": {
+      "upside": 0.010818090392137315,
+      "baseline": 0.012873103320503763,
+      "downside": 0.01938541585554922
+    },
+    "remaining_months": 29.0,
+    "lifetime_pd": 0.032940658282436974,
+    "effective_pd": 0.032940658282436974,
+    "lgd": 0.20770469980138942,
+    "ead": 1060816.25,
+    "ecl": 7258.030037189421,
+    "lgd_features": {
+      "facility_id": "SME00006-005033",
+      "customer_id": "SME00006",
+      "ead_at_default": 1060816.25,
+      "collateral_type": "Mortgage",
+      "collateral_coverage": 1.5479,
+      "guarantee_coverage": 0.0,
+      "product_type": "Term Loan",
+      "lien_rank": "First",
+      "industry": "Manufacturing",
+      "leverage_at_default": 0.7009,
+      "current_ratio_at_default": 1.4543,
+      "management_quality": 5.0
+    },
+    "source_facility": {
+      "id": "SME00006-005033",
+      "borrower_id": "SME00006",
+      "observed_at": "2026-09-24",
+      "product": "Term Loan",
+      "drawn": 1060816.25,
+      "limit": 1544093.46,
+      "face": 0.0,
+      "remaining_months": 29.0,
+      "collateral_type": "Mortgage",
+      "collateral_coverage": 1.5479,
+      "guarantee_coverage": 0.0,
+      "lien_rank": "First"
+    },
+    "source_borrower": {
+      "id": "SME00006",
+      "industry": "Manufacturing",
+      "observed_at": "2026-09-24",
+      "collateral_type": "Mortgage",
+      "features": {
+        "ebitda_margin": 0.004,
+        "leverage_ratio": 0.7009,
+        "current_ratio": 1.4543,
+        "debt_to_income": 0.1888,
+        "collateral_coverage": 1.5479,
+        "years_in_business": 6.0,
+        "credit_utilization": 0.8451,
+        "delinquencies_12m": 0.0,
+        "previous_defaults": 0.0,
+        "days_past_due": 0.0,
+        "management_quality": 5.0,
+        "governance_quality": 5.0,
+        "financial_reporting_quality": 4.0,
+        "market_position": 4.0,
+        "sponsor_support": 3.0,
+        "customer_concentration": 0.175,
+        "supplier_concentration": 0.2765,
+        "key_person_dependency": 0.0,
+        "audit_quality": 2.0,
+        "utilization_6m_change": -0.0064,
+        "avg_utilization_6m": 0.8441,
+        "months_above_80_utilization": 4.0,
+        "limit_breach_count": 3.0,
+        "consecutive_ews_months": 17.0,
+        "current_credit_impaired": 0.0,
+        "write_off_flag": 0.0,
+        "recognized_collateral_coverage": 1.0
+      }
+    },
+    "model_version": "reference-v5-0dfe4c8",
+    "artifact_hashes": {
+      "lgd": "c221d27bb2aace1f675a6e45562c2e4a4fedc037a85eda8668da018db5558e21",
+      "pd": "7eef9f8dbd0b2d530edaf5fc7c0a04d9a2f387f6b0b262e7bc138241aa0976eb"
+    },
+    "configuration_hash": "4ddedda1d30e70154cfcf325c0bf7914f09526d0bdee42f2cdb32a6737076e3d",
+    "use": "REFERENCE ONLY; bank gate BLOCKED"
+  },
+  "Stage 3": {
+    "facility_id": "SME00080-003034",
+    "borrower_id": "SME00080",
+    "reporting_date": "2026-09-24",
+    "stage": "Stage 3",
+    "stage_reasons": [
+      "credit_impaired",
+      "prior_default_pd"
+    ],
+    "sicr": false,
+    "watchlist": false,
+    "risk_rating": 8,
+    "risk_direction": "Stable",
+    "ews": [
+      {
+        "id": "ews_rising_utilization",
+        "triggered": false,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      },
+      {
+        "id": "ews_persistent_high_utilization",
+        "triggered": false,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      },
+      {
+        "id": "ews_limit_breach",
+        "triggered": false,
+        "effective_date": "2026-09-24",
+        "source": "borrower conduct",
+        "policy_version": "v5-three-signals"
+      }
+    ],
+    "pd": 0.06716915808138171,
+    "pit_pd": 0.06318483624887049,
+    "scenario_pd": {
+      "upside": 0.05353381875065961,
+      "baseline": 0.06318483624887049,
+      "downside": 0.09275746290963754
+    },
+    "remaining_months": 11.0,
+    "lifetime_pd": 0.06174838228226143,
+    "effective_pd": 1,
+    "lgd": 0.44308504093202133,
+    "ead": 1128787.91,
+    "ecl": 500149.0373059208,
+    "lgd_features": {
+      "facility_id": "SME00080-003034",
+      "customer_id": "SME00080",
+      "ead_at_default": 1128787.91,
+      "collateral_type": "Mortgage",
+      "collateral_coverage": 0.6963,
+      "guarantee_coverage": 0.0,
+      "product_type": "Term Loan",
+      "lien_rank": "First",
+      "industry": "Transport",
+      "leverage_at_default": 1.9387,
+      "current_ratio_at_default": 0.8852,
+      "management_quality": 4.0
+    },
+    "source_facility": {
+      "id": "SME00080-003034",
+      "borrower_id": "SME00080",
+      "observed_at": "2026-09-24",
+      "product": "Term Loan",
+      "drawn": 1128787.91,
+      "limit": 1721167.52,
+      "face": 0.0,
+      "remaining_months": 11.0,
+      "collateral_type": "Mortgage",
+      "collateral_coverage": 0.6963,
+      "guarantee_coverage": 0.0,
+      "lien_rank": "First"
+    },
+    "source_borrower": {
+      "id": "SME00080",
+      "industry": "Transport",
+      "observed_at": "2026-09-24",
+      "collateral_type": "Mortgage",
+      "features": {
+        "ebitda_margin": 0.3022,
+        "leverage_ratio": 1.9387,
+        "current_ratio": 0.8852,
+        "debt_to_income": 0.44,
+        "collateral_coverage": 0.6963,
+        "years_in_business": 9.0,
+        "credit_utilization": 0.5356,
+        "delinquencies_12m": 0.0,
+        "previous_defaults": 1.0,
+        "days_past_due": 0.0,
+        "management_quality": 4.0,
+        "governance_quality": 3.0,
+        "financial_reporting_quality": 1.0,
+        "market_position": 3.0,
+        "sponsor_support": 3.0,
+        "customer_concentration": 0.1165,
+        "supplier_concentration": 0.2492,
+        "key_person_dependency": 1.0,
+        "audit_quality": 2.0,
+        "utilization_6m_change": 0.0804,
+        "avg_utilization_6m": 0.5032,
+        "months_above_80_utilization": 0.0,
+        "limit_breach_count": 0.0,
+        "consecutive_ews_months": 0.0,
+        "current_credit_impaired": 1.0,
+        "write_off_flag": 0.0,
+        "recognized_collateral_coverage": 0.557
+      }
+    },
+    "model_version": "reference-v5-0dfe4c8",
+    "artifact_hashes": {
+      "lgd": "c221d27bb2aace1f675a6e45562c2e4a4fedc037a85eda8668da018db5558e21",
+      "pd": "7eef9f8dbd0b2d530edaf5fc7c0a04d9a2f387f6b0b262e7bc138241aa0976eb"
+    },
+    "configuration_hash": "4ddedda1d30e70154cfcf325c0bf7914f09526d0bdee42f2cdb32a6737076e3d",
+    "use": "REFERENCE ONLY; bank gate BLOCKED"
+  }
+}

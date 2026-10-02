@@ -1,0 +1,23 @@
+{
+  "historical_r1_hashes": "VERIFIED",
+  "new_final_holdout_opened": false,
+  "models_fitted": false,
+  "bank_gate": "BLOCKED",
+  "pd": {
+    "n": 3000,
+    "defaults": 102,
+    "observed_default_rate": 0.034,
+    "predicted_mean": 0.03438768859645263,
+    "auc": 0.7594554730104601,
+    "gini": 0.5189109460209202,
+    "ks": 0.40849673202614384,
+    "brier": 0.030002534586613554,
+    "log_loss": 0.12856211473794532
+  },
+  "r1_ecl": {
+    "max_weighting_error": 1.1641532182693481e-10,
+    "portfolio": 92036058.41877422,
+    "borrower_aggregation_error": 0.0
+  }
+}
+Reference facilities: 5172 errors: {'ead': 0.0, 'scenario_pd': 1.1102230246251565e-16, 'ecl': 7.275957614183426e-11}

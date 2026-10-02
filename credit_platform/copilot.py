@@ -15,12 +15,12 @@ from sqlalchemy import func, select
 from . import audit, schema as s, service
 from .common import ROOT, digest, now, uid
 
-PROMPT_VERSION = "credit-risk-copilot-4"
-PROVIDER_VERSION = "deterministic-4"
+PROMPT_VERSION = "credit-risk-copilot-5"
+PROVIDER_VERSION = "deterministic-5"
 REFUSAL = "I do not have sufficient permitted evidence to answer this."
 INJECTION = re.compile(
-    r"(ignore\s+(all|previous|prior)|system\s+prompt|developer\s+message|"
-    r"reveal\s+(secrets?|tokens?|credentials?)|drop\s+table|unrestricted\s+sql)",
+    r"(ignore\s+(all|previous|prior|the\s+validation)|system\s+prompt|developer\s+message|"
+    r"reveal\s+(secrets?|tokens?|credentials?)|drop\s+table|unrestricted\s+sql|execute\s+(this\s+)?sql|book\s+(it|lgd|ecl)|bank[- ]approved|another\s+user)",
     re.IGNORECASE,
 )
 
@@ -140,15 +140,8 @@ def _borrower(conn, run_id: str, borrower_id: str) -> tuple[dict, list[dict]]:
     run = service.one(conn, s.runs, run_id)
     if run["status"] != "SUCCEEDED":
         raise service.Conflict("Successful run required")
-    rows = [
-        dict(row)
-        for row in conn.execute(
-            select(s.decisions).where(
-                s.decisions.c.run_id == run_id,
-                s.decisions.c.borrower_id == borrower_id,
-            )
-        ).mappings()
-    ]
+    rows = [row for row in service.decision_rows(conn, run_id)
+            if row['borrower_id'] == borrower_id]
     if not rows:
         raise service.NotFound("Borrower decision not found in run")
     facilities = [
@@ -284,6 +277,11 @@ def answer(db, request, actor: dict) -> dict:
         "recorded_at": now(),
     }
     with db.begin() as conn:
+        # Missing identifiers must not make refusal evidence violate its FK.
+        if record["run_id"] and conn.execute(
+            select(s.runs.c.id).where(s.runs.c.id == record["run_id"])
+        ).first() is None:
+            record["run_id"] = None
         conn.execute(s.copilot_requests.insert().values(**record))
         audit.append(
             conn,
