@@ -1,0 +1,50 @@
+{
+  "selected": "M4",
+  "benchmark": 676483805.1041582,
+  "challenger": 672423199.2545233,
+  "difference": -4060605.849634886,
+  "percent_change": -0.6002517457176504,
+  "stage1": "N/A: impaired-only cohort",
+  "stage2": "N/A: impaired-only cohort",
+  "stage3": {
+    "M0": 676483805.1041582,
+    "M4": 672423199.2545233
+  },
+  "same_inputs": {
+    "facility_id": true,
+    "customer_id": true,
+    "scenario": true,
+    "pd": true,
+    "stage": true,
+    "ead_at_default": true
+  },
+  "reconciliation": [
+    {
+      "model": "M0",
+      "facility_count": 4161,
+      "scenario_rows": 12483,
+      "stage_unique": [
+        3
+      ],
+      "pd_unique": [
+        1
+      ],
+      "facility_vs_borrower_error": 2.384185791015625e-07,
+      "scalar_vs_vector_error": 1.1920928955078125e-07
+    },
+    {
+      "model": "M4",
+      "facility_count": 4161,
+      "scenario_rows": 12483,
+      "stage_unique": [
+        3
+      ],
+      "pd_unique": [
+        1
+      ],
+      "facility_vs_borrower_error": 0.0,
+      "scalar_vs_vector_error": 1.1920928955078125e-07
+    }
+  ],
+  "booked": false
+}

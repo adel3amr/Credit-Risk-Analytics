@@ -66,3 +66,25 @@ def test_model_lock_integrity():
     lock=json.loads((OUT/'LOCK.json').read_text())
     assert lock['data_manifest_sha256']==sha(DATA/'manifest.json')
     for name,h in lock['models'].items(): assert sha(OUT/name)==h
+
+
+def test_final_cashflow_target_independent_arithmetic():
+    x=pd.read_csv(DATA/'final_inputs.csv.gz').set_index('facility_id')
+    y=pd.read_csv(DATA/'final_outcomes.csv.gz')
+    e=x.loc[y.facility_id,'ead_at_default'].to_numpy();r=x.loc[y.facility_id,'interest_rate'].to_numpy()
+    discounted=sum(y[f'net_cf_{m}m'].to_numpy()/(1+r)**(m/12) for m in [1,6,12,24,36,60])
+    np.testing.assert_allclose(np.clip(1-discounted/e,0,1),y.actual,atol=1e-9,rtol=0)
+    assert (pd.to_datetime(y.resolved_at).to_numpy()>pd.to_datetime(x.loc[y.facility_id,'reporting_date']).to_numpy()).all()
+
+
+def test_final_ecl_population_and_aggregation():
+    p=pd.read_csv(OUT/'predictions.csv.gz');p=p[p.split=='final']
+    choice=json.loads((OUT/'LOCK.json').read_text())['selected']
+    a=p[p.model=='M0'].sort_values(['facility_id','scenario']);b=p[p.model==choice].sort_values(['facility_id','scenario'])
+    for field in ['facility_id','customer_id','ead_at_default','stage','pd','scenario']:
+        np.testing.assert_array_equal(a[field].to_numpy(),b[field].to_numpy())
+    report=json.loads((OUT/'independent_ecl.json').read_text())
+    for n,expected in [('M0',report['benchmark']),(choice,report['challenger'])]:
+        z=p[p.model==n].copy(); z['ecl']=z.prediction*z.ead_at_default*z.scenario.map({'upside':.2,'baseline':.6,'downside':.2})
+        assert abs(z.groupby('customer_id').ecl.sum().sum()-expected)<=1e-6
+        assert z.stage.eq(3).all() and z.pd.eq(1).all()

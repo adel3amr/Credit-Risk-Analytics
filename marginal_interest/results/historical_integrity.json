@@ -1,0 +1,25 @@
+{
+  "reviewed_sha": "7773beb86df8480d964daaaf62199cedc15d356a",
+  "changed_historical_paths": [],
+  "historical_evidence_hashes": {
+    "s2_remediation/results/LOCK.json": true,
+    "s2_remediation/results/calibration_metrics.csv": true,
+    "s2_remediation/results/calibration_predictions.csv": true,
+    "s2_remediation/results/calibration_support.csv": true,
+    "s2_remediation/results/current_metrics.csv": true,
+    "s2_remediation/results/current_predictions.csv": true,
+    "s2_remediation/results/current_shape.json": true,
+    "s2_remediation/results/current_support.csv": true,
+    "s2_remediation/results/ecl_movement.csv": true,
+    "s2_remediation/results/ecl_reconciliation.json": true,
+    "s2_remediation/results/engineering.json": true,
+    "s2_remediation/results/gate_checks.json": true,
+    "s2_remediation/results/promotion_metrics.csv": true,
+    "s2_remediation/results/promotion_predictions.csv": true,
+    "s2_remediation/results/promotion_shape.json": true,
+    "s2_remediation/results/promotion_support.csv": true,
+    "s2_remediation/results/quality_diagnostic.csv": true,
+    "s2_remediation/results/scenario_ecl.csv": true,
+    "s2_remediation/results/support_diagnosis.csv": true
+  }
+}

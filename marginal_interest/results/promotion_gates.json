@@ -1,0 +1,687 @@
+{
+  "disposition": "CHALLENGER_NOT_PROMOTED",
+  "institutional": "BLOCKED",
+  "historical_gate_arithmetic_verified": true,
+  "historical_checks_recalculated": 230,
+  "current_live_features": "BLOCKED: no validated MI ledger or observation-age contract",
+  "historical_conditional_gates": "NOT TRANSFERABLE: new remaining-LGD target; latent oracle is not observable conditional truth",
+  "original_S2_same_target_comparison": "NOT AVAILABLE: historical artifact has different target; cannot pass existing gate",
+  "calibration": [
+    {
+      "segment": "all",
+      "scenario": "upside",
+      "tolerance": 0.01,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "unsecured",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "secured",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "guarantee:zero",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "guarantee:partial",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "guarantee:full",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Financial Guarantee",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Import LC",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:OVD",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Performance Guarantee",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Term Loan",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Construction",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Hospitality",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Manufacturing",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Retail",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Services",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Technology",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Transport",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Cash",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Mortgage",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Other",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Unsecured",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "lien_rank:First",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "lien_rank:Second",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "lien_rank:Unsecured",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "latent_regime:0",
+      "scenario": "upside",
+      "tolerance": 0.01,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "latent_regime:1",
+      "scenario": "upside",
+      "tolerance": 0.01,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0-0.1",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.1-0.25",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.25-0.5",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.5-0.75",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.75-1",
+      "scenario": "upside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "all",
+      "scenario": "baseline",
+      "tolerance": 0.01,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "unsecured",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "secured",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "guarantee:zero",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "guarantee:partial",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "guarantee:full",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Financial Guarantee",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Import LC",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:OVD",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Performance Guarantee",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Term Loan",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Construction",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Hospitality",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Manufacturing",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Retail",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Services",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Technology",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Transport",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Cash",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Mortgage",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Other",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Unsecured",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "lien_rank:First",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "lien_rank:Second",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "lien_rank:Unsecured",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "latent_regime:0",
+      "scenario": "baseline",
+      "tolerance": 0.01,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "latent_regime:1",
+      "scenario": "baseline",
+      "tolerance": 0.01,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0-0.1",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.1-0.25",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.25-0.5",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.5-0.75",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.75-1",
+      "scenario": "baseline",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "all",
+      "scenario": "downside",
+      "tolerance": 0.01,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "unsecured",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "secured",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "guarantee:zero",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "guarantee:partial",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "guarantee:full",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Financial Guarantee",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Import LC",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:OVD",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Performance Guarantee",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "product_type:Term Loan",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Construction",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Hospitality",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Manufacturing",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Retail",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Services",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Technology",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "industry:Transport",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Cash",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Mortgage",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Other",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "collateral_type:Unsecured",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "lien_rank:First",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "lien_rank:Second",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "lien_rank:Unsecured",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "latent_regime:0",
+      "scenario": "downside",
+      "tolerance": 0.01,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "latent_regime:1",
+      "scenario": "downside",
+      "tolerance": 0.01,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0-0.1",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.1-0.25",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.25-0.5",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.5-0.75",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "PASS",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    },
+    {
+      "segment": "predicted:0.75-1",
+      "scenario": "downside",
+      "tolerance": 0.02,
+      "status": "FAIL",
+      "basis": "realized clustered interval; latent-state conditional equivalence not interchangeable"
+    }
+  ],
+  "support": "FAIL",
+  "scenario": "PASS",
+  "engineering": "PASS: 200 full-suite tests, 1 upstream deprecation warning; frozen hashes and cashflow/ECL checks verified",
+  "institutional_validation": "UNAVAILABLE"
+}

@@ -1,0 +1,15 @@
+model,industry,ecl
+M0,Construction,79313662.6514
+M0,Hospitality,59054878.4822
+M0,Manufacturing,140191092.122
+M0,Retail,132143894.115
+M0,Services,152500868.786
+M0,Technology,44549474.6632
+M0,Transport,68729934.2841
+M4,Construction,79245095.1924
+M4,Hospitality,59097929.3042
+M4,Manufacturing,138245646.374
+M4,Retail,131601506.332
+M4,Services,151114837.494
+M4,Technology,43938164.5991
+M4,Transport,69180019.96

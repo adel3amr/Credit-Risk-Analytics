@@ -1,0 +1,38 @@
+[
+  {
+    "split": "validation",
+    "scenario": "upside",
+    "target_cashflow_max_error": 4.807598763534315e-12,
+    "passed": true
+  },
+  {
+    "split": "validation",
+    "scenario": "baseline",
+    "target_cashflow_max_error": 5.249023438125278e-12,
+    "passed": true
+  },
+  {
+    "split": "validation",
+    "scenario": "downside",
+    "target_cashflow_max_error": 4.580169576939852e-12,
+    "passed": true
+  },
+  {
+    "split": "final",
+    "scenario": "upside",
+    "target_cashflow_max_error": 4.8349588221974216e-12,
+    "passed": true
+  },
+  {
+    "split": "final",
+    "scenario": "baseline",
+    "target_cashflow_max_error": 4.490574578852602e-12,
+    "passed": true
+  },
+  {
+    "split": "final",
+    "scenario": "downside",
+    "target_cashflow_max_error": 4.529779329409678e-12,
+    "passed": true
+  }
+]
