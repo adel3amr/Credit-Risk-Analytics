@@ -35,9 +35,9 @@ def generate():
         sector=['Manufacturing','Retail','Services','Construction'][i%4];fid=f'WN-F{i:05d}';bid=f'WN-B{i:05d}';source='WN-1:1072026';stress=.8*np.sin((year-2010)*1.3)+rng.normal(0,.25);strength=rng.normal();hidden=rng.normal()
         pd0=float(sig(-3-.65*strength+.5*stress));rating=int(np.clip(np.ceil(pd0*45)+2,1,7));principal=float(np.exp(rng.normal(12.5,.8)));rate=float(np.clip(.05+.02*stress+.04*pd0,.02,.18));pre=principal*rate/12
         fac=dict(id=fid,borrower_id=bid,product=['Term Loan','OVD'][i%2],principal=principal,predefault_interest=pre,rate=rate,source=source);tables['borrower'].append(dict(id=bid,industry=sector,source=source));tables['facility'].append(fac);events={n:[] for n in ENTITIES}
-        def add(kind,m,amount=0,delay=0,**payload):
+        def add(entity,m,amount=0,delay=0,**payload):
             day=dates[min(m,72)] if m>=0 else str((start+pd.DateOffset(months=m)).date());recorded=str((pd.Timestamp(day)+pd.Timedelta(days=delay)).date())
-            r=dict(id=f'{fid}-{kind}-{len(events[kind])}',facility_id=fid,effective_date=day,recorded_at=recorded,source=source,amount=float(amount),payload={'month':m,**payload});events[kind].append(r);return r
+            r=dict(id=f'{fid}-{entity}-{len(events[entity])}',facility_id=fid,effective_date=day,recorded_at=recorded,source=source,amount=float(amount),payload={'month':m,**payload});events[entity].append(r);return r
         for m in [-12,-6,-3,0]:
             p=float(sig(np.log(pd0/(1-pd0))+.025*(m+12)));add('credit_snapshot',m,predefault_pd=p,predefault_rating=rating,rating_migration=1 if m==0 else 0,financial_strength=strength,previous_defaults=int(i%17==0),utilization=float(np.clip(.6+.02*(m+12)+rng.normal(0,.03),0,1)),delinquency=max(0,int(90+m*7.5)),current_pd=1 if m==0 else p)
         add('default_event',0,reason='90DPD',default_pd=1,default_rating=8)

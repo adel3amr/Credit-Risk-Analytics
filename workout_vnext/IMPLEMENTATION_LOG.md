@@ -1,0 +1,1 @@
+First generator invocation failed on the first episode before any files/outcomes were written: event helper parameter kind collided with cost payload kind. Renamed helper parameter entity; seeds/distributions unchanged. Empty directory retained. No metrics evaluated.
