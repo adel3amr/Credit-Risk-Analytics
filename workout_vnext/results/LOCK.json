@@ -1,0 +1,20 @@
+{
+  "candidate": "component",
+  "benchmark": "direct_new",
+  "models": {
+    "without_interest.joblib": "f03dcc06e0f8d147c22ba30c051ae45e2cd5e638750d3644afbc95fe54128646",
+    "without_guarantees.joblib": "5c503a4558ced8af90d0e7fcf2a90649efbdcf51aff78f99a854f3fbc7033267",
+    "direct_new.joblib": "6c365e9e6f105cacec16181656c5465410a0773641281757b2513752b0c15d6f",
+    "without_history.joblib": "298ea8b21272578d6d10ac4bc37544c77579690fb7a841f2266725ecacfe3938",
+    "without_collateral.joblib": "a773a231c9abf1a7c88c2b80958fa39f289710d5c02d11159b82f1449226dfba",
+    "component.joblib": "b581cea00817606a9293c238637beda5ca8b334f8298bf4f0acc237056fcf8d8",
+    "without_macro.joblib": "65dfb5d3a06fa47b13c665ec100ca0e5a57bc7d5ca760b86802727e85969cc4f",
+    "without_costs.joblib": "6395ae448a8c2c43f42eb11c91717d8cfba0d902c7ed466087862b800bbef7fc",
+    "without_credit.joblib": "180fc27fb0b12e64391514f0ab0b0786094595ec16a855cee1e4e332ea0ae22f",
+    "without_age.joblib": "590dd216ea651a62c7b2a34d60c1ddc7b78389d87d181f7bae91726fd45c29da"
+  },
+  "data_manifest": "77b80f4ce30c2b00d1fe77030f5a61672b18c475d2843d1e0e81b1cf20714de2",
+  "architecture": "WN-1",
+  "final_opened": false,
+  "no_tuning": true
+}
