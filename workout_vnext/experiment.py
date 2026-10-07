@@ -128,4 +128,6 @@ def evaluate():
 
 if __name__=='__main__':
     import sys
-    {'fit':fit,'evaluate':evaluate}[sys.argv[1]]()
+    from importlib import import_module
+    module=import_module('workout_vnext.experiment')
+    {'fit':module.fit,'evaluate':module.evaluate}[sys.argv[1]]()
