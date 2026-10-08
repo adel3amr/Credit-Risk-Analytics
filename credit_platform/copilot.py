@@ -190,6 +190,78 @@ def _verified_grounding(question: str, evidence: dict, use_case: str) -> str:
     return DeterministicProvider().render(question, evidence, use_case)
 
 
+def _llm_evidence_text(question: str, evidence: dict, use_case: str) -> str:
+    """Compact business-readable evidence for narrative providers."""
+    if use_case == "portfolio":
+        lines = [
+            f"Portfolio: borrowers={evidence.get('borrower_count', 0)}, "
+            f"facilities={evidence.get('facility_count', 0)}, "
+            f"EAD={evidence.get('ead', 0.0):.2f}, ECL={evidence.get('ecl', 0.0):.2f}."
+        ]
+        for name, row in sorted(evidence.get("by_stage", {}).items()):
+            lines.append(
+                f"{name}: facilities={row.get('facilities', 0)}, "
+                f"borrowers={row.get('borrowers', 0)}, EAD={row.get('ead', 0.0):.2f}, "
+                f"ECL={row.get('ecl', 0.0):.2f}."
+            )
+        for name, row in sorted(
+            evidence.get("by_industry", {}).items(),
+            key=lambda kv: (-float(kv[1].get("ecl", 0.0)), kv[0]),
+        ):
+            lines.append(
+                f"Industry {name}: borrowers={row.get('borrowers', 0)}, "
+                f"EAD={row.get('ead', 0.0):.2f}, ECL={row.get('ecl', 0.0):.2f}, "
+                f"mean_PD={row.get('mean_pd', 0.0):.6f}, "
+                f"mean_LGD={row.get('mean_lgd', 0.0):.6f}, "
+                f"ECL_to_EAD={row.get('loss_intensity', 0.0):.6f}."
+            )
+        for key in ("watchlist", "unsecured", "guaranteed"):
+            row = evidence.get(key, {})
+            lines.append(
+                f"{key.title()}: borrowers={row.get('borrowers', 0)}, "
+                f"facilities={row.get('facilities', 0)}, EAD={row.get('ead', 0.0):.2f}, "
+                f"ECL={row.get('ecl', 0.0):.2f}."
+            )
+        for action in evidence.get("portfolio_review_actions", [])[:8]:
+            lines.append("Review action: " + str(action.get("reason", action.get("type", "review"))))
+        for row in evidence.get("risk_patterns", [])[:6]:
+            lines.append(
+                f"Risk pattern {row.get('pattern')}: borrowers={row.get('borrowers', 0)}, "
+                f"EAD={row.get('ead', 0.0):.2f}, mean_PD={row.get('mean_pd', 0.0):.6f}, "
+                f"ECL_to_EAD={row.get('ecl_to_ead', 0.0):.6f}."
+            )
+        return "\n".join(lines)
+
+    if use_case in ("borrower", "credit_review"):
+        lines = [f"Borrower {evidence.get('borrower_id')}, industry={evidence.get('industry')}."]
+        for row in evidence.get("facilities", []):
+            lines.append(
+                f"Facility {row.get('facility_id')}: product={row.get('product')}, "
+                f"stage={row.get('stage')}, rating={row.get('risk_rating')}, "
+                f"risk_direction={row.get('risk_direction')}, PD={row.get('pd')}, "
+                f"LGD={row.get('lgd')}, EAD={row.get('ead')}, ECL={row.get('ecl')}, "
+                f"collateral={row.get('collateral_type')}, "
+                f"collateral_coverage={row.get('collateral_coverage')}, "
+                f"guarantee_coverage={row.get('guarantee_coverage')}, "
+                f"stage_reasons={row.get('stage_reasons')}."
+            )
+        return "\n".join(lines)
+
+    return _verified_grounding(question, evidence, use_case)
+
+
+BAD_NARRATIVE = re.compile(
+    r"(json|python|code snippet|programming language|parse the data|data format|"
+    r"custom format|import json|load the data)",
+    re.IGNORECASE,
+)
+
+
+def _valid_narrative(answer: str) -> bool:
+    text = answer.strip()
+    return bool(text) and len(text) >= 40 and BAD_NARRATIVE.search(text) is None
+
+
 class OpenAIResponsesProvider:
     """Optional OpenAI narrative provider over governed evidence only."""
 
