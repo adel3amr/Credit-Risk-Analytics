@@ -5,7 +5,7 @@ import json
 import pandas as pd
 from sqlalchemy import select
 from . import artifacts, security, service, schema as s, audit, governance
-from .common import ROOT, atomic_json, file_hash
+from .common import ROOT, atomic_json, file_hash, frozen_text_hash
 from .contracts import BORROWER_FEATURES
 from .domain import DatasetInput, RunInput
 from .db import engine, require_schema
@@ -14,7 +14,7 @@ from .db import engine, require_schema
 def map_reference(reporting_date="2026-09-24"):
     raw_path = ROOT / "data/raw/sme_credit_portfolio.csv"
     if (
-        file_hash(raw_path)
+        frozen_text_hash(raw_path)
         != "2312db398a92c242abec665af6e1e7535b18e47349cfaf0cdf48e8ed3f83c8cd"
     ):
         raise ValueError("Source dataset identity mismatch")
@@ -69,7 +69,7 @@ def map_reference(reporting_date="2026-09-24"):
         DatasetInput.model_validate(
             {
                 "name": "V5 holdout reference",
-                "source": "synthetic-v5:" + file_hash(raw_path),
+                "source": "synthetic-v5:" + frozen_text_hash(raw_path),
                 "effective_date": reporting_date,
                 "borrowers": borrowers,
                 "facilities": facilities,
