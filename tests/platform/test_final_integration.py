@@ -64,3 +64,12 @@ def test_final_borrower_copilot_keeps_full_decision_context():
         "remaining_months",
     ):
         assert field in source
+
+
+def test_frozen_text_hash_is_crlf_portable(tmp_path):
+    from credit_platform.common import frozen_text_hash
+    lf = tmp_path / "lf.csv"
+    crlf = tmp_path / "crlf.csv"
+    lf.write_bytes(b"a,b\n1,2\n")
+    crlf.write_bytes(b"a,b\r\n1,2\r\n")
+    assert frozen_text_hash(lf) == frozen_text_hash(crlf)
