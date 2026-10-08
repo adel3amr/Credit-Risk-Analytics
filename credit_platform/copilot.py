@@ -15,8 +15,8 @@ from sqlalchemy import func, select
 from . import audit, schema as s, service
 from .common import ROOT, digest, now, uid
 
-PROMPT_VERSION = "credit-risk-copilot-7"
-PROVIDER_VERSION = "deterministic-7"
+PROMPT_VERSION = "credit-risk-copilot-8"
+PROVIDER_VERSION = "deterministic-8"
 REFUSAL = "I do not have sufficient permitted evidence to answer this."
 INJECTION = re.compile(
     r"(ignore\s+(all|previous|prior|the\s+validation)|system\s+prompt|developer\s+message|"
@@ -101,17 +101,88 @@ class DeterministicProvider:
         q = question.lower()
         if any(word in q for word in ("increase", "deteriorated most", "change since")):
             return "A single run cannot establish a change over time. Use the governed two-run movement endpoint; no causal explanation is inferred."
+
+        by_industry = evidence.get("by_industry", {})
+        broad = any(
+            phrase in q
+            for phrase in (
+                "summarize", "summary", "risk profile", "main risk",
+                "important areas", "human review", "portfolio risk",
+            )
+        )
+        if broad and by_industry:
+            ranked_ecl = sorted(
+                by_industry.items(),
+                key=lambda kv: (-float(kv[1].get("ecl", 0.0)), kv[0]),
+            )
+            highest_pd = max(
+                by_industry.items(),
+                key=lambda kv: (float(kv[1].get("mean_pd", 0.0)), kv[0]),
+            )
+            highest_loss = max(
+                by_industry.items(),
+                key=lambda kv: (float(kv[1].get("loss_intensity", 0.0)), kv[0]),
+            )
+            top_industries = "; ".join(
+                f"{name}: EAD {row['ead']:,.2f}, ECL {row['ecl']:,.2f}, "
+                f"mean PD {row.get('mean_pd', 0.0):.2%}, "
+                f"ECL/EAD {row.get('loss_intensity', 0.0):.2%}"
+                for name, row in ranked_ecl[:3]
+            )
+            watch = evidence.get("watchlist", {})
+            unsecured = evidence.get("unsecured", {})
+            guaranteed = evidence.get("guaranteed", {})
+            actions = []
+            for action in evidence.get("portfolio_review_actions", []):
+                typ = action.get("type")
+                if typ == "industry_concentration":
+                    actions.append(
+                        f"review {action['industry']} concentration "
+                        f"(mean PD {action['mean_pd']:.2%} vs portfolio "
+                        f"{action['portfolio_mean_pd']:.2%}; EAD {action['ead']:,.2f})"
+                    )
+                elif typ == "deteriorating_high_utilization":
+                    actions.append(
+                        f"prioritize {action['borrowers']} deteriorating high-utilization "
+                        f"borrowers representing EAD {action['ead']:,.2f}"
+                    )
+                elif typ == "unsecured_stage_2_3":
+                    actions.append(
+                        f"review collateral/recovery strategy for {action['borrowers']} "
+                        f"unsecured Stage 2/3 borrowers, EAD {action['ead']:,.2f}"
+                    )
+                elif action.get("reason"):
+                    actions.append(action["reason"])
+            action_text = "; ".join(actions[:5]) if actions else evidence.get("review_basis", "")
+            return (
+                f"Portfolio review: leading industries by ECL are {top_industries}. "
+                f"Highest mean-PD industry is {highest_pd[0]} "
+                f"({highest_pd[1].get('mean_pd', 0.0):.2%}); highest loss intensity is "
+                f"{highest_loss[0]} ({highest_loss[1].get('loss_intensity', 0.0):.2%}). "
+                f"Watchlist: {watch.get('borrowers', 0)} borrowers / EAD {watch.get('ead', 0.0):,.2f}. "
+                f"Unsecured: {unsecured.get('borrowers', 0)} borrowers / EAD {unsecured.get('ead', 0.0):,.2f}. "
+                f"Guaranteed: {guaranteed.get('borrowers', 0)} borrowers / EAD {guaranteed.get('ead', 0.0):,.2f}. "
+                f"Human-review priorities: {action_text}"
+            )
+
         if "industr" in q or "sector" in q:
-            ranked = sorted(evidence["by_industry"].items(), key=lambda kv:(-kv[1]["ecl"],kv[0]))
-            return "Industries ranked by reference ECL (not a deterioration forecast): " + "; ".join(f"{k}: EAD {v['ead']:,.2f}, ECL {v['ecl']:,.2f}" for k,v in ranked)
+            ranked = sorted(by_industry.items(), key=lambda kv:(-kv[1]["ecl"],kv[0]))
+            return "Industries ranked by reference ECL (not a deterioration forecast): " + "; ".join(
+                f"{k}: EAD {v['ead']:,.2f}, ECL {v['ecl']:,.2f}, "
+                f"mean PD {v.get('mean_pd', 0.0):.2%}, "
+                f"ECL/EAD {v.get('loss_intensity', 0.0):.2%}"
+                for k, v in ranked
+            )
         for key in ("watchlist", "unsecured", "guaranteed"):
             if key in q or (key=="guaranteed" and "guarantee" in q):
                 v=evidence[key]
                 return f"{key}: {v['borrowers']} distinct borrowers, {v['facilities']} facilities, EAD {v['ead']:,.2f}, ECL {v['ecl']:,.2f}."
         if "top" in q or "attention" in q:
-            return evidence["review_basis"] + " " + "; ".join(f"{r['facility_id']}: ECL {r['ecl']:,.2f}" for r in evidence["top_risk_cases"])
+            return evidence["review_basis"] + " " + "; ".join(
+                f"{r['facility_id']}: ECL {r['ecl']:,.2f}"
+                for r in evidence["top_risk_cases"]
+            )
         return evidence["count_basis"]
-
 
 
 def _verified_grounding(question: str, evidence: dict, use_case: str) -> str:
