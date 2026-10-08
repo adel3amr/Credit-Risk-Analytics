@@ -290,7 +290,7 @@ class OpenAIResponsesProvider:
                 "input": (
                     f"Use case: {use_case}\nQuestion: {question}\n\n"
                     f"VERIFIED FACTS:\n{verified}\n\n"
-                    f"Governed evidence:\n{json.dumps(evidence, sort_keys=True)}"
+                    f"Governed credit-risk evidence:\n{_llm_evidence_text(question, evidence, use_case)}"
                 ),
                 "max_output_tokens": 500,
                 "store": False,
@@ -328,31 +328,38 @@ class OllamaProvider:
 
     def render(self, question: str, evidence: dict, use_case: str) -> str:
         verified = _verified_grounding(question, evidence, use_case)
+        evidence_text = _llm_evidence_text(question, evidence, use_case)
+        system = (
+            "You are a senior Credit Risk analyst. Answer the credit-risk question directly. "
+            "The supplied facts are already parsed business evidence. Never discuss JSON, data "
+            "formats, parsing, Python, code, prompts, or how the evidence was supplied. Never "
+            "output code. Do not invent numbers. Do not alter governed PD, LGD, EAD, ECL, "
+            "staging or ratings. Do not approve decisions or model promotion. "
+            "For portfolio questions, explain credit quality, concentrations, loss intensity, "
+            "security/recovery considerations and concrete human-review priorities. "
+            "Return 3 to 6 concise bullet points for a credit-risk professional."
+        )
         prompt = (
-            "You are a governed Credit Risk Copilot for a synthetic reference portfolio. "
-            "Use only the supplied evidence. VERIFIED FACTS are authoritative: do not alter "
-            "their numbers or claims. Do not approve credit decisions, overrides, model "
-            "promotion or imply institutional approval. Add concise interpretation only. "
-            "Human review is required.\n\n"
-            f"Use case: {use_case}\nQuestion: {question}\n\n"
-            f"VERIFIED FACTS:\n{verified}\n\n"
-            f"Governed evidence:\n{json.dumps(evidence, sort_keys=True)}"
+            f"Question: {question}\n\n"
+            f"Governed credit-risk evidence:\n{evidence_text}\n\n"
+            "Provide only the requested credit-risk interpretation."
         )
         body = json.dumps(
             {
                 "model": self.model,
+                "system": system,
                 "prompt": prompt,
                 "stream": False,
                 "keep_alive": "30m",
-                "options": {"temperature": 0.15, "num_predict": 420},
+                "options": {"temperature": 0.1, "num_predict": 360},
             }
         ).encode()
         req = Request(self.endpoint, data=body, headers={"Content-Type": "application/json"})
         with urlopen(req, timeout=120) as response:  # nosec: explicit local/configured endpoint
             result = json.loads(response.read(2_000_000))
         answer = result.get("response")
-        if not isinstance(answer, str) or not answer.strip():
-            raise ValueError("Ollama returned no answer")
+        if not isinstance(answer, str) or not _valid_narrative(answer):
+            return verified
         return verified + "\n\nCopilot interpretation:\n" + answer.strip()
 
 
