@@ -375,28 +375,285 @@ def approve(db, id, decision, actor):
 
 
 def portfolio(conn, run_id):
+    """Canonical portfolio evidence used by API, dashboards and Copilot."""
     run = one(conn, s.runs, run_id)
     if run["status"] != "SUCCEEDED":
         raise Conflict("Run has no successful portfolio")
     t = traces(conn, run_id)
     result = validation.reconcile(t)
     result["concentrations"] = validation.concentrations(t)
+    total_ead = float(result["ead"] or 0.0)
+    total_ecl = float(result["ecl"] or 0.0)
+
     def aggregate(items):
-        return {"facilities": len(items), "borrowers": len({v["borrower_id"] for v in items}),
-                "ead": fsum(v["ead"] for v in items), "ecl": fsum(v["ecl"] for v in items)}
+        n = len(items)
+        ead = fsum(float(v["ead"]) for v in items)
+        ecl = fsum(float(v["ecl"]) for v in items)
+        return {
+            "facilities": n,
+            "borrowers": len({v["borrower_id"] for v in items}),
+            "ead": ead,
+            "ecl": ecl,
+            "mean_pd": fsum(float(v["pd"]) for v in items) / n if n else 0.0,
+            "mean_lgd": fsum(float(v["lgd"]) for v in items) / n if n else 0.0,
+            "ead_share": ead / total_ead if total_ead else 0.0,
+            "ecl_share": ecl / total_ecl if total_ecl else 0.0,
+            "loss_intensity": ecl / ead if ead else 0.0,
+        }
+
     result["run_id"] = run_id
     result["borrower_count"] = len({v["borrower_id"] for v in t})
-    result["count_basis"] = "Distinct scored borrowers; facility-level exposures. Borrowers may occur in multiple segments."
-    for name, key in [("stage", lambda v:v["stage"]), ("industry", lambda v:v["source_borrower"]["industry"]),
-                      ("product", lambda v:v["source_facility"]["product"]), ("rating", lambda v:str(v["risk_rating"])),
-                      ("risk_direction", lambda v:v["risk_direction"])]:
-        result["by_"+name] = {k:aggregate([v for v in t if key(v)==k]) for k in sorted({key(v) for v in t})}
-    for name, predicate in [("watchlist",lambda v:v["watchlist"]), ("unsecured",lambda v:v["lgd_features"]["collateral_coverage"]==0),
-                            ("guaranteed",lambda v:v["lgd_features"]["guarantee_coverage"]>0)]:
+    result["count_basis"] = (
+        "Distinct scored borrowers; facility-level exposures. "
+        "Borrowers may occur in multiple segments."
+    )
+
+    dimensions = [
+        ("stage", lambda v: v["stage"]),
+        ("industry", lambda v: v["source_borrower"]["industry"]),
+        ("product", lambda v: v["source_facility"]["product"]),
+        ("rating", lambda v: str(v.get("risk_rating"))),
+        ("risk_direction", lambda v: str(v.get("risk_direction"))),
+        ("collateral_type", lambda v: str(v["source_facility"].get("collateral_type"))),
+    ]
+    for name, key in dimensions:
+        keys = sorted({key(v) for v in t})
+        result["by_" + name] = {
+            k: aggregate([v for v in t if key(v) == k])
+            for k in keys
+        }
+
+    segments = [
+        ("watchlist", lambda v: bool(v.get("watchlist"))),
+        ("unsecured", lambda v: float(v["lgd_features"].get("collateral_coverage") or 0) == 0),
+        ("guaranteed", lambda v: float(v["lgd_features"].get("guarantee_coverage") or 0) > 0),
+    ]
+    for name, predicate in segments:
         result[name] = aggregate([v for v in t if predicate(v)])
-    result["top_risk_cases"] = [{k:v[k] for k in ("facility_id","borrower_id","stage","ead","ecl","risk_direction","stage_reasons")}
-                                for v in sorted(t,key=lambda v:(-v["ecl"],v["facility_id"]))[:10]]
-    result["review_basis"] = "Top ten facilities by reference ECL; review suggestions, not approvals or measured deterioration."
+
+    borrower_rollup = {}
+    borrower_trace = {}
+    for v in t:
+        bid = v["borrower_id"]
+        borrower_trace.setdefault(bid, v)
+        row = borrower_rollup.setdefault(
+            bid,
+            {
+                "borrower_id": bid,
+                "industry": v["source_borrower"]["industry"],
+                "stage": v["stage"],
+                "risk_rating": v.get("risk_rating"),
+                "risk_direction": v.get("risk_direction"),
+                "watchlist": bool(v.get("watchlist")),
+                "sicr": bool(v.get("sicr")),
+                "facilities": 0,
+                "ead": 0.0,
+                "ecl": 0.0,
+                "max_pd": 0.0,
+                "max_lgd": 0.0,
+            },
+        )
+        row["facilities"] += 1
+        row["ead"] += float(v["ead"])
+        row["ecl"] += float(v["ecl"])
+        row["max_pd"] = max(row["max_pd"], float(v["pd"]))
+        row["max_lgd"] = max(row["max_lgd"], float(v["lgd"]))
+        if v["stage"] == "Stage 3" or (v["stage"] == "Stage 2" and row["stage"] == "Stage 1"):
+            row["stage"] = v["stage"]
+
+    result["top_borrowers_by_ecl"] = sorted(
+        borrower_rollup.values(), key=lambda x: (-x["ecl"], x["borrower_id"])
+    )[:15]
+    result["top_borrowers_by_ead"] = sorted(
+        borrower_rollup.values(), key=lambda x: (-x["ead"], x["borrower_id"])
+    )[:15]
+    result["top_risk_cases"] = [
+        {
+            "facility_id": v["facility_id"],
+            "borrower_id": v["borrower_id"],
+            "industry": v["source_borrower"]["industry"],
+            "product": v["source_facility"]["product"],
+            "stage": v["stage"],
+            "risk_rating": v.get("risk_rating"),
+            "risk_direction": v.get("risk_direction"),
+            "pd": float(v["pd"]),
+            "lgd": float(v["lgd"]),
+            "ead": float(v["ead"]),
+            "ecl": float(v["ecl"]),
+            "collateral_type": v["source_facility"].get("collateral_type"),
+            "guarantee_coverage": v["source_facility"].get("guarantee_coverage"),
+            "stage_reasons": v.get("stage_reasons", []),
+        }
+        for v in sorted(t, key=lambda v: (-float(v["ecl"]), v["facility_id"]))[:10]
+    ]
+    result["review_basis"] = (
+        "Top ten facilities by reference ECL; review suggestions, "
+        "not approvals or measured deterioration."
+    )
+
+    ews_counts = {}
+    stage_reason_counts = {}
+    scenarios = {}
+    for v in t:
+        for signal in v.get("ews", []):
+            if signal.get("triggered"):
+                key = signal.get("id", "unknown")
+                ews_counts[key] = ews_counts.get(key, 0) + 1
+        for reason in v.get("stage_reasons", []):
+            stage_reason_counts[reason] = stage_reason_counts.get(reason, 0) + 1
+        for name, value in v.get("scenario_pd", {}).items():
+            row = scenarios.setdefault(name, {"count": 0, "sum": 0.0})
+            row["count"] += 1
+            row["sum"] += float(value)
+    result["ews_trigger_counts"] = ews_counts
+    result["stage_reason_counts"] = stage_reason_counts
+    result["scenario_mean_pd"] = {
+        k: v["sum"] / v["count"] if v["count"] else 0.0
+        for k, v in scenarios.items()
+    }
+
+    borrower_features = {
+        bid: dict(v["source_borrower"].get("features", {}))
+        for bid, v in borrower_trace.items()
+    }
+
+    def borrower_count(predicate):
+        return sum(1 for features in borrower_features.values() if predicate(features))
+
+    result["risk_indicator_counts"] = {
+        "high_utilization_ge_80pct_borrowers": borrower_count(
+            lambda f: float(f.get("credit_utilization", 0)) >= 0.80
+        ),
+        "days_past_due_gt_0_borrowers": borrower_count(
+            lambda f: float(f.get("days_past_due", 0)) > 0
+        ),
+        "days_past_due_ge_30_borrowers": borrower_count(
+            lambda f: float(f.get("days_past_due", 0)) >= 30
+        ),
+        "days_past_due_ge_90_borrowers": borrower_count(
+            lambda f: float(f.get("days_past_due", 0)) >= 90
+        ),
+        "recent_delinquency_borrowers": borrower_count(
+            lambda f: float(f.get("delinquencies_12m", 0)) > 0
+        ),
+        "previous_default_borrowers": borrower_count(
+            lambda f: float(f.get("previous_defaults", 0)) > 0
+        ),
+        "current_credit_impaired_borrowers": borrower_count(
+            lambda f: float(f.get("current_credit_impaired", 0)) == 1
+        ),
+        "limit_breach_borrowers": borrower_count(
+            lambda f: float(f.get("limit_breach_count", 0)) > 0
+        ),
+        "persistent_high_utilization_borrowers": borrower_count(
+            lambda f: float(f.get("months_above_80_utilization", 0)) > 0
+        ),
+        "high_leverage_ge_3x_borrowers": borrower_count(
+            lambda f: float(f.get("leverage_ratio", 0)) >= 3.0
+        ),
+    }
+
+    portfolio_pd = fsum(float(v["pd"]) for v in t) / len(t) if t else 0.0
+    portfolio_loss = total_ecl / total_ead if total_ead else 0.0
+    min_group = max(30, int(max(result["borrower_count"], 1) * 0.01))
+
+    def borrower_subset(predicate):
+        return [
+            bid for bid, v in borrower_trace.items()
+            if predicate(v, v["source_borrower"].get("features", {}))
+        ]
+
+    patterns = [
+        ("High utilization", borrower_subset(lambda v, f: float(f.get("credit_utilization", 0)) >= 0.80)),
+        ("Recent delinquency", borrower_subset(lambda v, f: float(f.get("delinquencies_12m", 0)) > 0)),
+        ("Previous default", borrower_subset(lambda v, f: float(f.get("previous_defaults", 0)) > 0)),
+        ("Deteriorating EWS", borrower_subset(lambda v, f: v.get("risk_direction") == "Deteriorating")),
+        ("Unsecured", borrower_subset(lambda v, f: float(v["lgd_features"].get("collateral_coverage") or 0) == 0)),
+        (
+            "High utilization + deterioration",
+            borrower_subset(
+                lambda v, f: float(f.get("credit_utilization", 0)) >= 0.80
+                and v.get("risk_direction") == "Deteriorating"
+            ),
+        ),
+    ]
+    result["risk_patterns"] = []
+    for label, ids in patterns:
+        if len(ids) < min_group:
+            continue
+        idset = set(ids)
+        subset = [v for v in t if v["borrower_id"] in idset]
+        ead = fsum(float(v["ead"]) for v in subset)
+        ecl = fsum(float(v["ecl"]) for v in subset)
+        pd = fsum(float(v["pd"]) for v in subset) / len(subset) if subset else 0.0
+        loss = ecl / ead if ead else 0.0
+        result["risk_patterns"].append(
+            {
+                "pattern": label,
+                "borrowers": len(idset),
+                "ead": ead,
+                "mean_pd": pd,
+                "pd_vs_portfolio": pd / portfolio_pd if portfolio_pd else 0.0,
+                "ecl_to_ead": loss,
+                "loss_vs_portfolio": loss / portfolio_loss if portfolio_loss else 0.0,
+            }
+        )
+    result["risk_patterns"].sort(key=lambda x: (-x["loss_vs_portfolio"], x["pattern"]))
+
+    actions = []
+    for industry, row in result["by_industry"].items():
+        if row["borrowers"] >= min_group and row["mean_pd"] >= portfolio_pd * 1.25:
+            actions.append(
+                {
+                    "type": "industry_concentration",
+                    "industry": industry,
+                    "borrowers": row["borrowers"],
+                    "ead": row["ead"],
+                    "mean_pd": row["mean_pd"],
+                    "portfolio_mean_pd": portfolio_pd,
+                    "reason": "Mean PD is at least 1.25x the portfolio mean with sufficient population.",
+                }
+            )
+    det_ids = borrower_subset(
+        lambda v, f: v.get("risk_direction") == "Deteriorating"
+        and float(f.get("credit_utilization", 0)) >= 0.80
+    )
+    if len(det_ids) >= min_group:
+        idset = set(det_ids)
+        actions.append(
+            {
+                "type": "deteriorating_high_utilization",
+                "borrowers": len(idset),
+                "ead": fsum(float(v["ead"]) for v in t if v["borrower_id"] in idset),
+                "reason": "Deteriorating borrowers with utilization at or above 80%.",
+            }
+        )
+    s2u_ids = borrower_subset(
+        lambda v, f: v["stage"] in ("Stage 2", "Stage 3")
+        and float(v["lgd_features"].get("collateral_coverage") or 0) == 0
+    )
+    if s2u_ids:
+        idset = set(s2u_ids)
+        actions.append(
+            {
+                "type": "unsecured_stage_2_3",
+                "borrowers": len(idset),
+                "ead": fsum(float(v["ead"]) for v in t if v["borrower_id"] in idset),
+                "reason": "Unsecured Stage 2/3 borrowers require collateral/recovery review.",
+            }
+        )
+    if not actions:
+        actions.append(
+            {
+                "type": "routine_monitoring",
+                "reason": "No broad portfolio trigger exceeds the current review thresholds.",
+            }
+        )
+    result["portfolio_review_actions"] = actions
+    result["interpretation_note"] = (
+        "All values are governed outputs from the selected successful synthetic reference run. "
+        "Rankings are descriptive portfolio analytics, not credit decisions."
+    )
 
     applied = (
         conn.execute(

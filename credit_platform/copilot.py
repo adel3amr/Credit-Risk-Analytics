@@ -276,28 +276,62 @@ def _borrower(conn, run_id: str, borrower_id: str) -> tuple[dict, list[dict]]:
     run = service.one(conn, s.runs, run_id)
     if run["status"] != "SUCCEEDED":
         raise service.Conflict("Successful run required")
-    rows = [row for row in service.decision_rows(conn, run_id)
-            if row['borrower_id'] == borrower_id]
+    rows = [
+        row for row in service.decision_rows(conn, run_id)
+        if row["borrower_id"] == borrower_id
+    ]
     if not rows:
         raise service.NotFound("Borrower decision not found in run")
-    facilities = [
-        {
-            "facility_id": row["facility_id"],
-            "stage": row["stage"],
-            "pd": row["pd"],
-            "lgd": row["lgd"],
-            "ead": row["ead"],
-            "ecl": row["ecl"],
-            "stage_reasons": row["trace"].get("stage_reasons", []),
-            "watchlist": row["trace"].get("watchlist"),
-            "sicr": row["trace"].get("sicr"),
-        }
-        for row in rows
-    ]
-    return {"run_id": run_id, "borrower_id": borrower_id, "facilities": facilities}, [
+
+    facilities = []
+    source_borrower = None
+    for row in rows:
+        trace = row["trace"]
+        source_borrower = source_borrower or trace.get("source_borrower", {})
+        source_facility = trace.get("source_facility", {})
+        facilities.append(
+            {
+                "facility_id": row["facility_id"],
+                "product": source_facility.get("product"),
+                "stage": row["stage"],
+                "pd": row["pd"],
+                "pit_pd": trace.get("pit_pd"),
+                "scenario_pd": trace.get("scenario_pd", {}),
+                "lifetime_pd": trace.get("lifetime_pd"),
+                "effective_pd": trace.get("effective_pd"),
+                "risk_rating": trace.get("risk_rating"),
+                "risk_direction": trace.get("risk_direction"),
+                "lgd": row["lgd"],
+                "ead": row["ead"],
+                "ecl": row["ecl"],
+                "stage_reasons": trace.get("stage_reasons", []),
+                "watchlist": trace.get("watchlist"),
+                "sicr": trace.get("sicr"),
+                "ews": trace.get("ews", []),
+                "remaining_months": trace.get("remaining_months"),
+                "collateral_type": source_facility.get("collateral_type"),
+                "collateral_coverage": trace.get("lgd_features", {}).get("collateral_coverage"),
+                "guarantee_coverage": trace.get("lgd_features", {}).get("guarantee_coverage"),
+                "lien_rank": source_facility.get("lien_rank"),
+                "drawn": source_facility.get("drawn"),
+                "limit": source_facility.get("limit"),
+                "face": source_facility.get("face"),
+            }
+        )
+    evidence = {
+        "run_id": run_id,
+        "borrower_id": borrower_id,
+        "industry": (source_borrower or {}).get("industry"),
+        "source_profile": {
+            "observed_at": (source_borrower or {}).get("observed_at"),
+            "features": (source_borrower or {}).get("features", {}),
+        },
+        "facilities": facilities,
+        "bank_gate": "BLOCKED",
+    }
+    return evidence, [
         {"type": "decision_trace", "run_id": run_id, "borrower_id": borrower_id}
     ]
-
 
 def _portfolio(conn, run_id: str) -> tuple[dict, list[dict]]:
     base = service.portfolio(conn, run_id)

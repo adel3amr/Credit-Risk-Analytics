@@ -37,3 +37,30 @@ def test_final_portfolio_copilot_uses_service_single_source():
     assert "service.portfolio" in source
     assert "workout_lgd" in source
     assert "Institutional production remains BLOCKED" in source
+
+
+def test_final_service_is_canonical_portfolio_evidence():
+    from credit_platform import service
+    source = Path(service.__file__).read_text(encoding="utf-8")
+    for field in (
+        "by_collateral_type",
+        "top_borrowers_by_ecl",
+        "scenario_mean_pd",
+        "risk_indicator_counts",
+        "risk_patterns",
+        "portfolio_review_actions",
+    ):
+        assert field in source
+
+
+def test_final_borrower_copilot_keeps_full_decision_context():
+    source = Path(copilot.__file__).read_text(encoding="utf-8")
+    for field in (
+        "risk_rating",
+        "risk_direction",
+        "scenario_pd",
+        "collateral_coverage",
+        "guarantee_coverage",
+        "remaining_months",
+    ):
+        assert field in source

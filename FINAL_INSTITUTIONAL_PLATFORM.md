@@ -40,11 +40,11 @@ The Streamlit workbench is preserved visually and functionally with:
 - Risk Copilot
 - Model Validation for the validator role
 
-The Copilot is additive. It does not replace PD/LGD/EAD/ECL, staging, approvals or model promotion.
+The Copilot is additive. Borrower evidence includes rating, EWS/risk direction, scenario PDs, staging reasons, facility product, collateral/guarantee context and remaining maturity. It does not replace PD/LGD/EAD/ECL, staging, approvals or model promotion.
 
 ## GenAI control model
 
-The final Copilot uses the platform service layer as its source of governed portfolio evidence. Deterministic facts remain authoritative. Optional OpenAI and local Ollama providers may add narrative interpretation, but a provider failure falls back to deterministic evidence.
+The final Copilot uses the platform service layer as its single source of governed portfolio evidence. That canonical service now carries the full dashboard evidence set: stage, industry, product, rating, risk direction and collateral aggregations; watchlist/unsecured/guaranteed segments; scenario PD means; EWS/stage-reason counts; borrower risk indicators; risk patterns; deterministic review actions; top borrower and facility cases; overrides and controlled reference ECL. Deterministic facts remain authoritative. Optional OpenAI and local Ollama providers may add narrative interpretation, but a provider failure falls back to deterministic evidence.
 
 Controls retained:
 
