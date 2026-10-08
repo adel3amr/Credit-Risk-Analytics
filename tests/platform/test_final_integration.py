@@ -73,3 +73,64 @@ def test_frozen_text_hash_is_crlf_portable(tmp_path):
     lf.write_bytes(b"a,b\n1,2\n")
     crlf.write_bytes(b"a,b\r\n1,2\r\n")
     assert frozen_text_hash(lf) == frozen_text_hash(crlf)
+
+
+def test_copilot_rejects_meta_json_answers():
+    assert not copilot._valid_narrative(
+        "The provided data appears to be JSON. I can provide a Python code snippet to parse it."
+    )
+    assert copilot._valid_narrative(
+        "Hospitality has the highest mean PD, while Services contributes the largest absolute ECL. "
+        "Prioritize the unsecured Stage 2/3 population and high-utilization deteriorating borrowers."
+    )
+
+
+def test_deterministic_portfolio_summary_is_risk_complete():
+    evidence = {
+        "run_id": "r1",
+        "borrower_count": 100,
+        "facility_count": 120,
+        "ead": 1000.0,
+        "ecl": 50.0,
+        "bank_gate": "BLOCKED",
+        "by_stage": {
+            "Stage 1": {"facilities": 90, "borrowers": 80, "ead": 700.0, "ecl": 20.0},
+            "Stage 2": {"facilities": 25, "borrowers": 18, "ead": 250.0, "ecl": 20.0},
+            "Stage 3": {"facilities": 5, "borrowers": 4, "ead": 50.0, "ecl": 10.0},
+        },
+        "by_industry": {
+            "Services": {
+                "borrowers": 40, "facilities": 50, "ead": 450.0, "ecl": 25.0,
+                "mean_pd": 0.04, "mean_lgd": 0.40, "loss_intensity": 25.0 / 450.0,
+            },
+            "Hospitality": {
+                "borrowers": 20, "facilities": 25, "ead": 200.0, "ecl": 15.0,
+                "mean_pd": 0.08, "mean_lgd": 0.45, "loss_intensity": 15.0 / 200.0,
+            },
+        },
+        "watchlist": {"borrowers": 12, "facilities": 14, "ead": 140.0, "ecl": 8.0},
+        "unsecured": {"borrowers": 30, "facilities": 34, "ead": 300.0, "ecl": 18.0},
+        "guaranteed": {"borrowers": 15, "facilities": 16, "ead": 120.0, "ecl": 4.0},
+        "portfolio_review_actions": [
+            {
+                "type": "unsecured_stage_2_3",
+                "borrowers": 8,
+                "ead": 90.0,
+                "reason": "Unsecured Stage 2/3 borrowers require collateral/recovery review.",
+            }
+        ],
+        "risk_patterns": [],
+        "review_basis": "Top facilities by reference ECL.",
+        "top_risk_cases": [],
+        "count_basis": "Distinct borrowers and facility-level exposures.",
+    }
+    answer = copilot.DeterministicProvider().render(
+        "Summarize the portfolio risk profile and the most important areas for human review.",
+        evidence,
+        "portfolio",
+    )
+    assert "Services" in answer
+    assert "Hospitality" in answer
+    assert "Watchlist" in answer
+    assert "Unsecured" in answer
+    assert "Human-review priorities" in answer
