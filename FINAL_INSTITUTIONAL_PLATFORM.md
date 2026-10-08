@@ -63,7 +63,9 @@ Controls retained:
 
 The WN-1 branch reached **225 passing tests** and reconciled **5,172 facilities** before final consolidation. Those results are inherited evidence, not a claim that this integration commit has already passed hosted qualification.
 
-The final branch is configured to run both the full V5 validation workflow and the platform workflow, including PostgreSQL migrations/shadow calculation, frozen workout-evidence verification, full pytest and Docker build. Hosted CI results are the authoritative qualification evidence for this consolidation branch.
+The final branch is configured to run both the full V5 validation workflow and the platform workflow, including PostgreSQL migrations/shadow calculation, frozen workout-evidence verification, full pytest and Docker build. The first consolidation CI at commit `d01b7dc4fa6c4de16d31a9df7c99f3d0b612d32b` completed successfully on both workflows. Evidence from the platform run: **228 tests passed**, V5 release checks **30/30**, 5,172 facilities reconciled with zero stage mismatches, audit status **VERIFIED**, PostgreSQL persistence verified the WN-1 relational domain (including 8,000 borrowers/facilities/defaults, 31,815 workout snapshots and 64,838 recovery transactions), and the Docker image built successfully.
+
+The qualification workflow now also starts the preserved Streamlit workbench headlessly against the PostgreSQL reference database and requires its health endpoint to respond before the release job can pass. Hosted CI remains the authoritative qualification evidence for each later consolidation commit.
 
 ## Claim boundary
 

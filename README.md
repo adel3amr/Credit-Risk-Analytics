@@ -54,7 +54,7 @@ The platform traces borrower and facility data through PD, EWS/watchlist, SICR/s
 
 The reference UI provides portfolio/run analysis, facility evidence, model validation/governance views and an **Ask Risk Copilot** panel for portfolio, borrower and model-risk explanations. Run `python -m alembic upgrade head`, issue a local credential with the CLI, start `uvicorn credit_platform.api:app`, and open `http://localhost:8000`. Full commands and reproducibility evidence are in [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 
-The final test suite passes locally. Full shadow scoring covers 5,172 facilities and the S1 reference covers 8,695 current facilities. PostgreSQL/container execution and browser qualification remain unverified in the current environment. LGD research does not close the prediction-time downturn/support gate. No challenger was promoted.
+Final consolidation CI has passed the full regression workflow and platform workflow: 228 tests passed with one dependency deprecation warning, V5 release checks were 30/30, the 5,172-facility shadow run reconciled with zero stage mismatches and verified audit chaining, PostgreSQL persisted the complete WN-1 relational workout domain, and the Docker image built successfully. A headless Streamlit startup check is included in the final qualification workflow. LGD research still does not close the institutional calibration/support gate and no challenger was promoted.
 
 ## Historical V5 release documentation
 

@@ -41,6 +41,27 @@ jobs:
           python scripts/platform_shadow.py
           python -m credit_platform.cli audit-verify
           WORKOUT_DATABASE_URL="$DATABASE_URL" python -m workout_vnext.persist
+      - name: Streamlit workbench headless smoke
+        env:
+          DATABASE_URL: postgresql+psycopg://postgres:ephemeral-ci-only@localhost:5432/creditrisk_test
+        run: |
+          streamlit run app.py --server.headless true --server.address 127.0.0.1 --server.port 8501 > /tmp/streamlit.log 2>&1 &
+          ui_pid=$!
+          trap 'kill "$ui_pid" 2>/dev/null || true' EXIT
+          ok=0
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:8501/_stcore/health | grep -qi ok; then
+              ok=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ok" -ne 1 ]; then
+            cat /tmp/streamlit.log
+            exit 1
+          fi
+          kill "$ui_pid" 2>/dev/null || true
+          wait "$ui_pid" 2>/dev/null || true
       - name: Compile modules
         run: python -m compileall -q credit_platform economic_lgd s2_remediation lgd_hardening marginal_interest workout_vnext
       - name: Container build
