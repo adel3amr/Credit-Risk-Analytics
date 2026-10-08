@@ -1,292 +1,457 @@
-> **Final consolidation branch:** `release/final-institutional-platform`. This branch integrates the preserved Streamlit workbench and governed GenAI Copilot with the WN-1/red-team platform baseline without rewriting historical research. See [FINAL_INSTITUTIONAL_PLATFORM.md](FINAL_INSTITUTIONAL_PLATFORM.md). The active reference models and all rejected/blocked challengers remain separately traceable. Institutional production approval is **not** claimed.\n\n> **Latest bounded closeout: WN-1 workout research and platform integration.** See [the authoritative closeout](WORKOUT_PLATFORM_CLOSEOUT.md) and [run guide](workout_vnext/README.md). The component challenger was **not promoted**. Historical results below retain their original scope; WN-1 is a new target and population. Institutional use remains blocked.
-
-> Latest completed work: [post-R1 hardening decision](lgd_hardening/DECISION.md).
-
-> Final red-team review: see [CURRENT_SYSTEM_STATE.md](CURRENT_SYSTEM_STATE.md), [FINAL_RED_TEAM_REPORT.md](FINAL_RED_TEAM_REPORT.md), and [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md). Historical results below retain their original scope. No model promotion, methodological change, or dataset regeneration occurred in this review.
-> **168 tests pass. R1 remains unpromoted.** A calibration trial was rejected;
-> residual recovery-quality lineage, domain and validation issues remain. New
-> domain/capture/release controls are implemented. No new final holdout was opened
-> and no missing prediction-time information was fabricated.
-> [Commands and evidence](lgd_hardening/README.md).
->
-> Previous completed work: [focused S2-R1 decision](s2_remediation/DECISION.md).
-> **151 tests pass; candidate NOT PROMOTED.** Scenario reversals are zero and
-> current conditional bias is +0.10 pp. Downside point bias improves to −0.47 pp,
-> but uncertainty, guarantees, fresh holdout support and prediction-band checks
-> fail the frozen promotion tolerances. Bank use remains BLOCKED.
-> [Verification and reproduction commands](s2_remediation/README.md).
->
-> Previous observable-economic remediation: [S2 decision and results](economic_lgd/DECISION.md).
-> Same-S2-population current conditional bias improves -6.33 → -0.26 pp; this is
-> not a retroactive correction of S1 -12.65 pp. Scenario/support and segment findings
-> block promotion. Economic LGD validation and Copilot evidence are available.
->
-> Historical downturn decision: [LGD_DOWNTURN_FINAL_DECISION.md](LGD_DOWNTURN_FINAL_DECISION.md).
-> Oracle calibration works; operational state proxies fail. Separate guarded scenario
-> sensitivity implemented; no booked adjustment or promotion. 122 tests pass.
-
-> Historical LGD disposition: [LGD_FINAL_RESOLUTION.md](LGD_FINAL_RESOLUTION.md).
-> Severe-realized bias is largely a conditioning effect; a separate current-context
-> transfer deficiency remains. 111 tests pass; no challenger promoted.
-
-> New integrated dataset: [Synthetic Bank S1](synthetic_bank/README.md)—65,000 borrowers,
-> linked facilities/conduct/workouts, frozen cohort comparison, no automatic model promotion.
-
-> Historical LGD follow-up: [remediation and root-cause report](LGD_REMEDIATION_REPORT.md).
-> 104 tests pass; scoring-output defects corrected. Conditional simulation explains
-> much of the retrospective severe-loss gap; live-support and calibration findings
-> remain open. No challenger promoted; bank use remains blocked.
-
 # Credit Risk Analytics, Decisioning & Model-Risk Platform
 
-**Production-oriented reference implementation of an end-to-end Credit Risk analytics and decisioning platform.** It uses transparent synthetic credit data; institutional model, accounting, security and deployment approval remain blocked.
+A full-stack **Credit Risk research platform** built to study how an end-to-end credit-risk lifecycle fits together: data, models, decisioning, IFRS 9-style ECL, portfolio monitoring, validation, governance, audit and grounded GenAI.
 
-The platform traces borrower and facility data through PD, EWS/watchlist, SICR/staging, LGD, EAD, scenarios and ECL into portfolio analytics, validation, monitoring, findings and management evidence. It includes canonical dated data, PostgreSQL-compatible persistence, traceable reference runs, authenticated APIs, backend permissions, controlled overrides, audit evidence, and a grounded Credit Risk Copilot that explains existing outputs without replacing risk engines.
+> **Research scope:** the portfolio and workout datasets are synthetic and publicly informed. The project is designed for research, learning and professional demonstration rather than live credit decisions.
 
-- [Reproduce and run](REPRODUCIBILITY.md)
-- [Executive architecture summary](EXECUTIVE_ARCHITECTURE_SUMMARY.md)
-- [Authoritative baseline](AUTHORITATIVE_BASELINE_RECONCILIATION.md)
-- [Independent validation report](FINAL_INDEPENDENT_VALIDATION_REPORT.md)
-- [Production-readiness matrix](FINAL_PRODUCTION_READINESS.md)
-- [Architecture](TARGET_ARCHITECTURE.md) · [Database](DATABASE_SCHEMA.md) · [API](API_DOCUMENTATION.md)
-- [Feature contracts](MODEL_FEATURE_CONTRACTS.md) · [Model inventory](MODEL_INVENTORY.md) · [Limitations](LIMITATIONS.md)
-- [GenAI Copilot](GENAI_COPILOT_GUIDE.md) · [GenAI controls](GENAI_RISK_AND_CONTROLS.md) · [Final closeout](FINAL_STATE_AND_CLOSEOUT.md)
+## What this project covers
 
-The reference UI provides portfolio/run analysis, facility evidence, model validation/governance views and an **Ask Risk Copilot** panel for portfolio, borrower and model-risk explanations. Run `python -m alembic upgrade head`, issue a local credential with the CLI, start `uvicorn credit_platform.api:app`, and open `http://localhost:8000`. Full commands and reproducibility evidence are in [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
+The repository goes beyond a standalone PD or LGD notebook. It connects the major components of a credit-risk function into one traceable system:
 
-Final consolidation CI has passed the full regression workflow and platform workflow: 228 tests passed with one dependency deprecation warning, V5 release checks were 30/30, the 5,172-facility shadow run reconciled with zero stage mismatches and verified audit chaining, PostgreSQL persisted the complete WN-1 relational workout domain, and the Docker image built successfully. A headless Streamlit startup check is included in the final qualification workflow. LGD research still does not close the institutional calibration/support gate and no challenger was promoted.
-
-## Historical V5 release documentation
-
-The retained release documentation below describes the earlier demonstration release, not approval of the new platform for bank use.
-
-# Credit Risk Analytics & IFRS 9 Decisioning System — V5
-
-> **Isolated LGD research branch:** [From Aggregate Calibration to Tail Risk](lgd_research/FROM_AGGREGATE_CALIBRATION_TO_TAIL_RISK.md) evaluates new synthetic data, prediction-time information, baselines, two-stage/component challengers, ablations, stress and a precommitted final holdout. The [executive research decision](lgd_research/EXECUTIVE_RESEARCH_SUMMARY.md) retains published V5 (`0dfe4c8`) as the benchmark and blocks live-bank use. These experimental models are **not** the governed V5 model.
-
-V5 finalizes the implementation and validation of the frozen V4/V5 methodology. It retains Logistic Regression PD, facility workout Gradient Boosting LGD, existing staging/EWS policy, facility EAD and stage-dependent ECL. This is a synthetic demonstration, **blocked for live bank provisioning**.
-
-**Whole-project review and decision:** [initial prototype through V5, all major branches, new guarantee-support experiment and bank-use gate](validation_review/PROJECT_WIDE_DECISION.md). The 2026-09-24 experiment identified an original-training/live guarantee-input mismatch (almost no zero-guarantee workouts versus 79.2% zero-guarantee live facilities). Separate generated development and validation vintages test the same approved model specification; the severe realized-loss bias persists. The refit is diagnostic and was **not** promoted to the governed model. To check the operating decision, run `python scripts/assess_bank_readiness.py --purpose bank`; expected exit code is 2 until actual bank workout validation and independent approval exist.
-
-See the [V5 executive validation report](reports/credit_risk_report.md), [classified change log](docs/V5_CHANGELOG.md), and [known limitations](docs/MODEL_LIMITATIONS.md). Realized high-loss underprediction remains a documented limitation; V5 does not promote a challenger or tune the data to hide it.
-
-The [independent full-repository lifecycle review](validation_review/RESEARCH_REPORT.md) covers the initial prototype through V5 and separate experiments. It includes a [publication PDF](validation_review/RESEARCH_REPORT.pdf), 15 clean historical reruns, seven figures, a version matrix, model and findings registers, 49 local tests and per-stage worked ECL examples. The approved model code and frozen V5 reference commit remain intact; representative reruns are not an execution of every commit. The high-loss LGD finding remains open.
-
-## Overview
-End-to-end synthetic SME credit-risk platform covering borrower PD, independent qualitative underwriting information, early-warning monitoring, internal risk rating, facility-level EAD, workout-LGD modelling, simplified IFRS 9-style staging/ECL, model validation and governed human intervention.
-
-> **Data note:** All customer and behavioural data are synthetic. Results demonstrate methodology under the stated data-generating assumptions; they are not estimates of a real bank portfolio.
-
-## Architecture
-```text
-Financials + current behaviour + qualitative underwriting candidates     -> 12M PD / challenger tests
-36-month behavioural history                                      -> EWS / monitoring
-Reporting-date deterioration                                      -> simplified SICR / stage
-Resolved historical default/workout facilities                    -> workout LGD model
-Current facilities + collateral + product + seniority             -> facility LGD
-Facility EAD + remaining maturity + borrower PD/stage + LGD        -> facility ECL
-Facility ECL                                                       -> borrower / portfolio ECL
-Macro scenarios                                                    -> forward-looking PD overlay
-Policy + human override                                            -> governed internal rating
+```mermaid
+flowchart LR
+    A[Borrower & Facility Data] --> B[PD]
+    B --> C[Internal Rating]
+    C --> D[EWS & Watchlist]
+    D --> E[SICR & Staging]
+    E --> F[LGD]
+    A --> G[EAD]
+    F --> H[ECL]
+    G --> H
+    B --> H
+    E --> H
+    I[Macro Scenarios] --> H
+    H --> J[Portfolio Cockpit]
+    J --> K[Validation & Monitoring]
+    K --> L[Governance & Audit]
+    L --> M[Risk Copilot]
 ```
 
-Logistic Regression is the governed primary PD model because interpretability and probability calibration are central to the use case. Random Forest and Gradient Boosting are challengers; the primary model is not selected by whichever algorithm happens to achieve the highest holdout AUC.
+### Risk stack
 
-## Synthetic portfolio
-- **12,000 SME borrowers in total.**
-- **9,000 borrowers are used for model development/training.**
-- **3,000 borrowers (25%) are kept untouched for final out-of-sample validation.**
-- 36 monthly behavioural observations per borrower (432,000 borrower-months).
+| Layer | Implementation |
+|---|---|
+| **PD** | Logistic Regression reference model with Random Forest / Gradient Boosting challenger analysis, discrimination and calibration testing |
+| **Internal rating** | Transparent 1–10 risk-rating framework with performing, Watchlist and default/write-off grades |
+| **EWS** | Behavioural early-warning signals using utilization, persistence and limit-breach indicators |
+| **Watchlist / SICR** | Separate monitoring and staging logic with explicit decision reasons and audit traces |
+| **IFRS 9-style staging** | Stage 1 / 2 / 3 classification with Stage 3 precedence and documented internal policy assumptions |
+| **LGD** | Facility-level workout LGD, direct benchmarks, challenger programmes, support/stability diagnostics and component-workout research |
+| **EAD** | Facility-level term-loan, overdraft and trade-finance exposure mechanics |
+| **ECL** | Facility-level Stage 1 / 2 / 3 expected-credit-loss calculation and borrower/portfolio aggregation |
+| **Scenarios** | Upside / baseline / downside macro scenario layer with forward-looking PD effects |
+| **Validation** | AUC, Gini, KS, Brier, Log Loss, calibration, bias, RMSE/MAE, support, stability, tail diagnostics, bootstrap uncertainty and reconciliation |
+| **Governance** | Model registry, findings, feature contracts, overrides, approvals, promotion gates, lineage and append-only audit evidence |
+| **GenAI** | Governed Risk Copilot over the same deterministic evidence used by the platform |
 
-The 3,000-borrower holdout is part of the 12,000-borrower portfolio; it is not an additional sample.
-- Term loans, overdrafts (OVD) and trade-finance facilities.
-- Chronological utilization history generated forward from M-35 to reporting date M0.
-- Future 12-month default is generated only after reporting-date borrower information is constructed.
+## The data work
 
-### EAD policy
-For this project:
-- **Term-loan EAD = 100% of current withdrawn/outstanding amount.**
-- **OVD EAD = 100% of approved total limit.**
-- Trade-finance EAD = instrument amount x transparent synthetic CCF.
-- Total borrower EAD = sum of product EADs.
+Two complementary synthetic data programmes are preserved.
 
-Trade CCFs and other portfolio-generation parameters are synthetic methodology assumptions, not regulatory prescriptions.
+### Integrated synthetic bank dataset
 
-### LGD
-The governed LGD layer is now a separate **facility-level workout model** trained on a synthetic history of resolved defaulted facilities. The workout history contains EAD at default, product type, collateral, lien rank, guarantee coverage, borrower condition, recovery cash flows, workout costs and recovery timing.
+The linked S1 dataset contains:
 
-Economic LGD is defined from discounted net recoveries relative to EAD at default. Post-default outcomes such as realized recovery cash flows, workout timing, cure outcome and write-off outcome are retained for target construction and audit but are excluded from the predictive feature set. A Gradient Boosting regression is fixed ex ante as the governed non-linear LGD model. Ridge, Huber Gradient Boosting, Random Forest and Histogram Gradient Boosting are retained as diagnostic challengers; the frozen holdout is not used to silently re-select the champion.
+- **65,000 borrowers** across development, selection, final and current cohorts
+- **113,012 facilities**
+- **2,340,000 monthly conduct records**
+- term loans, overdrafts and trade-finance facilities
+- borrower financial, qualitative and behavioural features
+- linked collateral and third-party guarantee contracts
+- default/workout histories with dated recovery cashflows and costs
+- disjoint cohorts and frozen final-evaluation evidence
 
-For the current portfolio, each borrower is expanded into its live term-loan, OVD and trade facilities. Facility LGDs are predicted separately and then EAD-weighted back to borrower level for reporting.
+See [synthetic_bank/README.md](synthetic_bank/README.md).
 
-## PD model
-The governed PD framework evaluates current financial and behavioural information alongside **genuinely additional qualitative underwriting candidates**:
+### WN-1 dated workout environment
+
+The final workout research programme adds a relational, observation-time LGD environment with:
+
+- **8,000 borrowers**
+- **8,000 facilities**
+- **8,000 default events**
+- **66,307 credit snapshots**
+- **31,815 workout snapshots**
+- **74,973 collateral valuations**
+- **3,896 collateral-enforcement events**
+- **2,401 guarantee claims**
+- **64,838 recovery transactions**
+- **235,311 workout-cost records**
+- **1,861 restructuring events**
+- **4,628 cure events**
+- **1,466 write-offs**
+- **228,495 interest-accrual records**
+- **6,980 resolution events**
+- **164,984 macro snapshots**
+
+The dataset preserves both effective and recorded dates so the project can reconstruct what was observable at a given LGD observation date.
+
+See [workout_vnext/README.md](workout_vnext/README.md).
+
+## PD and borrower risk
+
+The PD framework combines financial, behavioural and qualitative borrower information, including:
+
 - EBITDA margin
-- leverage ratio
-- current ratio
+- leverage
+- liquidity/current ratio
 - debt-to-income
 - collateral coverage
 - years in business
-- current credit utilization
-- delinquencies in the last 12 months
+- utilization
+- delinquencies
 - previous defaults
 - days past due
 - industry
-- management quality
-- governance quality
-- financial reporting quality
+- management and governance quality
+- reporting quality
 - market position
-- sponsor/support strength
-- customer concentration
-- supplier concentration
+- sponsor support
+- customer/supplier concentration
 - key-person dependency
 - audit quality
 
-The qualitative fields are generated independently of the financial ratios and account behaviour, so they test genuinely incremental underwriting information rather than re-encoding existing variables. On the frozen V4 holdout, however, the full qualitative specification did **not** improve discrimination versus the simpler current-behaviour specification. That negative result is retained rather than tuning the synthetic DGP or holdout. Trajectory variables likewise remain primarily an EWS/monitoring layer.
+The project evaluates **incremental information**, rather than simply adding variables until AUC rises. Null and negative challenger results are retained.
 
-Validation includes ROC-AUC, Gini, KS, Brier score, log loss, calibration-in-the-large and calibration by holdout decile.
+The frozen V5 PD holdout reproduces approximately:
 
-## Operational Risk Rating
-The continuous PD-derived credit score is retained as a model-risk measure, while the workbench also exposes a bank-style **1-10 internal Risk Rating**:
+- ROC-AUC **0.7595**
+- Gini **0.5189**
+- KS **0.4085**
+- Brier **0.0300**
+- Log Loss **0.1286**
+- observed default rate **3.40%**
+- mean predicted PD **3.44%**
 
-- **1:** reserved for Stage-1 borrowers with full eligible cash coverage (recognized cash collateral coverage at least 99.9% of EAD).
-- **2-6:** performing grades, ordered from strongest to weakest using transparent PD bands.
-- **7:** Watchlist / enhanced monitoring. Stage 2 maps to Rating 7 by default, but Rating 7 does **not** itself create Stage 2. A rare Stage-2 Rating-6 case is a documented human override rather than an automatic rule.
-- **8:** defaulted / Stage 3 exposure.
-- **9:** severe NPL / advanced delinquency.
-- **10:** explicit write-off status. Rating 10 is not created by DPD alone.
-- Full cash security does **not** cure Stage 2/Stage 3 status; Rating 1 applies only to Stage 1 full eligible cash cover.
+## EWS, Watchlist, SICR and staging
 
-Risk Rating 1 is therefore not a low-PD grade: a low-PD borrower without full cash coverage starts at Rating 2. The PD grade cut points are transparent synthetic policy assumptions and are not optimized on the holdout.
+The monitoring layer separates borrower deterioration from accounting stage classification.
 
-## Early-warning system
-The EWS is a separate monitoring layer using:
-- six-month utilization increase,
-- persistent high utilization,
-- limit breaches.
+It includes:
 
-Two or more signals produce an EWS **Deteriorating** status; one produces **Watch**. Thresholds are transparent synthetic monitoring assumptions, not empirically calibrated production triggers.
+- six-month utilization movement
+- persistent high utilization
+- limit breaches
+- Watch / Deteriorating EWS states
+- Watchlist treatment
+- SICR reasons
+- DPD and impairment triggers
+- Stage 1 / Stage 2 / Stage 3
+- internal 1–10 risk rating
+- borrower/facility decision traces
 
-A predefined internal synthetic policy moves a currently deteriorating borrower to Stage 2 after **9 consecutive months** satisfying the EWS deterioration rule. `consecutive_ews_months` measures rule persistence, not literal operational watchlist tenure. Nine months is **not an IFRS 9 requirement** and is not optimized on the holdout sample.
+The project's nine-month EWS persistence treatment is an **internal research policy assumption**, not a regulatory requirement.
 
-## Simplified IFRS 9-style staging and ECL
-This repository is not a production IFRS 9 accounting engine.
+## LGD research programme
 
-- **Stage 3:** current credit-impaired flag or DPD >= 90.
-- **Stage 2:** simplified SICR proxies including DPD/conduct/history triggers and the fixed 9-month EWS-persistence policy.
-- **Stage 1:** exposures not meeting Stage 2 or Stage 3 conditions.
+LGD became the main model-risk research stream in the project.
 
-ECL is calculated at **facility level** and then aggregated to the borrower. Stage 1 uses 12-month forward-looking PD × facility LGD × facility EAD. Stage 2 uses a constant-hazard lifetime-PD approximation based on each facility's **reporting-date remaining maturity**, rather than applying one borrower-level term to the whole exposure. Stage 3 uses the governed workout-LGD estimate with PD effectively equal to 100%; the older direct collateral cash-shortfall calculation is retained only as a challenger/diagnostic.
+The repository preserves the full sequence instead of hiding failed experiments:
 
-The ECL layer applies explicit upside, baseline and downside macroeconomic scenarios using GDP growth, unemployment, policy-rate and inflation shocks. These feed a fixed synthetic log-odds sensitivity mapping and are probability-weighted. The macro paths and sensitivities are methodology assumptions, not official forecasts or empirically estimated elasticities.
+1. **V5 facility workout LGD** — Gradient Boosting reference model.
+2. **Independent tail validation** — investigated severe realized-loss behaviour.
+3. **Support / guarantee diagnostics** — identified population-support differences.
+4. **R2 challengers and oracle diagnostics** — separated model limitations from unavailable information.
+5. **S1 integrated data programme** — rebuilt linked borrower/facility/workout populations.
+6. **Observable-economic S2 research** — tested prediction-time economic information.
+7. **S2-R1 constrained challenger** — added scenario and support controls.
+8. **Post-R1 hardening** — rejected calibration changes that worsened other gates.
+9. **Marginal Interest experiment** — tested impaired-facility interest as an incremental workout signal; incremental value was inconclusive.
+10. **WN-1 workout engine** — built a dated component-based recovery architecture with cure, recovery channels, timing, costs, collateral, guarantees and macro vintages.
 
-Important limitations remain: no true origination/reference PD for a full IFRS 9 SICR comparison, no empirically estimated macro-credit satellite model, synthetic rather than observed workout history, and simplified facility maturity/CCF assumptions. The architecture is designed to resemble real bank risk systems; the numerical calibration is not represented as production-ready or regulatory-approved.
+The research story is not simply a search for a lower RMSE. It demonstrates **model challenge, failed promotion, evidence preservation, controlled experimentation and governance**.
 
-## Incremental-information experiment
-Logistic Regression is held constant while four nested information sets are compared:
+See:
 
-1. Financial only.
-2. Financial + current behaviour.
-3. Financial + current behaviour + trajectory.
-4. Full hybrid + **independent qualitative underwriting information**.
+- [MODEL_INVENTORY.md](MODEL_INVENTORY.md)
+- [WORKOUT_PLATFORM_CLOSEOUT.md](WORKOUT_PLATFORM_CLOSEOUT.md)
+- [workout_vnext/FINDINGS.md](workout_vnext/FINDINGS.md)
+- [FINAL_INDEPENDENT_VALIDATION_REPORT.md](FINAL_INDEPENDENT_VALIDATION_REPORT.md)
 
-The purpose is to measure incremental information content rather than maximize AUC through feature accumulation. The qualitative layer is no longer built from quantiles or transformations of the financial/behavioural variables. All fields exist before the train/holdout split, eliminating the earlier full-sample quantile contamination. Paired bootstrap resampling is used for AUC differences.
+## EAD and ECL
 
-## Collateral, recovery and workout-LGD methodology
+The calculation chain is facility-level.
 
-The recovery layer generates collateral type before collateral value so that security is conditional on the exposure rather than assuming that every SME is heavily collateralised. The synthetic portfolio mix is 35% unsecured, 10% cash collateral, 35% mortgage and 20% other collateral. Nominal collateral coverage is generated from type-specific distributions.
+- Term-loan EAD uses current drawn/outstanding exposure.
+- OVD EAD uses the approved limit.
+- Trade-finance exposure uses transparent CCF assumptions.
+- Stage 1 uses 12-month forward-looking PD.
+- Stage 2 uses a lifetime-PD approximation over remaining facility maturity.
+- Stage 3 uses PD = 100% with workout LGD.
+- Facility results aggregate back to borrower and portfolio views.
 
-For ECL recovery purposes, eligible cash collateral is recognized at 100% of nominal value (capped at EAD), mortgage collateral receives a 20% haircut, and other collateral receives a 35% haircut. Residual exposure after recognized collateral is treated as unsecured and carries the synthetic unsecured loss-severity assumption. These collateral shares, coverage distributions, haircuts and unsecured-LGD parameters are transparent project assumptions: they are not IFRS 9 minimums, regulatory haircuts, official benchmarks or empirically calibrated recovery rates.
+The reference portfolio reconciles **5,172 facilities** with:
 
-The architecture is intentionally layered: facility EAD → facility security/product/seniority → workout-LGD estimate → stage-specific facility ECL → borrower aggregation. The original deterministic collateral proxy remains available as a challenger/diagnostic but is no longer the governed LGD input to ECL.
+- EAD approximately **2.092bn**
+- ECL approximately **45.27m**
+- **0 stage mismatches**
+- independently reproduced PD/LGD/EAD/ECL arithmetic
 
-## Current governed validation
-V5 preserves the deterministic V4 calibration. PD and LGD use separate fixed holdouts, which have been repeatedly inspected and are not fresh model-selection samples.
+A methodology bridge is retained so ECL movements can be decomposed between LGD changes and facility-term mechanics rather than reported as one unexplained number.
 
-### PD — 3,000-borrower holdout
-- Logistic Regression (governed): **ROC-AUC 0.7595**, **Gini 0.5189**.
-- Observed default rate: **3.40%**; calibration-in-the-large: approximately **-0.04 pp**.
-- Random Forest AUC: **0.7405**; Gradient Boosting AUC: **0.7301**.
-- Incremental-information testing found a positive but statistically inconclusive lift from current behaviour over financials alone; trajectory and independent qualitative fields did not provide convincing additional out-of-sample discrimination. These null/negative results are retained.
+## Portfolio Cockpit and Borrower Credit File
 
-### Workout LGD — 2,000-facility holdout
-The governed Gradient Boosting model remains fixed rather than being re-selected after inspecting challengers:
-- **MAE 11.40 pp**, **RMSE 16.58 pp**, **R² 59.51%**.
-- Actual mean LGD **45.43%** vs predicted **45.13%**; mean bias (prediction - actual) **-0.31 pp**.
-- EAD-weighted actual LGD **45.31%** vs predicted **45.18%**; EAD-weighted bias **-0.13 pp**.
-- Calibration is strong at portfolio level, but the governed model underpredicts the severe-loss tail: top-10% EAD-weighted bias **-4.41 pp** and top-5% **-6.48 pp**.
-- Huber, Random Forest, Histogram Gradient Boosting and Ridge are retained as diagnostic challengers. None is promoted after viewing the frozen holdout; doing so would turn validation evidence into model-selection data.
+The Streamlit workbench contains:
 
-### Portfolio / ECL — retained V4/V5 holdout
-- Stage 1: **2,769 borrowers**, EAD **EUR 1.930bn**, ECL **EUR 28.44m**.
-- Stage 2: **221 borrowers**, EAD **EUR 156.95m**, ECL **EUR 14.25m**.
-- Stage 3: **10 borrowers**, EAD **EUR 4.67m**, ECL **EUR 2.58m**.
-- Total EAD: approximately **EUR 2.092bn**; total staged ECL: approximately **EUR 45.27m**.
-- Probability-weighted forward-looking mean 12-month PD: approximately **3.64%**.
-- Same-population methodology bridge: legacy LGD + legacy term **EUR 39.31m**; workout LGD + legacy term **EUR 56.19m**; workout LGD + facility remaining maturity **EUR 45.27m**.
+### Portfolio Cockpit
+- borrower and facility counts
+- EAD and ECL
+- Stage mix
+- direct vs indirect exposure
+- utilization
+- industry and product concentrations
+- risk ratings
+- risk direction
+- Watchlist / SICR
+- unsecured and guaranteed exposure
+- portfolio review signals
 
-These are synthetic project results, not estimates for a real bank or regulatory benchmark.
+### Borrower Credit File
+- borrower profile
+- PD and rating
+- EWS / Watchlist / SICR
+- stage and stage reasons
+- facility product/exposure
+- LGD / EAD / ECL
+- collateral and guarantee context
+- decision trace
 
-## Project structure
+### Risk Management
+- governed overrides
+- maker/checker approval
+- macro-scenario review
+- permissions
+- audit trail
+
+### Model Validation
+- PD discrimination and calibration
+- LGD performance and calibration
+- support / stability analysis
+- challenger evidence
+- ECL bridges
+- model findings and promotion decisions
+
+## Governed Risk Copilot
+
+The GenAI layer sits **on top of governed evidence** rather than replacing the risk engine.
+
+It can answer questions such as:
+
+- Which industries deserve attention and why?
+- What are the largest ECL concentrations?
+- Why is this borrower in its current stage?
+- What are the borrower's main risk drivers?
+- What LGD validation findings remain open?
+- Why was a challenger not promoted?
+
+The same canonical service layer supplies the portfolio facts used by the platform and the Copilot.
+
+Controls include:
+
+- deterministic numerical grounding
+- evidence references
+- RBAC
+- allowlisted use cases
+- prompt-injection refusal
+- human-review requirement
+- append-only request metadata
+- no autonomous approval
+- no model promotion
+- no model modification
+- no unrestricted generated SQL
+
+Provider options:
+
+- deterministic local provider
+- local **Ollama**
+- **OpenAI**
+- explicitly configured external JSON provider
+
+## Engineering and governance
+
+The repository also includes:
+
+- canonical domain models
+- SQLite local reference execution
+- PostgreSQL persistence
+- Alembic migrations
+- FastAPI
+- Streamlit
+- Docker / Docker Compose
+- role-based access
+- expiring/revocable credentials
+- model and configuration hashing
+- dataset hashes
+- feature contracts
+- append-only audit evidence
+- two-person override control
+- model registry and findings
+- CI validation workflows
+- reproducible research locks and manifests
+
+## Final verification
+
+The final integration branch is:
+
 ```text
-Credit-Risk-Analytics/
-├── data/
-│   ├── raw/
-│   │   ├── sme_credit_portfolio.csv
-│   │   └── sme_behavioral_history_36m.csv
-│   └── processed/scored_portfolio.csv
-├── scripts/generate_sme_portfolio.py
-├── notebooks/
-│   ├── credit_risk_pipeline.py
-│   └── hybrid_pd_experiment.py
-├── src/
-│   ├── data_preparation.py
-│   ├── pd_model.py
-│   ├── lgd_model.py
-│   ├── facility_ecl.py
-│   ├── validation.py
-│   ├── scorecard.py
-│   ├── early_warning.py
-│   └── ecl.py
-├── app.py
-├── outputs/
-└── docs/
+release/final-institutional-platform
 ```
 
-## Run V5 from a clean checkout
-Use Python 3.12. Create and activate a virtual environment, install the tested direct dependencies, then run the complete build:
-```bash
-git clone --branch feature/v5-lgd-validation-hardening https://github.com/adel3amr/Credit-Risk-Analytics.git
+Latest verified engineering evidence:
+
+| Check | Result |
+|---|---|
+| Full automated suite | **230 passed** |
+| V5 release checks | **30 / 30 passed** |
+| Reference shadow calculation | **5,172 facilities reconciled** |
+| Stage mismatches | **0** |
+| Audit chain | **VERIFIED** |
+| PostgreSQL migrations | **PASS** |
+| WN-1 PostgreSQL persistence | **VERIFIED** |
+| Docker image build | **PASS** |
+| Streamlit headless startup | **PASS** |
+| Full V5 GitHub workflow | **PASS** |
+| Platform GitHub workflow | **PASS** |
+
+Historical branches, rejected challengers and research evidence remain separate and traceable.
+
+## Repository map
+
+```text
+Credit-Risk-Analytics/
+├── app.py                         # Streamlit risk workbench
+├── src/                           # PD, LGD, EWS, rating, EAD/ECL logic
+├── credit_platform/               # API, persistence, governance, audit, Copilot
+├── synthetic_bank/                # linked synthetic bank dataset
+├── workout_vnext/                 # dated component-workout LGD research
+├── marginal_interest/             # Marginal Interest experiment
+├── lgd_research/                  # LGD research programme
+├── economic_lgd/                  # observable-economic LGD research
+├── s2_remediation/                # constrained LGD challenger
+├── lgd_hardening/                 # post-R1 validation / controls
+├── validation_review/             # independent review evidence
+├── migrations/                    # Alembic database migrations
+├── tests/                         # automated validation and platform tests
+├── docs/                          # historical methodology documentation
+├── outputs/                       # reproducible model / validation outputs
+└── .github/workflows/             # CI validation
+```
+
+## Run the project
+
+Use **Python 3.12**.
+
+### Windows PowerShell — quickest full demo
+
+```powershell
+git clone https://github.com/adel3amr/Credit-Risk-Analytics.git
 cd Credit-Risk-Analytics
-python -m venv .venv
-# Linux/macOS: source .venv/bin/activate
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install -r requirements-v5.txt
+git checkout release/final-institutional-platform
+
+py -3.12 -m venv .venv
+Set-ExecutionPolicy -Scope Process Bypass
+.\.venv\Scripts\Activate.ps1
+
+python -m pip install --upgrade pip
+pip install -r requirements-platform-lock.txt
+
 python scripts/run_v5.py
-python -m pytest -q
-python scripts/test_dashboard.py
+python -m credit_platform.cli build-models
+python -m alembic upgrade head
+
+python -m credit_platform.cli issue-token --name analyst --role analyst
+python -m credit_platform.cli issue-token --name manager --role manager
+python -m credit_platform.cli issue-token --name validator --role validator
+python -m credit_platform.cli issue-token --name auditor --role audit
+python -m credit_platform.cli issue-token --name admin --role admin
+
+python -m credit_platform.cli seed-governance
+python -m credit_platform.cli run-reference --operator analyst
+
 python -m streamlit run app.py
 ```
 
-Select `validator.demo` for PD validation, LGD tails, challenger evidence, legacy comparisons and reconciliation checks. Other roles expose the portfolio, borrower/facility credit file and governed interventions. Facility rows show maturity, PD, LGD, EAD and ECL. Fixed identities demonstrate workflow permissions rather than authentication.
+Then open the local Streamlit URL shown in PowerShell, normally:
 
-The build fails on the first failed step and can be invoked from any working directory. It produces `v5_run_manifest.json` (environment and data hashes), `v5_release_checks.csv`, `v5_facility_trace_examples.csv`, and `v5_lgd_*.csv`. No external bank data or private service is required. `requirements-v5.txt` pins tested direct dependencies; pip resolves transitive versions. `requirements.txt` remains available for development.
+```text
+http://localhost:8501
+```
 
-Generate the synthetic data before running the analytics so the raw schema and governed feature set stay synchronized.
+The default Copilot provider is deterministic and requires no external API.
 
-Generated raw/processed CSVs and model outputs are intentionally not version-controlled. The scripts and CI recreate them deterministically, preventing stale committed artifacts from contradicting the current code.
+### Optional local Ollama Copilot
 
-## Governance principles
-- No future-default target leakage into reporting-date staging.
-- Governed PD features are explicit; missing required features fail rather than being silently omitted.
-- Logistic Regression is fixed as the primary model; RF/GB are challengers.
-- Holdout results are reported, not optimized; challengers observed on the frozen holdout are not silently promoted.
-- The 9-month EWS threshold is fixed ex ante for V2 and is not retuned after seeing validation results.
-- Synthetic assumptions and accounting simplifications are stated explicitly; see `docs/MODEL_LIMITATIONS.md`.
-- PD and LGD use separate fixed holdouts; repeated diagnostic inspection is disclosed.
-- Realized recovery cash flows, cure outcome, recovery timing and write-off outcome are excluded from LGD model inputs.
-- Model output, accounting stage, internal rating and human override remain separate governed objects.
-- Methodology changes are versioned and reviewed rather than silently optimized against holdout results.
+With Ollama installed and `llama3.2` available:
 
-## Disclaimer
-Educational synthetic portfolio project only. It is not a production credit model and does not constitute accounting, regulatory, lending or investment advice.
+```powershell
+$env:COPILOT_PROVIDER="ollama"
+$env:OLLAMA_MODEL="llama3.2"
+python -m streamlit run app.py
+```
+
+### Optional OpenAI Copilot
+
+```powershell
+$env:COPILOT_PROVIDER="openai"
+$env:OPENAI_API_KEY="YOUR_KEY"
+python -m streamlit run app.py
+```
+
+Never commit API keys or issued platform credentials.
+
+### Run the verification suite
+
+```powershell
+python -m pytest -q
+python scripts/validate_v5.py
+python scripts/platform_shadow.py
+python -m credit_platform.cli audit-verify
+```
+
+### Docker / PostgreSQL
+
+Create a local ignored `.env` with separate random passwords for `POSTGRES_PASSWORD` and `APP_DB_PASSWORD`, then:
+
+```bash
+docker compose up --build -d
+```
+
+See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) and [DEPLOYMENT_OPERATIONS.md](DEPLOYMENT_OPERATIONS.md) for the full reference deployment workflow.
+
+## Documentation
+
+Start here:
+
+- [Final platform consolidation](FINAL_INSTITUTIONAL_PLATFORM.md)
+- [Architecture](TARGET_ARCHITECTURE.md)
+- [Executive architecture summary](EXECUTIVE_ARCHITECTURE_SUMMARY.md)
+- [Data dictionary](DATA_DICTIONARY.md)
+- [Database schema](DATABASE_SCHEMA.md)
+- [API documentation](API_DOCUMENTATION.md)
+- [Model inventory](MODEL_INVENTORY.md)
+- [Feature contracts](MODEL_FEATURE_CONTRACTS.md)
+- [Independent validation](FINAL_INDEPENDENT_VALIDATION_REPORT.md)
+- [External evidence register](EXTERNAL_EVIDENCE_REGISTER.md)
+- [GenAI Copilot guide](GENAI_COPILOT_GUIDE.md)
+- [GenAI controls](GENAI_RISK_AND_CONTROLS.md)
+- [Reproducibility](REPRODUCIBILITY.md)
+
+## Research history
+
+The project intentionally preserves model and research history instead of presenting only the final polished result.
+
+Important branches include:
+
+```text
+review/final-red-team-release
+research/lgd-marginal-interest-workout
+research/lgd-workout-engine-vnext
+feature/integrated-streamlit-copilot
+release/final-institutional-platform
+```
+
+That history is part of the project: it shows how hypotheses were challenged, how adverse evidence was handled, how models were rejected when they failed gates, and how the final platform was assembled without rewriting earlier results.
+
+---
+
+**Project purpose:** Credit Risk research, model-risk practice, software engineering and professional demonstration using synthetic and publicly informed data.
