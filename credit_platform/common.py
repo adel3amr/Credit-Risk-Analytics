@@ -28,6 +28,12 @@ def file_hash(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def frozen_text_hash(path):
+    """Stable SHA-256 for frozen text evidence across LF/CRLF checkouts."""
+    raw = Path(path).read_bytes()
+    return hashlib.sha256(raw.replace(bytes([13, 10]), bytes([10]))).hexdigest()
+
+
 def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
