@@ -1,7 +1,7 @@
 name: Platform reference validation
 on:
   push:
-    branches: ['platform/**', 'review/final-red-team-release', 'feature/final-platform-closeout', 'research/lgd-workout-engine-vnext']
+    branches: ['platform/**', 'review/final-red-team-release', 'feature/final-platform-closeout', 'research/lgd-workout-engine-vnext', 'release/final-institutional-platform']
   pull_request:
     paths: ['workout_vnext/**', 'marginal_interest/**', 'tests/test_marginal_interest.py', 'credit_platform/**', 'research_diagnostics/**', 'synthetic_bank/**', 'economic_lgd/**', 's2_remediation/**', 'lgd_hardening/**', 'migrations/**', 'tests/platform/**', 'requirements-platform*.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
 permissions:
@@ -42,7 +42,7 @@ jobs:
           python -m credit_platform.cli audit-verify
           WORKOUT_DATABASE_URL="$DATABASE_URL" python -m workout_vnext.persist
       - name: Compile modules
-        run: python -m compileall -q credit_platform economic_lgd s2_remediation lgd_hardening
+        run: python -m compileall -q credit_platform economic_lgd s2_remediation lgd_hardening marginal_interest workout_vnext
       - name: Container build
         run: docker build -t credit-risk-reference .
       - uses: actions/upload-artifact@v4

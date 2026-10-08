@@ -15,8 +15,8 @@ from sqlalchemy import func, select
 from . import audit, schema as s, service
 from .common import ROOT, digest, now, uid
 
-PROMPT_VERSION = "credit-risk-copilot-6"
-PROVIDER_VERSION = "deterministic-6"
+PROMPT_VERSION = "credit-risk-copilot-7"
+PROVIDER_VERSION = "deterministic-7"
 REFUSAL = "I do not have sufficient permitted evidence to answer this."
 INJECTION = re.compile(
     r"(ignore\s+(all|previous|prior|the\s+validation)|system\s+prompt|developer\s+message|"
@@ -113,6 +113,106 @@ class DeterministicProvider:
         return evidence["count_basis"]
 
 
+
+def _verified_grounding(question: str, evidence: dict, use_case: str) -> str:
+    """Deterministic evidence statement that remains the numerical source of truth."""
+    return DeterministicProvider().render(question, evidence, use_case)
+
+
+class OpenAIResponsesProvider:
+    """Optional OpenAI narrative provider over governed evidence only."""
+
+    name = "openai-responses"
+    version = "responses-v2-grounded"
+
+    def __init__(self):
+        self.key = os.environ.get("OPENAI_API_KEY", "")
+        self.model = os.environ.get("OPENAI_COPILOT_MODEL", "gpt-5.6-luna")
+        if not self.key:
+            raise ValueError("OPENAI_API_KEY is required for the OpenAI Copilot provider")
+
+    def render(self, question: str, evidence: dict, use_case: str) -> str:
+        verified = _verified_grounding(question, evidence, use_case)
+        instruction = (
+            "You are a governed Credit Risk Copilot. Use only supplied governed evidence. "
+            "The VERIFIED FACTS block is authoritative. Do not contradict it, invent facts, "
+            "recalculate or replace PD/LGD/EAD/ECL/SICR/staging, approve overrides, promote "
+            "models, or imply bank approval. Add concise professional interpretation only. "
+            "If evidence is insufficient, state that. Human review is required."
+        )
+        body = json.dumps(
+            {
+                "model": self.model,
+                "instructions": instruction,
+                "input": (
+                    f"Use case: {use_case}\nQuestion: {question}\n\n"
+                    f"VERIFIED FACTS:\n{verified}\n\n"
+                    f"Governed evidence:\n{json.dumps(evidence, sort_keys=True)}"
+                ),
+                "max_output_tokens": 500,
+                "store": False,
+            }
+        ).encode()
+        req = Request(
+            "https://api.openai.com/v1/responses",
+            data=body,
+            headers={"Authorization": f"Bearer {self.key}", "Content-Type": "application/json"},
+        )
+        with urlopen(req, timeout=30) as response:  # nosec: fixed HTTPS OpenAI endpoint
+            result = json.loads(response.read(2_000_000))
+        parts = [
+            part.get("text", "")
+            for item in result.get("output", [])
+            if item.get("type") == "message"
+            for part in item.get("content", [])
+            if part.get("type") == "output_text"
+        ]
+        answer = "\n".join(p.strip() for p in parts if p and p.strip()).strip()
+        if not answer:
+            raise ValueError("OpenAI Responses API returned no text answer")
+        return verified + "\n\nCopilot interpretation:\n" + answer
+
+
+class OllamaProvider:
+    """Optional local conversational provider; deterministic facts remain authoritative."""
+
+    name = "ollama-local"
+    version = "ollama-v3-grounded"
+
+    def __init__(self):
+        self.endpoint = os.environ.get("OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/generate")
+        self.model = os.environ.get("OLLAMA_MODEL", "llama3.2")
+
+    def render(self, question: str, evidence: dict, use_case: str) -> str:
+        verified = _verified_grounding(question, evidence, use_case)
+        prompt = (
+            "You are a governed Credit Risk Copilot for a synthetic reference portfolio. "
+            "Use only the supplied evidence. VERIFIED FACTS are authoritative: do not alter "
+            "their numbers or claims. Do not approve credit decisions, overrides, model "
+            "promotion or imply institutional approval. Add concise interpretation only. "
+            "Human review is required.\n\n"
+            f"Use case: {use_case}\nQuestion: {question}\n\n"
+            f"VERIFIED FACTS:\n{verified}\n\n"
+            f"Governed evidence:\n{json.dumps(evidence, sort_keys=True)}"
+        )
+        body = json.dumps(
+            {
+                "model": self.model,
+                "prompt": prompt,
+                "stream": False,
+                "keep_alive": "30m",
+                "options": {"temperature": 0.15, "num_predict": 420},
+            }
+        ).encode()
+        req = Request(self.endpoint, data=body, headers={"Content-Type": "application/json"})
+        with urlopen(req, timeout=120) as response:  # nosec: explicit local/configured endpoint
+            result = json.loads(response.read(2_000_000))
+        answer = result.get("response")
+        if not isinstance(answer, str) or not answer.strip():
+            raise ValueError("Ollama returned no answer")
+        return verified + "\n\nCopilot interpretation:\n" + answer.strip()
+
+
 class ExternalJSONProvider:
     """Optional provider. Disabled unless explicit endpoint, key and opt-in are supplied."""
 
@@ -155,8 +255,18 @@ class ExternalJSONProvider:
 
 def provider() -> Provider:
     configured = os.getenv("COPILOT_PROVIDER", "deterministic").lower()
+    if configured == "auto":
+        if os.getenv("OPENAI_API_KEY"):
+            return OpenAIResponsesProvider()
+        if os.getenv("OLLAMA_MODEL"):
+            return OllamaProvider()
+        return DeterministicProvider()
     if configured == "deterministic":
         return DeterministicProvider()
+    if configured == "ollama":
+        return OllamaProvider()
+    if configured == "openai":
+        return OpenAIResponsesProvider()
     if configured == "external-json":
         return ExternalJSONProvider()
     raise ValueError("Unsupported Copilot provider")
@@ -253,7 +363,13 @@ def answer(db, request, actor: dict) -> dict:
                         evidence['workout_lgd'] = result
                         sources.append(source)
                         tool_calls.append('get_workout_lgd_validation')
-            response = selected.render(request.question, evidence, request.use_case)
+            try:
+                response = selected.render(request.question, evidence, request.use_case)
+            except (OSError, TimeoutError, ValueError, json.JSONDecodeError):
+                # Conversational providers are optional. A provider outage must never
+                # remove the deterministic governed explanation.
+                selected = DeterministicProvider()
+                response = selected.render(request.question, evidence, request.use_case)
         except (service.NotFound, service.Conflict):
             status, response = "INSUFFICIENT_EVIDENCE", REFUSAL
     result = {
