@@ -5,8 +5,15 @@ from pathlib import Path
 from sqlalchemy import select
 from src.governance import has_permission, validate_macro_scenarios, OverrideRequest, approve_override, append_audit_event
 from credit_platform.db import engine as platform_engine
-from credit_platform import schema as platform_schema, copilot as governed_copilot
-from credit_platform.domain import CopilotInput
+from credit_platform import (
+    schema as platform_schema,
+    copilot as governed_copilot,
+    security as platform_security,
+    service as platform_service,
+)
+from credit_platform.cli import map_reference
+from credit_platform.common import uid as platform_uid
+from credit_platform.domain import CopilotInput, RunInput
 
 ROOT = Path(__file__).resolve().parent
 AUDIT = ROOT / "outputs" / "borrower_audit_trace.csv"
@@ -18,6 +25,76 @@ LGD_VALIDATION = ROOT / "outputs" / "lgd_model_validation.csv"
 LGD_CALIBRATION = ROOT / "outputs" / "lgd_calibration_deciles.csv"
 FACILITY_LGD = ROOT / "outputs" / "facility_lgd_predictions.csv"
 FACILITY_ECL = ROOT / "outputs" / "facility_ecl_predictions.csv"
+
+
+def _active_platform_principal(db, platform_role):
+    with db.connect() as conn:
+        row = (
+            conn.execute(
+                select(platform_schema.principals)
+                .where(
+                    platform_schema.principals.c.role == platform_role,
+                    platform_schema.principals.c.active == 1,
+                )
+                .order_by(platform_schema.principals.c.created_at.desc())
+            )
+            .mappings()
+            .first()
+        )
+    return dict(row) if row is not None else None
+
+
+def _ensure_demo_principal(db, platform_role):
+    """Create a short-lived local demo principal when the workbench has none."""
+    actor = _active_platform_principal(db, platform_role)
+    if actor is not None:
+        return actor, False
+    # The generated bearer token is intentionally discarded: the Streamlit demo
+    # calls the governed service internally and does not expose a reusable secret.
+    platform_security.issue(
+        db,
+        f"streamlit-demo-{platform_role}-{platform_uid()[:8]}",
+        platform_role,
+        days=1,
+    )
+    actor = _active_platform_principal(db, platform_role)
+    if actor is None:
+        raise RuntimeError(f"Could not provision local demo role: {platform_role}")
+    return actor, True
+
+
+def _successful_platform_runs(db):
+    with db.connect() as conn:
+        return [
+            dict(row)
+            for row in conn.execute(
+                select(platform_schema.runs)
+                .where(platform_schema.runs.c.status == "SUCCEEDED")
+                .order_by(platform_schema.runs.c.ended_at.desc())
+            ).mappings()
+        ]
+
+
+def _ensure_reference_run(db):
+    """Make the local Streamlit demo usable without a separate CLI bootstrap."""
+    runs = _successful_platform_runs(db)
+    if runs:
+        return runs, False
+    operator, _ = _ensure_demo_principal(db, "analyst")
+    payload = map_reference()
+    dataset = platform_service.ingest(db, payload, operator["id"])
+    run = platform_service.execute(
+        db,
+        RunInput(
+            dataset_id=dataset["id"],
+            request_key="streamlit-reference-" + dataset["hash"],
+            purpose="reference",
+        ),
+        operator["id"],
+    )
+    if run["status"] != "SUCCEEDED":
+        raise RuntimeError(f"Reference run did not succeed: {run['status']}")
+    return _successful_platform_runs(db), True
 
 st.set_page_config(page_title="Credit Risk Analytics — V5", layout="wide")
 st.title("Credit Risk Analytics & IFRS 9 Decisioning System — V5")
@@ -429,44 +506,38 @@ with tabs[3]:
     }
 
     actor = None
+    successful_runs = []
+    demo_actor_created = False
+    demo_run_created = False
+    bootstrap_error = None
     try:
         db = platform_engine()
-        with db.connect() as conn:
-            successful_runs = [
-                dict(r) for r in conn.execute(
-                    select(platform_schema.runs)
-                    .where(platform_schema.runs.c.status == "SUCCEEDED")
-                    .order_by(platform_schema.runs.c.ended_at.desc())
-                ).mappings()
-            ]
-            principal_row = (
-                conn.execute(
-                    select(platform_schema.principals)
-                    .where(
-                        platform_schema.principals.c.role == role_map[role],
-                        platform_schema.principals.c.active == 1,
-                    )
-                    .order_by(platform_schema.principals.c.created_at.desc())
-                )
-                .mappings()
-                .first()
-            )
-            if principal_row is not None:
-                actor = dict(principal_row)
+        actor, demo_actor_created = _ensure_demo_principal(db, role_map[role])
+        successful_runs, demo_run_created = _ensure_reference_run(db)
     except Exception as exc:
-        successful_runs = []
-        st.warning(
-            "The governed platform database is not ready. Run the platform migrations, "
-            "governance seed and reference calculation first."
-        )
+        bootstrap_error = str(exc)
 
-    if actor is None:
-        st.warning(
-            f"No active governed principal exists for role '{role_map[role]}'. "
-            "Create one with the platform CLI before using Copilot in this role."
+    if bootstrap_error:
+        st.error(
+            "Risk Copilot could not prepare its local governed evidence: "
+            f"{bootstrap_error}"
         )
+        st.caption(
+            "The workbench needs the migrated platform database plus the reference "
+            "artifacts generated by scripts/run_v5.py and build-models."
+        )
+    else:
+        if demo_actor_created or demo_run_created:
+            st.caption("Local demo evidence prepared automatically for this session.")
 
-    provider_name = "OpenAI GenAI" if __import__("os").environ.get("COPILOT_PROVIDER", "").lower() == "openai" else "Deterministic governed fallback"
+    provider_setting = __import__("os").environ.get("COPILOT_PROVIDER", "deterministic").lower()
+    provider_name = {
+        "openai": "OpenAI GenAI + deterministic grounding",
+        "ollama": "Ollama local GenAI + deterministic grounding",
+        "auto": "Automatic governed provider selection",
+        "external-json": "Configured external provider + deterministic grounding",
+        "deterministic": "Deterministic governed provider",
+    }.get(provider_setting, provider_setting)
     st.caption(f"Provider: {provider_name}")
 
     use_label = st.selectbox(
