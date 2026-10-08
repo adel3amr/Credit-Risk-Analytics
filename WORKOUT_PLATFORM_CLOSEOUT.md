@@ -144,7 +144,7 @@ WN-1 model-risk questions and the authenticated validation tab share one hash-ve
 | Docker | NOT RUN | binary absent; existing nonroot Dockerfile retained |
 | Hosted CI | NOT RUN on final branch | workflow extended; historical green runs are not this release |
 | Rendered browser | OUTSTANDING | truncated Playwright browser download; no fabricated screenshots |
-| GitHub publication | Pending final checkpoint push; receipt records actual result | no claim that remote branch exists until verified |
+| GitHub publication | BLOCKED: CLI GitHub authentication unavailable | Push of 90a3593 failed: could not read GitHub Username; no remote publication claimed |
 | Institutional LGD | BLOCKED | calibration, MAE, stress, support, censoring, real feature capture |
 | Operational deployment | BLOCKED | no qualified live database/TLS/SSO/backup/monitoring environment |
 
