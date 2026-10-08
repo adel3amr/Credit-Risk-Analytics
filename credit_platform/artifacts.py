@@ -3,7 +3,7 @@
 import joblib
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from .common import ROOT, atomic_json, file_hash
+from .common import ROOT, atomic_json, file_hash, frozen_text_hash
 from src.data_preparation import prepare_data, pd_feature_columns
 from src.pd_model import logistic_model
 from src.lgd_model import gradient_boosting_lgd_model
@@ -28,7 +28,7 @@ def build():
         workout: "d1ff68a25593693039ee00b0d6b7a1f84b226d2d0995d9e6a54a897fcf5de220",
     }
     for path, sha in expected.items():
-        if file_hash(path) != sha:
+        if frozen_text_hash(path) != sha:
             raise ValueError(f"Frozen training data hash mismatch: {path.name}")
     raw = pd.read_csv(data)
     frame = prepare_data(raw)
