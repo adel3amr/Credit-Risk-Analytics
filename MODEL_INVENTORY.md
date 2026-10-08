@@ -67,3 +67,6 @@ calibration realized outcomes. Known engineering validation worsened downside
 and high-band errors. Artifacts and fit-source hashes are retained in
 `lgd_hardening/results`. The retained candidate stays `s2-r1-monotone-gb-1`,
 CHALLENGER_NOT_PROMOTED. No new final independent holdout opened.
+
+## WN-1 research registry
+Component and direct-new model versions are frozen in `workout_vnext/results/LOCK.json`. Status BLOCKED; active scorer unchanged. Target: remaining discounted workout loss. Dataset WN-1: 4,800/1,600/1,600 borrower splits. See the WN-1 protocol and closeout.

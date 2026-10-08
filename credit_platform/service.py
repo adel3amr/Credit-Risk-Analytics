@@ -1,5 +1,6 @@
 """Transaction boundaries for source, calculation, governance and evidence."""
 
+from math import fsum
 from sqlalchemy import select, update
 from . import schema as s, audit, artifacts, risk, validation
 from .common import now, uid, digest, application_hash
@@ -380,6 +381,23 @@ def portfolio(conn, run_id):
     t = traces(conn, run_id)
     result = validation.reconcile(t)
     result["concentrations"] = validation.concentrations(t)
+    def aggregate(items):
+        return {"facilities": len(items), "borrowers": len({v["borrower_id"] for v in items}),
+                "ead": fsum(v["ead"] for v in items), "ecl": fsum(v["ecl"] for v in items)}
+    result["run_id"] = run_id
+    result["borrower_count"] = len({v["borrower_id"] for v in t})
+    result["count_basis"] = "Distinct scored borrowers; facility-level exposures. Borrowers may occur in multiple segments."
+    for name, key in [("stage", lambda v:v["stage"]), ("industry", lambda v:v["source_borrower"]["industry"]),
+                      ("product", lambda v:v["source_facility"]["product"]), ("rating", lambda v:str(v["risk_rating"])),
+                      ("risk_direction", lambda v:v["risk_direction"])]:
+        result["by_"+name] = {k:aggregate([v for v in t if key(v)==k]) for k in sorted({key(v) for v in t})}
+    for name, predicate in [("watchlist",lambda v:v["watchlist"]), ("unsecured",lambda v:v["lgd_features"]["collateral_coverage"]==0),
+                            ("guaranteed",lambda v:v["lgd_features"]["guarantee_coverage"]>0)]:
+        result[name] = aggregate([v for v in t if predicate(v)])
+    result["top_risk_cases"] = [{k:v[k] for k in ("facility_id","borrower_id","stage","ead","ecl","risk_direction","stage_reasons")}
+                                for v in sorted(t,key=lambda v:(-v["ecl"],v["facility_id"]))[:10]]
+    result["review_basis"] = "Top ten facilities by reference ECL; review suggestions, not approvals or measured deterioration."
+
     applied = (
         conn.execute(
             select(s.overrides, s.approvals.c.approver)

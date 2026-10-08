@@ -94,3 +94,24 @@ def seed(db, actor):
                 )
             )
             audit.append(conn, actor, "BLOCKED_RESEARCH_REGISTRY", id, {})
+
+        # Additive, hash-versioned blocked registry entry. Historical entries untouched.
+        from .workout_evidence import get
+        evidence, source = get()
+        model_hash = evidence["model_lock_hash"]
+        mid = "research:WN-1:" + model_hash
+        if not conn.execute(select(s.models.c.id).where(s.models.c.id == mid)).first():
+            conn.execute(s.models.insert().values(id=mid, family="LGD", version="WN-1",
+                status="BLOCKED", recorded_at=now(), manifest={"target":"remaining discounted workout loss",
+                "methodology":"workout_vnext/PROTOCOL.md", "owner":"Reference research programme",
+                "development":"WN-1:4800 borrowers", "validation":"WN-1:1600 borrowers",
+                "final":"WN-1:1600 borrowers,2018–2020", "source":source, "decision":evidence["decision"],
+                "artifact_lock_hash":model_hash, "effective_for_bank_use":False}))
+            audit.append(conn, actor, "BLOCKED_RESEARCH_REGISTRY", mid, {"source":source})
+        for fid, description in [("WN-001","Component failed calibration/noninferiority and stress gates"),
+                                 ("WN-002","Resolved-only selection; institutional capture and joint support unvalidated"),
+                                 ("WN-003","Security valuation and nominal guarantees may persist after realization/payout; not residual available cover")]:
+            if not conn.execute(select(s.findings.c.id).where(s.findings.c.id==fid)).first():
+                conn.execute(s.findings.insert().values(id=fid,component="LGD WN-1",severity="High",
+                    description=description,evidence=source,owner="Reference research programme",recorded_at=now()))
+                audit.append(conn,actor,"RESEARCH_FINDING",fid,{"source":source})

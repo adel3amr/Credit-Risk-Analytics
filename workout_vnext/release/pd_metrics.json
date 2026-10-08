@@ -1,0 +1,12 @@
+{
+  "n": 3000,
+  "target": "default",
+  "auc": 0.7594554730104601,
+  "gini": 0.5189109460209202,
+  "ks": 0.40849673202614384,
+  "brier": 0.030002534586613554,
+  "log_loss": 0.12856211473794532,
+  "observed_rate": 0.034,
+  "predicted_mean": 0.03438768859645263,
+  "scope": "historical holdout borrower output; PIT reporting predictions"
+}

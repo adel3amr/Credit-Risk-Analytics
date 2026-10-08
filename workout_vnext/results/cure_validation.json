@@ -1,0 +1,8 @@
+{
+  "resolved_observations": 5290,
+  "actual_cure_rate": 0.6270321361058601,
+  "predicted_cure_rate": 0.6306320423578862,
+  "brier": 0.18921331942622005,
+  "scope": "resolved-only; censored ultimate cure unknown",
+  "timing": "log-Ridge diagnostic conditional on resolution; not censor-adjusted"
+}

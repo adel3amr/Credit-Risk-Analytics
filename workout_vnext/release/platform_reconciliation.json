@@ -1,0 +1,552 @@
+{
+  "run_id": "2d8ce346-9981-495b-984d-3c27e38f8026",
+  "dataset_hash": "979cabea288e127d7736c5a56d58d9bf804a2393f27f2479a3dd010899d8397b",
+  "portfolio": {
+    "facility_count": 5172,
+    "maximum_ecl_error": 0.0,
+    "ead": 2091914075.83,
+    "ecl": 45265972.043210395,
+    "stages": {
+      "Stage 1": 4772,
+      "Stage 2": 385,
+      "Stage 3": 15
+    },
+    "concentrations": {
+      "industry": [
+        {
+          "segment": "Hospitality",
+          "facilities": 424,
+          "ead": 152031221.74,
+          "ecl": 4998441.421215842,
+          "weighted_pd": 0.05788617583661282,
+          "weighted_lgd": 0.46394666231243653
+        },
+        {
+          "segment": "Technology",
+          "facilities": 422,
+          "ead": 173697197.27,
+          "ecl": 3129059.1141221807,
+          "weighted_pd": 0.03370380147866436,
+          "weighted_lgd": 0.4533664360402182
+        },
+        {
+          "segment": "Manufacturing",
+          "facilities": 923,
+          "ead": 363681824.57,
+          "ecl": 7235776.208786564,
+          "weighted_pd": 0.034435567707012296,
+          "weighted_lgd": 0.4608484889495338
+        },
+        {
+          "segment": "Transport",
+          "facilities": 543,
+          "ead": 243661519.31,
+          "ecl": 7754619.013099165,
+          "weighted_pd": 0.04400613539048264,
+          "weighted_lgd": 0.47318303727283906
+        },
+        {
+          "segment": "Services",
+          "facilities": 1210,
+          "ead": 499294732.22,
+          "ecl": 9144965.785198024,
+          "weighted_pd": 0.03447112085729077,
+          "weighted_lgd": 0.44401025211239253
+        },
+        {
+          "segment": "Construction",
+          "facilities": 607,
+          "ead": 232897382.06,
+          "ecl": 5488378.221843932,
+          "weighted_pd": 0.037684956782755574,
+          "weighted_lgd": 0.46009697295725693
+        },
+        {
+          "segment": "Retail",
+          "facilities": 1043,
+          "ead": 426650198.66,
+          "ecl": 7514732.278944691,
+          "weighted_pd": 0.033751276345571256,
+          "weighted_lgd": 0.4784348067239322
+        }
+      ],
+      "product": [
+        {
+          "segment": "Term Loan",
+          "facilities": 2354,
+          "ead": 1218656289.37,
+          "ecl": 26033601.2973309,
+          "weighted_pd": 0.0366985949079954,
+          "weighted_lgd": 0.45251575015218687
+        },
+        {
+          "segment": "OVD",
+          "facilities": 1742,
+          "ead": 636161722.06,
+          "ecl": 14722036.812918222,
+          "weighted_pd": 0.0374479620836067,
+          "weighted_lgd": 0.5103192484346675
+        },
+        {
+          "segment": "Performance Guarantee",
+          "facilities": 390,
+          "ead": 93540629.77,
+          "ecl": 1540215.219451099,
+          "weighted_pd": 0.03534821192616179,
+          "weighted_lgd": 0.3925094120292127
+        },
+        {
+          "segment": "Import LC",
+          "facilities": 483,
+          "ead": 50117711.06,
+          "ecl": 732109.6566797466,
+          "weighted_pd": 0.03723222191685976,
+          "weighted_lgd": 0.43387328460785285
+        },
+        {
+          "segment": "Financial Guarantee",
+          "facilities": 203,
+          "ead": 93437723.57,
+          "ecl": 2238009.0568304267,
+          "weighted_pd": 0.04891491275527127,
+          "weighted_lgd": 0.3273430526239034
+        }
+      ],
+      "collateral": [
+        {
+          "segment": "Other",
+          "facilities": 955,
+          "ead": 374454822.15,
+          "ecl": 9376474.889005933,
+          "weighted_pd": 0.04133214340655443,
+          "weighted_lgd": 0.510401930567172
+        },
+        {
+          "segment": "Mortgage",
+          "facilities": 1936,
+          "ead": 814019941.45,
+          "ecl": 13898413.878378415,
+          "weighted_pd": 0.035728363224615596,
+          "weighted_lgd": 0.3819081067810169
+        },
+        {
+          "segment": "Cash",
+          "facilities": 506,
+          "ead": 196295646.15,
+          "ecl": 790092.4560389586,
+          "weighted_pd": 0.03001227355149506,
+          "weighted_lgd": 0.11512722183694957
+        },
+        {
+          "segment": "Unsecured",
+          "facilities": 1775,
+          "ead": 707143666.08,
+          "ecl": 21200990.81978709,
+          "weighted_pd": 0.03936543808751938,
+          "weighted_lgd": 0.6230006855638672
+        }
+      ],
+      "stage": [
+        {
+          "segment": "Stage 1",
+          "facilities": 4772,
+          "ead": 1930297086.16,
+          "ecl": 28437247.56665175,
+          "weighted_pd": 0.029422625312295603,
+          "weighted_lgd": 0.4595832109561799
+        },
+        {
+          "segment": "Stage 2",
+          "facilities": 385,
+          "ead": 156951974.48,
+          "ecl": 14249690.528192693,
+          "weighted_pd": 0.13499727860220387,
+          "weighted_lgd": 0.48066979317365904
+        },
+        {
+          "segment": "Stage 3",
+          "facilities": 15,
+          "ead": 4665015.1899999995,
+          "ecl": 2579033.948365952,
+          "weighted_pd": 0.0656851130888469,
+          "weighted_lgd": 0.5528457772001278
+        }
+      ]
+    },
+    "run_id": "2d8ce346-9981-495b-984d-3c27e38f8026",
+    "borrower_count": 3000,
+    "count_basis": "Distinct scored borrowers; facility-level exposures. Borrowers may occur in multiple segments.",
+    "by_stage": {
+      "Stage 1": {
+        "facilities": 4772,
+        "borrowers": 2769,
+        "ead": 1930297086.16,
+        "ecl": 28437247.56665175
+      },
+      "Stage 2": {
+        "facilities": 385,
+        "borrowers": 221,
+        "ead": 156951974.48,
+        "ecl": 14249690.528192693
+      },
+      "Stage 3": {
+        "facilities": 15,
+        "borrowers": 10,
+        "ead": 4665015.1899999995,
+        "ecl": 2579033.948365952
+      }
+    },
+    "by_industry": {
+      "Construction": {
+        "facilities": 607,
+        "borrowers": 356,
+        "ead": 232897382.06,
+        "ecl": 5488378.221843932
+      },
+      "Hospitality": {
+        "facilities": 424,
+        "borrowers": 241,
+        "ead": 152031221.74,
+        "ecl": 4998441.421215842
+      },
+      "Manufacturing": {
+        "facilities": 923,
+        "borrowers": 539,
+        "ead": 363681824.57,
+        "ecl": 7235776.208786564
+      },
+      "Retail": {
+        "facilities": 1043,
+        "borrowers": 603,
+        "ead": 426650198.66,
+        "ecl": 7514732.278944691
+      },
+      "Services": {
+        "facilities": 1210,
+        "borrowers": 706,
+        "ead": 499294732.22,
+        "ecl": 9144965.785198024
+      },
+      "Technology": {
+        "facilities": 422,
+        "borrowers": 241,
+        "ead": 173697197.27,
+        "ecl": 3129059.1141221807
+      },
+      "Transport": {
+        "facilities": 543,
+        "borrowers": 314,
+        "ead": 243661519.31,
+        "ecl": 7754619.013099165
+      }
+    },
+    "by_product": {
+      "Financial Guarantee": {
+        "facilities": 203,
+        "borrowers": 203,
+        "ead": 93437723.57,
+        "ecl": 2238009.0568304267
+      },
+      "Import LC": {
+        "facilities": 483,
+        "borrowers": 483,
+        "ead": 50117711.06,
+        "ecl": 732109.6566797466
+      },
+      "OVD": {
+        "facilities": 1742,
+        "borrowers": 1742,
+        "ead": 636161722.06,
+        "ecl": 14722036.812918222
+      },
+      "Performance Guarantee": {
+        "facilities": 390,
+        "borrowers": 390,
+        "ead": 93540629.77,
+        "ecl": 1540215.219451099
+      },
+      "Term Loan": {
+        "facilities": 2354,
+        "borrowers": 2354,
+        "ead": 1218656289.37,
+        "ecl": 26033601.2973309
+      }
+    },
+    "by_rating": {
+      "1": {
+        "facilities": 101,
+        "borrowers": 55,
+        "ead": 50079781.76,
+        "ecl": 101920.62776830334
+      },
+      "2": {
+        "facilities": 468,
+        "borrowers": 270,
+        "ead": 198944696.37,
+        "ecl": 290773.46573439863
+      },
+      "3": {
+        "facilities": 951,
+        "borrowers": 561,
+        "ead": 369734505.84,
+        "ecl": 1285161.1359350565
+      },
+      "4": {
+        "facilities": 1272,
+        "borrowers": 750,
+        "ead": 500555930.08,
+        "ecl": 3607620.6050926903
+      },
+      "5": {
+        "facilities": 1040,
+        "borrowers": 601,
+        "ead": 420095269.15,
+        "ecl": 5939829.059204623
+      },
+      "6": {
+        "facilities": 820,
+        "borrowers": 466,
+        "ead": 343906428.81,
+        "ecl": 15367670.707873166
+      },
+      "7": {
+        "facilities": 505,
+        "borrowers": 287,
+        "ead": 203932448.63,
+        "ecl": 16093962.493236206
+      },
+      "8": {
+        "facilities": 15,
+        "borrowers": 10,
+        "ead": 4665015.1899999995,
+        "ecl": 2579033.948365952
+      }
+    },
+    "by_risk_direction": {
+      "Deteriorating": {
+        "facilities": 424,
+        "borrowers": 239,
+        "ead": 177462944.91,
+        "ecl": 13196623.256909095
+      },
+      "Stable": {
+        "facilities": 4373,
+        "borrowers": 2544,
+        "ead": 1736093630.11,
+        "ecl": 27259375.491363246
+      },
+      "Watch": {
+        "facilities": 375,
+        "borrowers": 217,
+        "ead": 178357500.81,
+        "ecl": 4809973.294938057
+      }
+    },
+    "watchlist": {
+      "facilities": 505,
+      "borrowers": 287,
+      "ead": 203932448.63,
+      "ecl": 16093962.493236206
+    },
+    "unsecured": {
+      "facilities": 1775,
+      "borrowers": 1037,
+      "ead": 707143666.08,
+      "ecl": 21200990.81978709
+    },
+    "guaranteed": {
+      "facilities": 1076,
+      "borrowers": 1076,
+      "ead": 237096064.4,
+      "ecl": 4510333.932961272
+    },
+    "top_risk_cases": [
+      {
+        "facility_id": "SME09788-003442",
+        "borrower_id": "SME09788",
+        "stage": "Stage 2",
+        "ead": 3159166.17,
+        "ecl": 629366.3738271192,
+        "risk_direction": "Deteriorating",
+        "stage_reasons": [
+          "persistent_ews_9_months"
+        ]
+      },
+      {
+        "facility_id": "SME00080-003035",
+        "borrower_id": "SME00080",
+        "stage": "Stage 3",
+        "ead": 1076319.39,
+        "ecl": 614788.5145059039,
+        "risk_direction": "Stable",
+        "stage_reasons": [
+          "credit_impaired",
+          "prior_default_pd"
+        ]
+      },
+      {
+        "facility_id": "SME07316-004130",
+        "borrower_id": "SME07316",
+        "stage": "Stage 2",
+        "ead": 1367868.53,
+        "ecl": 500182.4511805603,
+        "risk_direction": "Deteriorating",
+        "stage_reasons": [
+          "persistent_ews_9_months"
+        ]
+      },
+      {
+        "facility_id": "SME00080-003034",
+        "borrower_id": "SME00080",
+        "stage": "Stage 3",
+        "ead": 1128787.91,
+        "ecl": 500149.0373059208,
+        "risk_direction": "Stable",
+        "stage_reasons": [
+          "credit_impaired",
+          "prior_default_pd"
+        ]
+      },
+      {
+        "facility_id": "SME09997-003368",
+        "borrower_id": "SME09997",
+        "stage": "Stage 2",
+        "ead": 1246777.55,
+        "ecl": 453088.8604482694,
+        "risk_direction": "Deteriorating",
+        "stage_reasons": [
+          "prior_default_pd",
+          "persistent_ews_9_months"
+        ]
+      },
+      {
+        "facility_id": "SME09466-000323",
+        "borrower_id": "SME09466",
+        "stage": "Stage 2",
+        "ead": 691724.93,
+        "ecl": 427790.2065586456,
+        "risk_direction": "Deteriorating",
+        "stage_reasons": [
+          "persistent_ews_9_months"
+        ]
+      },
+      {
+        "facility_id": "SME05111-004454",
+        "borrower_id": "SME05111",
+        "stage": "Stage 2",
+        "ead": 828499.8,
+        "ecl": 409229.888493989,
+        "risk_direction": "Stable",
+        "stage_reasons": [
+          "prior_default_pd"
+        ]
+      },
+      {
+        "facility_id": "SME09997-003367",
+        "borrower_id": "SME09997",
+        "stage": "Stage 2",
+        "ead": 550007.33,
+        "ecl": 349526.0578400039,
+        "risk_direction": "Deteriorating",
+        "stage_reasons": [
+          "prior_default_pd",
+          "persistent_ews_9_months"
+        ]
+      },
+      {
+        "facility_id": "SME00591-004891",
+        "borrower_id": "SME00591",
+        "stage": "Stage 2",
+        "ead": 1988299.13,
+        "ecl": 333697.3311641027,
+        "risk_direction": "Deteriorating",
+        "stage_reasons": [
+          "persistent_ews_9_months"
+        ]
+      },
+      {
+        "facility_id": "SME06536-004872",
+        "borrower_id": "SME06536",
+        "stage": "Stage 2",
+        "ead": 2383982.61,
+        "ecl": 321311.8302054566,
+        "risk_direction": "Stable",
+        "stage_reasons": [
+          "dpd_30",
+          "prior_default_pd"
+        ]
+      }
+    ],
+    "review_basis": "Top ten facilities by reference ECL; review suggestions, not approvals or measured deterioration.",
+    "reference_ecl": 45265972.043210395,
+    "override_adjustment": 0,
+    "controlled_reference_ecl": 45265972.043210395,
+    "approved_overrides": [],
+    "bank_gate": "BLOCKED"
+  },
+  "max_historical_difference": {
+    "ead": 0.010000000009313226,
+    "ecl": 0.0025685547152534127,
+    "lgd": 9.71445146547012e-17,
+    "pd": 9.974659986866641e-17
+  },
+  "stage_mismatches": 0,
+  "audit": {
+    "events": 28,
+    "head": "89b04d768c18388aa9b3b4a5bfce7ae923449bdfccf61b66f34ecf4ea573e2c7",
+    "status": "VERIFIED"
+  },
+  "copilot_question_suite": [
+    {
+      "question": "Portfolio totals",
+      "exact_cockpit_evidence_match": true,
+      "status": "ANSWERED"
+    },
+    {
+      "question": "Borrower counts",
+      "exact_cockpit_evidence_match": true,
+      "status": "ANSWERED"
+    },
+    {
+      "question": "Facility counts",
+      "exact_cockpit_evidence_match": true,
+      "status": "ANSWERED"
+    },
+    {
+      "question": "Stage distribution",
+      "exact_cockpit_evidence_match": true,
+      "status": "ANSWERED"
+    },
+    {
+      "question": "Industry attention",
+      "exact_cockpit_evidence_match": true,
+      "status": "ANSWERED"
+    },
+    {
+      "question": "Watchlist",
+      "exact_cockpit_evidence_match": true,
+      "status": "ANSWERED"
+    },
+    {
+      "question": "Unsecured exposure",
+      "exact_cockpit_evidence_match": true,
+      "status": "ANSWERED"
+    },
+    {
+      "question": "Guarantees",
+      "exact_cockpit_evidence_match": true,
+      "status": "ANSWERED"
+    },
+    {
+      "question": "Top risk cases",
+      "exact_cockpit_evidence_match": true,
+      "status": "ANSWERED"
+    },
+    {
+      "question": "Which borrowers deteriorated most?",
+      "exact_cockpit_evidence_match": true,
+      "status": "ANSWERED"
+    }
+  ],
+  "note": "Reference scorer unchanged; historical face/EAD rounding allows <1.1 cents."
+}

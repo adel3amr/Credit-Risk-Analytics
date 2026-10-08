@@ -1,0 +1,502 @@
+{
+  "version": "WN-1",
+  "features": [
+    {
+      "name": "predefault_pd",
+      "definition": "Last dated predefault PD proxy; current default PD is separately one",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "credit_snapshot",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        1
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "predefault_rating",
+      "definition": "Dated predefault internal rating proxy",
+      "type": "number",
+      "unit": "rank",
+      "source": "credit_snapshot",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        1,
+        7
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "rating_migration",
+      "definition": "Dated reported change in rating; not future migration",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "credit_snapshot",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        null,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "financial_strength",
+      "definition": "Observed standardized synthetic financial-strength proxy",
+      "type": "number",
+      "unit": "standardized value",
+      "source": "credit_snapshot",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        null,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "previous_defaults",
+      "definition": "Known prior-default indicator",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "credit_snapshot",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "utilization",
+      "definition": "Last dated credit utilization",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "credit_snapshot",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        1
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "delinquency",
+      "definition": "Last dated days past due",
+      "type": "number",
+      "unit": "days",
+      "source": "credit_snapshot",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "age",
+      "definition": "Months elapsed since default",
+      "type": "number",
+      "unit": "months",
+      "source": "default_event",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "months_since_last_recovery",
+      "definition": "Age minus latest observed recovery month; age if none",
+      "type": "number",
+      "unit": "months",
+      "source": "recovery_transaction",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "recovered_ratio",
+      "definition": "Observed cumulative cash recovery / default exposure",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "recovery_transaction",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        1
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "collateral_ratio",
+      "definition": "Last recorded appraised value / remaining EAD; not depleted security availability",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "collateral_valuation",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "haircut",
+      "definition": "Last known valuation haircut fraction",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "collateral_valuation",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        1
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "lien",
+      "definition": "Known lien rank",
+      "type": "number",
+      "unit": "rank",
+      "source": "collateral_valuation",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        1,
+        2
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "enforcement",
+      "definition": "Observed enforcement initiation indicator",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "collateral_enforcement",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        1
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "guarantee_ratio",
+      "definition": "Minimum of one and eligible nominal guarantee / remaining EAD; not payout-depleted",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "guarantee",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        1
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "guarantor_quality",
+      "definition": "Known synthetic quality fraction",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "guarantee",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        1
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "enforceability",
+      "definition": "Known enforceability indicator",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "guarantee",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        1
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "claim",
+      "definition": "Observed claim submission indicator",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "guarantee_claim",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        1
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "restructured",
+      "definition": "Observed restructuring agreement indicator",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "restructure_event",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        1
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "cost_ratio",
+      "definition": "Observed accumulated costs / default exposure",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "workout_cost",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "growth",
+      "definition": "Contemporaneous annual output-growth assumption",
+      "type": "number",
+      "unit": "percent",
+      "source": "macro_snapshot",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        null,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "unemployment",
+      "definition": "Contemporaneous unemployment assumption",
+      "type": "number",
+      "unit": "percent",
+      "source": "macro_snapshot",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "price_change",
+      "definition": "Contemporaneous collateral-price change fraction",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "macro_snapshot",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        null,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "rate",
+      "definition": "Fixed annual facility discount/accrual rate",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "facility",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "mi_ratio",
+      "definition": "Cumulative postdefault suspended memorandum interest / remaining EAD",
+      "type": "number",
+      "unit": "numeric ratio / indicator",
+      "source": "interest_accrual",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "ead",
+      "definition": "Principal plus predefault interest minus cash recoveries already received; excludes suspended interest and writeoffs",
+      "type": "number",
+      "unit": "EUR",
+      "source": "facility",
+      "observation_time": "effective_date AND recorded_at <= observation_date",
+      "allowed_range": [
+        0,
+        null
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE at institution; available in WN synthetic ledger",
+      "lineage": "known_event_ids; facility/default linkage; data manifest",
+      "model_usage": "direct-new and component; family ablations omit specified features",
+      "sensitivity": "synthetic public reference; future institutional equivalent confidential"
+    },
+    {
+      "name": "industry",
+      "definition": "Known industry",
+      "type": "category",
+      "unit": "category",
+      "source": "borrower/facility/collateral",
+      "observation_time": "origination/default known",
+      "allowed_categories": [
+        "Manufacturing",
+        "Retail",
+        "Services",
+        "Construction"
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE validation; synthetic available",
+      "lineage": "canonical entity ID",
+      "model_usage": "direct-new/component",
+      "sensitivity": "synthetic public"
+    },
+    {
+      "name": "product",
+      "definition": "Known product",
+      "type": "category",
+      "unit": "category",
+      "source": "borrower/facility/collateral",
+      "observation_time": "origination/default known",
+      "allowed_categories": [
+        "Term Loan",
+        "OVD"
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE validation; synthetic available",
+      "lineage": "canonical entity ID",
+      "model_usage": "direct-new/component",
+      "sensitivity": "synthetic public"
+    },
+    {
+      "name": "collateral_type",
+      "definition": "Known collateral_type",
+      "type": "category",
+      "unit": "category",
+      "source": "borrower/facility/collateral",
+      "observation_time": "origination/default known",
+      "allowed_categories": [
+        "none",
+        "cash",
+        "property",
+        "other"
+      ],
+      "missing_policy": "reject",
+      "availability": "REQUIRES NEW DATA CAPTURE validation; synthetic available",
+      "lineage": "canonical entity ID",
+      "model_usage": "direct-new/component",
+      "sensitivity": "synthetic public"
+    }
+  ]
+}

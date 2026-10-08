@@ -1,0 +1,11 @@
+split,stress,mean_lgd_change,decreasing_loss_count,basis
+validation,downturn,0.09818129003540275,35,"sensitivity,not realized stressed validation"
+validation,collateral_shock,-0.002844062204803071,4282,"sensitivity,not realized stressed validation"
+validation,guarantee_stress,0.002818737128443411,365,"sensitivity,not realized stressed validation"
+validation,slower_recovery,0.04456117303204367,0,"sensitivity,not realized stressed validation"
+validation,cost_shock,0.018076108659049996,0,"sensitivity,not realized stressed validation"
+final,downturn,0.08800328952505522,75,"sensitivity,not realized stressed validation"
+final,collateral_shock,-0.0025493638495719282,3922,"sensitivity,not realized stressed validation"
+final,guarantee_stress,0.0019445871899067815,469,"sensitivity,not realized stressed validation"
+final,slower_recovery,0.035647340997225406,0,"sensitivity,not realized stressed validation"
+final,cost_shock,0.015580932751697753,0,"sensitivity,not realized stressed validation"

@@ -1,9 +1,9 @@
 name: Platform reference validation
 on:
   push:
-    branches: ['platform/**', 'review/final-red-team-release', 'feature/final-platform-closeout']
+    branches: ['platform/**', 'review/final-red-team-release', 'feature/final-platform-closeout', 'research/lgd-workout-engine-vnext']
   pull_request:
-    paths: ['credit_platform/**', 'research_diagnostics/**', 'synthetic_bank/**', 'economic_lgd/**', 's2_remediation/**', 'lgd_hardening/**', 'migrations/**', 'tests/platform/**', 'requirements-platform*.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
+    paths: ['workout_vnext/**', 'marginal_interest/**', 'tests/test_marginal_interest.py', 'credit_platform/**', 'research_diagnostics/**', 'synthetic_bank/**', 'economic_lgd/**', 's2_remediation/**', 'lgd_hardening/**', 'migrations/**', 'tests/platform/**', 'requirements-platform*.txt', 'compose.yaml', 'Dockerfile', 'scripts/platform*', '.github/workflows/platform.yml']
 permissions:
   contents: read
 jobs:
@@ -30,6 +30,8 @@ jobs:
       - run: python -m synthetic_bank.validate
       - name: Verify frozen S2 remediation without re-opening holdout
         run: python -c "from s2_remediation.evaluate import verify, verify_lock; verify(); verify_lock()"
+      - name: Verify frozen workout evidence without refitting or selecting models
+        run: python -c "from credit_platform.workout_evidence import get; get()"
       - run: python -m pytest -q
       - name: PostgreSQL migrations and full shadow calculation
         env:
@@ -38,6 +40,7 @@ jobs:
           python -m alembic upgrade head
           python scripts/platform_shadow.py
           python -m credit_platform.cli audit-verify
+          WORKOUT_DATABASE_URL="$DATABASE_URL" python -m workout_vnext.persist
       - name: Compile modules
         run: python -m compileall -q credit_platform economic_lgd s2_remediation lgd_hardening
       - name: Container build

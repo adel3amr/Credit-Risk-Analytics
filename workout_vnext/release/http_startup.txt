@@ -1,0 +1,16 @@
+Started server process [7]
+Waiting for application startup.
+Application startup complete.
+Uvicorn running on http://127.0.0.1:8766 (Press CTRL+C to quit)
+{"request_id": "e7918e9a-1c26-4eb2-a02b-966296fa6c48", "route": "/health/ready", "method": "GET", "status": 200, "duration_ms": 10.66}
+{"request_id": "a291b0e4-7efa-4c60-baa9-a99d7d7e8b57", "route": "/health/ready", "method": "GET", "status": 200, "duration_ms": 8.57}
+{"request_id": "c17045b2-d468-4dc1-882b-a4880e5d2947", "route": "/", "method": "GET", "status": 200, "duration_ms": 3.69}
+{"request_id": "6a8619da-3696-4e10-ae03-1b98816e5b26", "route": "/static/{name}", "method": "GET", "status": 200, "duration_ms": 0.68}
+{"request_id": "88aaf26f-4d7e-47f9-96b4-73367a85e9c6", "route": "/api/v1/lgd-workout-validation", "method": "GET", "status": 401, "duration_ms": 0.55}
+{"request_id": "e8e8ee1b-3995-4ab1-94e5-f194427e2143", "route": "/api/v1/lgd-workout-validation", "method": "GET", "status": 200, "duration_ms": 19.18}
+{"request_id": "e7a3f5d8-9b2a-44a8-9fda-415c3aa45da9", "route": "/api/v1/audit", "method": "GET", "status": 403, "duration_ms": 1.52}
+{"request_id": "edf7ab8f-6565-43c9-b89a-e76fb5ed6bec", "route": "/api/v1/models", "method": "GET", "status": 200, "duration_ms": 2.57}
+Shutting down
+Waiting for application shutdown.
+Application shutdown complete.
+Finished server process [7]

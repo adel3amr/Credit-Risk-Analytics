@@ -22,6 +22,8 @@ def verify():
     return m
 
 def features(x,omit=None):
+    from .contracts import check
+    check(x)
     cols=[c for c in FEATURES if c not in FAMILIES.get(omit,[])]+CAT
     if x[cols].isna().any().any() or not np.isfinite(x[[c for c in cols if c not in CAT]].to_numpy()).all():raise ValueError('Missing/nonfinite WN features')
     if (x.ead<=0).any() or (x.rate<0).any() or not x.predefault_pd.between(0,1).all() or (x.age<0).any():raise ValueError('Invalid WN feature domain')

@@ -1,0 +1,33 @@
+{
+  "observations": 31815,
+  "maximum_target_error": 3.7054803669889225e-11,
+  "resolved_targets_clipped": 391,
+  "open_observations_without_target": 5100,
+  "split_borrowers": {
+    "development": 4800,
+    "validation": 1600,
+    "final": 1600
+  },
+  "asof_lineage_checks": 31815,
+  "cash_recovery_cap_checks": 31815,
+  "mi_excluded_from_ead_checks": 31815,
+  "counts": {
+    "default_event": 8000,
+    "credit_snapshot": 66307,
+    "workout_snapshot": 31815,
+    "collateral": 8000,
+    "collateral_valuation": 74973,
+    "collateral_enforcement": 3896,
+    "guarantee": 8000,
+    "guarantee_claim": 2401,
+    "recovery_transaction": 64838,
+    "workout_cost": 235311,
+    "restructure_event": 1861,
+    "cure_event": 4628,
+    "writeoff_event": 1466,
+    "interest_accrual": 228495,
+    "resolution_event": 6980,
+    "macro_snapshot": 164984
+  },
+  "status": "PASS"
+}

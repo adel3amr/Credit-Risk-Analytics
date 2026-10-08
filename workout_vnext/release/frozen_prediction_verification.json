@@ -1,0 +1,8 @@
+{
+  "frozen_artifact_hashes": "PASS",
+  "recomputed_predictions_max_error": {
+    "direct_new": 4.998779168374767e-13,
+    "component": 4.999056724130924e-13
+  },
+  "method": "inference-only verification; no fit, search or selection"
+}

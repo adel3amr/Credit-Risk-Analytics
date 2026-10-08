@@ -196,6 +196,13 @@ def create_app(db=None):
     def copilot_query(data: CopilotInput, p=Depends(allow("read"))):
         return copilot.answer(app.state.db, data, p)
 
+    @app.get("/api/v1/lgd-workout-validation")
+    def workout_validation(user=Depends(allow("read"))):
+        from .workout_evidence import get
+        result, source = get()
+        return [{"model": "WN-1-component", "status": result["decision"]["status"],
+                 "institutional": "BLOCKED", "evidence": result, "source": source}]
+
     @app.get("/api/v1/lgd-economic-validation")
     def economic_validation(p=Depends(allow("read"))):
         from .economic_evidence import get

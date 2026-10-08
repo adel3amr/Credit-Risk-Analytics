@@ -1,0 +1,42 @@
+{
+  "server": "uvicorn real loopback HTTP",
+  "checks": [
+    {
+      "path": "/health/ready",
+      "authenticated": false,
+      "status": 200
+    },
+    {
+      "path": "/",
+      "authenticated": false,
+      "status": 200
+    },
+    {
+      "path": "/static/app.js",
+      "authenticated": false,
+      "status": 200
+    },
+    {
+      "path": "/api/v1/lgd-workout-validation",
+      "authenticated": false,
+      "status": 401
+    },
+    {
+      "path": "/api/v1/lgd-workout-validation",
+      "authenticated": true,
+      "status": 200
+    },
+    {
+      "path": "/api/v1/audit",
+      "authenticated": true,
+      "status": 403
+    },
+    {
+      "path": "/api/v1/models",
+      "authenticated": true,
+      "status": 200
+    }
+  ],
+  "status": "PASS",
+  "browser_render": "NOT VERIFIED"
+}

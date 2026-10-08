@@ -123,3 +123,6 @@ quality fields; a captured document alone cannot authorize a numeric feature
 without an independently validated derivation. No such derivation or populated
 capture dataset exists. The explicit mechanical/support/scenario contract is
 `lgd_hardening/ECONOMIC_DOMAIN_CONTRACT.json`. See the accompanying decision.
+
+## WN-1 additive research contract
+See [dated workout features](workout_vnext/FEATURE_CONTRACT.md). This contract does not replace incumbent model inputs.

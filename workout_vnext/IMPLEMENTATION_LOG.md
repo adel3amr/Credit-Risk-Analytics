@@ -1,1 +1,7 @@
 First generator invocation failed on the first episode before any files/outcomes were written: event helper parameter kind collided with cost payload kind. Renamed helper parameter entity; seeds/distributions unchanged. Empty directory retained. No metrics evaluated.
+
+Post-freeze engineering changes: strict input contract validation added before inference, without changing valid-input predictions; inference-only verification matches saved final predictions within 5e-13. Date/schema validation strengthened; no dataset was regenerated and no model refitted. Shared portfolio evidence replaces duplicate Copilot SQL aggregation. External narrative fallback rejects ungrounded prose. New blocked registry entries are additive.
+
+Change classification: workout domain/DGP DATA ARCHITECTURE and DATA; component/direct experiment RESEARCH and new METHODOLOGY version WN-1; contracts MODEL IMPLEMENTATION and VALIDATION; loader DATABASE; evidence endpoint API; Copilot grounding SECURITY/GOVERNANCE; shared cockpit UI/UX; CI INFRASTRUCTURE; reports DOCUMENTATION. Active historical model/policy methods unchanged.
+
+Release resumption: transient runtime/logs were lost overnight; pinned environment was recreated and all 225 tests rerun. Full SQLite ledger counts and 5,172-facility platform reconciliation were re-executed. First cross-command loopback HTTP attempt was refused; running the server and checks in one subprocess namespace passed all checks. No application code change was needed for that environment boundary.

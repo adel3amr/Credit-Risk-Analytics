@@ -19,3 +19,6 @@ Canonical version 1 is defined by `credit_platform/domain.py`; relational types/
 | original_ecl / proposed_ecl | Original result and requested reference adjustment | Original never overwritten; different manager approval |
 
 All current data are synthetic, INTERNAL. Future borrower/facility/financial data should be CONFIDENTIAL; credentials RESTRICTED. Statistical support minima/maxima are observed, not approval thresholds. Generator field rules remain in scripts/generate_sme_portfolio.py and scripts/generate_lgd_workout_history.py; R2 recovery assumptions remain separate.
+
+## WN-1 dated workout domain
+See `workout_vnext/store.py`, `workout_vnext/FEATURE_CONTRACT.md`, and `workout_vnext/data/manifest.json` for event entities, field contracts and exact frozen counts. Currency EUR applies only to WN-1.

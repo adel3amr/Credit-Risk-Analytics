@@ -15,8 +15,8 @@ from sqlalchemy import func, select
 from . import audit, schema as s, service
 from .common import ROOT, digest, now, uid
 
-PROMPT_VERSION = "credit-risk-copilot-5"
-PROVIDER_VERSION = "deterministic-5"
+PROMPT_VERSION = "credit-risk-copilot-6"
+PROVIDER_VERSION = "deterministic-6"
 REFUSAL = "I do not have sufficient permitted evidence to answer this."
 INJECTION = re.compile(
     r"(ignore\s+(all|previous|prior|the\s+validation)|system\s+prompt|developer\s+message|"
@@ -37,6 +37,12 @@ class DeterministicProvider:
     version = PROVIDER_VERSION
 
     def render(self, question: str, evidence: dict, use_case: str) -> str:
+        if "workout_lgd" in evidence:
+            w = evidence["workout_lgd"]
+            return (f"WN-1 dated workout experiment: {w['decision']['status']}. "
+                    f"Calibration failures: {', '.join(w['decision']['calibration_failures'])}. "
+                    "Resolved-workout selection and unvalidated institutional feature capture remain limitations. "
+                    "The component challenger is not the active scorer. Institutional production remains BLOCKED.")
         if "economic_lgd" in evidence:
             result = evidence["economic_lgd"]
             rows = result["metrics"]
@@ -76,9 +82,10 @@ class DeterministicProvider:
                 for k, v in sorted(evidence["by_stage"].items())
             )
             return (
-                f"Run {evidence['run_id']} contains {evidence['facility_count']} facilities, "
+                f"Run {evidence['run_id']} contains {evidence['borrower_count']} scored borrowers and {evidence['facility_count']} facilities, "
                 f"EAD {evidence['ead']:,.2f}, and governed ECL {evidence['ecl']:,.2f}. "
-                f"Stage composition: {stages}. Bank-use gate: {evidence['bank_gate']}."
+                f"Stage composition: {stages}. Bank-use gate: {evidence['bank_gate']}. "
+                + self.portfolio_detail(question, evidence)
             )
         finding = evidence["lgd_finding"]
         return (
@@ -88,6 +95,22 @@ class DeterministicProvider:
             "at prediction time and operational proxies failed. The challenger was therefore "
             "not promoted; the explicit downturn overlay is restricted to sensitivity use."
         )
+
+
+    def portfolio_detail(self, question, evidence):
+        q = question.lower()
+        if any(word in q for word in ("increase", "deteriorated most", "change since")):
+            return "A single run cannot establish a change over time. Use the governed two-run movement endpoint; no causal explanation is inferred."
+        if "industr" in q or "sector" in q:
+            ranked = sorted(evidence["by_industry"].items(), key=lambda kv:(-kv[1]["ecl"],kv[0]))
+            return "Industries ranked by reference ECL (not a deterioration forecast): " + "; ".join(f"{k}: EAD {v['ead']:,.2f}, ECL {v['ecl']:,.2f}" for k,v in ranked)
+        for key in ("watchlist", "unsecured", "guaranteed"):
+            if key in q or (key=="guaranteed" and "guarantee" in q):
+                v=evidence[key]
+                return f"{key}: {v['borrowers']} distinct borrowers, {v['facilities']} facilities, EAD {v['ead']:,.2f}, ECL {v['ecl']:,.2f}."
+        if "top" in q or "attention" in q:
+            return evidence["review_basis"] + " " + "; ".join(f"{r['facility_id']}: ECL {r['ecl']:,.2f}" for r in evidence["top_risk_cases"])
+        return evidence["count_basis"]
 
 
 class ExternalJSONProvider:
@@ -124,7 +147,10 @@ class ExternalJSONProvider:
         answer = result.get("answer")
         if not isinstance(answer, str) or not answer.strip():
             raise ValueError("External provider returned no answer")
-        return answer.strip()
+        # Arbitrary provider prose cannot establish numerical or causal grounding.
+        # Only exact deterministic evidence rendering is eligible for release.
+        grounded = DeterministicProvider().render(question, evidence, use_case)
+        return answer.strip() if answer.strip() == grounded else grounded
 
 
 def provider() -> Provider:
@@ -165,32 +191,7 @@ def _borrower(conn, run_id: str, borrower_id: str) -> tuple[dict, list[dict]]:
 
 def _portfolio(conn, run_id: str) -> tuple[dict, list[dict]]:
     base = service.portfolio(conn, run_id)
-    grouped = conn.execute(
-        select(
-            s.decisions.c.stage,
-            func.count().label("facilities"),
-            func.sum(s.decisions.c.ead).label("ead"),
-            func.sum(s.decisions.c.ecl).label("ecl"),
-        )
-        .where(s.decisions.c.run_id == run_id)
-        .group_by(s.decisions.c.stage)
-    ).mappings()
-    evidence = {
-        "run_id": run_id,
-        "facility_count": base["facility_count"],
-        "ead": base["ead"],
-        "ecl": base["ecl"],
-        "bank_gate": base["bank_gate"],
-        "by_stage": {
-            row["stage"]: {
-                "facilities": row["facilities"],
-                "ead": row["ead"],
-                "ecl": row["ecl"],
-            }
-            for row in grouped
-        },
-    }
-    return evidence, [{"type": "portfolio_run", "run_id": run_id}]
+    return base, [{"type": "portfolio_run", "run_id": run_id}]
 
 
 def _model_risk() -> tuple[dict, list[dict]]:
@@ -227,7 +228,12 @@ def answer(db, request, actor: dict) -> dict:
                     evidence, sources = _portfolio(conn, request.run_id)
                     tool_calls = ["get_portfolio_summary", "get_stage_aggregation"]
                 else:
-                    if re.search(r"\b(s2|economic|observable|successor)\b", request.question, re.IGNORECASE):
+                    if re.search(r"\b(wn-1|workout|vnext)\b", request.question, re.IGNORECASE):
+                        from .workout_evidence import get
+                        result, source = get()
+                        evidence, sources = {"workout_lgd": result}, [source]
+                        tool_calls = ["get_workout_lgd_validation"]
+                    elif re.search(r"\b(s2|economic|observable|successor)\b", request.question, re.IGNORECASE):
                         from .economic_evidence import get
                         result, source = get()
                         evidence, sources = {"economic_lgd": result}, [source]
@@ -242,6 +248,11 @@ def answer(db, request, actor: dict) -> dict:
                         evidence['economic_lgd']=result
                         sources.append(source)
                         tool_calls.append('get_economic_lgd_validation')
+                        from .workout_evidence import get as workout_get
+                        result, source = workout_get()
+                        evidence['workout_lgd'] = result
+                        sources.append(source)
+                        tool_calls.append('get_workout_lgd_validation')
             response = selected.render(request.question, evidence, request.use_case)
         except (service.NotFound, service.Conflict):
             status, response = "INSUFFICIENT_EVIDENCE", REFUSAL

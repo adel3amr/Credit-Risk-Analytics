@@ -59,3 +59,6 @@ The existing authenticated economic-LGD validation endpoint and Copilot now use
 R1 metrics are retained historical results. No new candidate is scoreable or
 promoted. The additional `lgd_hardening.runtime.score` boundary checks both the
 registry and complete decision gates; historical research helpers stay frozen.
+
+## WN-1 and shared portfolio evidence
+`GET /api/v1/lgd-workout-validation` requires read permission and verifies the frozen evidence lock. `GET /api/v1/runs/{id}/portfolio` now includes distinct scored borrowers, stage/industry/product/rating/risk-direction aggregates, watchlist/unsecured/guaranteed exposure and top ten facility ECL review cases. Copilot retrieves this exact evidence. WN data/model scoring is not an active public scoring endpoint.

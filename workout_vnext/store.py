@@ -1,4 +1,5 @@
 """Portable WN-1 relational reference store, independent additive schema lifecycle."""
+from datetime import date
 from sqlalchemy import MetaData,Table,Column,String,Float,JSON,ForeignKey,CheckConstraint,select,inspect
 
 metadata=MetaData()
@@ -13,11 +14,20 @@ def migrate(db):
     if inspect(db).has_table('wn_schema_version'):
         with db.connect() as c:
             if c.execute(select(versions.c.version)).scalars().all()!=['WN-1']: raise ValueError('Unsupported workout schema')
+        inspector=inspect(db)
+        for table in metadata.sorted_tables:
+            if not inspector.has_table(table.name) or {c.name for c in table.columns} != {c['name'] for c in inspector.get_columns(table.name)}:
+                raise ValueError('Incomplete workout schema '+table.name)
         return
     metadata.create_all(db)
     with db.begin() as c:c.execute(versions.insert().values(version='WN-1'))
 
 def load(db,tables):
+    for name in ENTITIES:
+        for row in tables.get(name,[]):
+            for field in ('effective_date','recorded_at'):
+                value=row[field]
+                if date.fromisoformat(value).isoformat()!=value:raise ValueError('Noncanonical date')
     migrate(db)
     with db.begin() as c:
         for name,table in [('borrower',borrowers),('facility',facilities)]+list(EVENTS.items()):
@@ -25,5 +35,6 @@ def load(db,tables):
             if rows:c.execute(table.insert(),rows)
 
 def asof(conn,facility_id,observation):
+    if date.fromisoformat(observation).isoformat()!=observation:raise ValueError('Noncanonical observation date')
     if conn.execute(select(facilities.c.id).where(facilities.c.id==facility_id)).first() is None: raise ValueError('Unknown facility')
     return {n:[dict(r) for r in conn.execute(select(t).where(t.c.facility_id==facility_id,t.c.effective_date<=observation,t.c.recorded_at<=observation).order_by(t.c.effective_date,t.c.id)).mappings()] for n,t in EVENTS.items()}

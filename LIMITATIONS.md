@@ -87,3 +87,6 @@ See `economic_lgd/DECISION.md`: scenario extrapolation and -2.32 pp downside bia
 clusters, hypothetical rather than observed-default workouts and assumed economic
 elasticities. Improved S2 aggregate calibration cannot repair historical S1
 evidence or establish bank approval. No challenger promoted and no MoC applied.
+
+## WN-1 final research limitations
+See `workout_vnext/FINDINGS.md`. Calibration, support, scenario reversals, unresolved-selection bias and institutional source capture block promotion. Security features do not fully deplete after payouts. No empirical-bank validation or bank approval is claimed.

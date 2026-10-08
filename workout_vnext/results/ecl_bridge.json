@@ -1,0 +1,16 @@
+{
+  "currency": "EUR",
+  "scope": "1600 final default episodes at age zero; multiple reporting dates, vintage cohort not a single-date bank portfolio",
+  "facilities": 1600,
+  "ead": 584272556.3029622,
+  "direct_ecl": 95166131.45322542,
+  "component_ecl": 93856252.08327577,
+  "change": -1309879.3699496537,
+  "change_pct": -1.3764133835717285,
+  "stage1": "N/A: impaired-only cohort; active platform unchanged",
+  "stage2": "N/A: impaired-only cohort; active platform unchanged",
+  "stage3_direct": 95166131.45322542,
+  "stage3_component": 93856252.08327577,
+  "scenario": "baseline weight 1; shadow, unbooked",
+  "maximum_facility_error": 0.0
+}

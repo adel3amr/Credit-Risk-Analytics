@@ -1,0 +1,9 @@
+{
+  "postgresql_binary": null,
+  "docker_binary": null,
+  "postgresql_execution": "NOT RUN: no local server/client available",
+  "docker_execution": "NOT RUN: binary unavailable",
+  "hosted_ci": "NOT RUN on this branch; workflow extended for WN evidence and PostgreSQL load",
+  "browser": "OUTSTANDING: Playwright archive download truncated; see browser_install.txt",
+  "github_remote_branch": "NOT FOUND on read-only ls-remote check before publication"
+}

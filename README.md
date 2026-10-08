@@ -1,3 +1,5 @@
+> **Latest bounded closeout: WN-1 workout research and platform integration.** See [the authoritative closeout](WORKOUT_PLATFORM_CLOSEOUT.md) and [run guide](workout_vnext/README.md). The component challenger was **not promoted**. Historical results below retain their original scope; WN-1 is a new target and population. Institutional use remains blocked.
+
 > Latest completed work: [post-R1 hardening decision](lgd_hardening/DECISION.md).
 
 > Final red-team review: see [CURRENT_SYSTEM_STATE.md](CURRENT_SYSTEM_STATE.md), [FINAL_RED_TEAM_REPORT.md](FINAL_RED_TEAM_REPORT.md), and [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md). Historical results below retain their original scope. No model promotion, methodological change, or dataset regeneration occurred in this review.
