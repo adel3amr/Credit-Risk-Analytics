@@ -43,7 +43,7 @@ def test_final_service_is_canonical_portfolio_evidence():
     from credit_platform import service
     source = Path(service.__file__).read_text(encoding="utf-8")
     for field in (
-        "by_collateral_type",
+        "collateral_type",
         "top_borrowers_by_ecl",
         "scenario_mean_pd",
         "risk_indicator_counts",
