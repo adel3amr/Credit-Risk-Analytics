@@ -280,3 +280,63 @@ def test_borrower_adverse_indicators_include_source_features():
     assert copilot._exact_analytics_intent(
         "what are the key adverse indicators?", "borrower"
     )
+
+
+def test_full_context_packet_exposes_portfolio_and_borrower_capabilities():
+    portfolio = {
+        "run_id": "r1",
+        "borrower_count": 3,
+        "facility_count": 4,
+        "ead": 1000.0,
+        "ecl": 50.0,
+        "reference_ecl": 50.0,
+        "override_adjustment": 0.0,
+        "controlled_reference_ecl": 50.0,
+        "bank_gate": "BLOCKED",
+        "by_stage": {"Stage 1": {"borrowers": 3, "facilities": 4, "ead": 1000.0, "ecl": 50.0, "mean_pd": .04, "mean_lgd": .4, "ead_share": 1.0, "ecl_share": 1.0, "loss_intensity": .05}},
+        "by_industry": {"Services": {"borrowers": 3, "facilities": 4, "ead": 1000.0, "ecl": 50.0, "mean_pd": .04, "mean_lgd": .4, "ead_share": 1.0, "ecl_share": 1.0, "loss_intensity": .05}},
+        "by_product": {}, "by_rating": {}, "by_risk_direction": {}, "by_collateral_type": {},
+        "watchlist": {"borrowers": 1, "facilities": 1, "ead": 100.0, "ecl": 10.0, "mean_pd": .08, "mean_lgd": .5, "loss_intensity": .1},
+        "unsecured": {"borrowers": 2, "facilities": 2, "ead": 400.0, "ecl": 30.0, "mean_pd": .06, "mean_lgd": .5, "loss_intensity": .075},
+        "guaranteed": {"borrowers": 1, "facilities": 1, "ead": 200.0, "ecl": 5.0, "mean_pd": .02, "mean_lgd": .3, "loss_intensity": .025},
+        "scenario_mean_pd": {"baseline": .04, "downside": .05},
+        "ews_trigger_counts": {"high_utilization": 1},
+        "stage_reason_counts": {"no_stage2_or_stage3_trigger": 3},
+        "risk_indicator_counts": {"high_utilization_ge_80pct_borrowers": 1},
+        "risk_patterns": [{"pattern": "High utilization", "borrowers": 1, "ead": 100.0, "mean_pd": .08, "pd_vs_portfolio": 2.0, "ecl_to_ead": .1, "loss_vs_portfolio": 2.0}],
+        "top_borrowers_by_ecl": [{"borrower_id":"B1","industry":"Services","stage":"Stage 1","risk_rating":4,"risk_direction":"Watch","watchlist":True,"sicr":False,"facilities":2,"ead":300.0,"ecl":20.0,"max_pd":.08,"max_lgd":.5}],
+        "top_borrowers_by_ead": [{"borrower_id":"B2","industry":"Services","stage":"Stage 1","risk_rating":3,"ead":400.0,"ecl":10.0,"max_pd":.03,"max_lgd":.4}],
+        "top_risk_cases": [{"facility_id":"F1","borrower_id":"B1","industry":"Services","product":"OVD","stage":"Stage 1","risk_rating":4,"risk_direction":"Watch","pd":.08,"lgd":.5,"ead":150.0,"ecl":12.0,"collateral_type":"Unsecured","guarantee_coverage":0.0,"stage_reasons":[]}],
+        "portfolio_review_actions": [{"type":"deteriorating_high_utilization","borrowers":1,"ead":100.0,"reason":"review"}],
+        "concentrations": {"industry":[{"segment":"Services","ead":1000.0,"ecl":50.0}]},
+        "approved_overrides": [],
+    }
+    ptext = copilot._llm_evidence_text("summarize portfolio", portfolio, "portfolio")
+    for phrase in ("TOP BORROWERS BY ECL", "SCENARIO PD", "RISK INDICATOR COUNTS", "VALIDATION CONCENTRATIONS"):
+        assert phrase in ptext
+
+    borrower = {
+        "borrower_id": "B1",
+        "industry": "Services",
+        "bank_gate": "BLOCKED",
+        "source_profile": {"observed_at":"2026-09-24","features":{"credit_utilization":.861,"delinquencies_12m":1,"management_quality":3}},
+        "facilities": [{
+            "facility_id":"F1","product":"OVD","stage":"Stage 1","risk_rating":4,"risk_direction":"Watch",
+            "watchlist":True,"sicr":False,"pd":.08,"pit_pd":.075,"lifetime_pd":.08,"effective_pd":.08,
+            "scenario_pd":{"baseline":.08,"downside":.1},"lgd":.5,"ead":150.0,"ecl":12.0,
+            "remaining_months":12,"collateral_type":"Unsecured","collateral_coverage":0.0,
+            "guarantee_coverage":0.0,"lien_rank":"Unsecured","drawn":150.0,"limit":200.0,"face":0.0,
+            "stage_reasons":[],"ews":[{"id":"high_utilization","triggered":True}],
+        }],
+    }
+    btext = copilot._llm_evidence_text("explain borrower", borrower, "borrower")
+    assert "credit_utilization=0.861" in btext
+    assert "delinquencies_12m=1" in btext
+    assert "scenario_PD={'baseline': 0.08, 'downside': 0.1}" in btext
+    assert "EWS=[{'id': 'high_utilization', 'triggered': True}]" in btext
+
+
+def test_openai_default_is_current_stronger_model(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "test-only-placeholder")
+    monkeypatch.delenv("OPENAI_COPILOT_MODEL", raising=False)
+    assert copilot.OpenAIResponsesProvider().model == "gpt-6.1-sol"
