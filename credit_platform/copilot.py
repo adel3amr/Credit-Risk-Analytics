@@ -15,7 +15,7 @@ from sqlalchemy import func, select
 from . import audit, schema as s, service
 from .common import ROOT, digest, now, uid
 
-PROMPT_VERSION = "credit-risk-copilot-9"
+PROMPT_VERSION = "credit-risk-copilot-10"
 PROVIDER_VERSION = "deterministic-8"
 REFUSAL = "I do not have sufficient permitted evidence to answer this."
 INJECTION = re.compile(
@@ -61,21 +61,7 @@ class DeterministicProvider:
                 + ". No MoC or booked adjustment. Bank use remains BLOCKED."
             )
         if use_case in ("borrower", "credit_review"):
-            facilities = evidence["facilities"]
-            stages = sorted({row["stage"] for row in facilities})
-            reasons = sorted(
-                {reason for row in facilities for reason in row.get("stage_reasons", [])}
-            )
-            total_ead = sum(row["ead"] for row in facilities)
-            total_ecl = sum(row["ecl"] for row in facilities)
-            prefix = "DRAFT — human review required. " if use_case == "credit_review" else ""
-            return (
-                f"{prefix}Borrower {evidence['borrower_id']} has {len(facilities)} facility/facilities "
-                f"in {', '.join(stages)}. Governed EAD is {total_ead:,.2f} and ECL is "
-                f"{total_ecl:,.2f}. Recorded stage reason(s): "
-                f"{', '.join(reasons) if reasons else 'none recorded'}. "
-                "These are retrieved run outputs; this narrative does not change the decision."
-            )
+            return self.borrower_detail(question, evidence, use_case)
         if use_case == "portfolio":
             stages = ", ".join(
                 f"{k}: {v['facilities']} facilities / ECL {v['ecl']:,.2f}"
@@ -97,10 +83,148 @@ class DeterministicProvider:
         )
 
 
+    def borrower_detail(self, question, evidence, use_case):
+        q = question.lower()
+        facilities = evidence["facilities"]
+        features = evidence.get("source_profile", {}).get("features", {})
+        stages = sorted({row["stage"] for row in facilities})
+        reasons = sorted(
+            {reason for row in facilities for reason in row.get("stage_reasons", [])}
+        )
+        total_ead = sum(float(row["ead"]) for row in facilities)
+        total_ecl = sum(float(row["ecl"]) for row in facilities)
+        max_pd = max((float(row["pd"]) for row in facilities), default=0.0)
+        max_lgd = max((float(row["lgd"]) for row in facilities), default=0.0)
+        ratings = sorted({str(row.get("risk_rating")) for row in facilities if row.get("risk_rating") is not None})
+        directions = sorted({str(row.get("risk_direction")) for row in facilities if row.get("risk_direction")})
+        watchlist = any(bool(row.get("watchlist")) for row in facilities)
+        sicr = any(bool(row.get("sicr")) for row in facilities)
+
+        adverse = []
+        utilization = float(features.get("credit_utilization", 0.0))
+        delinq = int(features.get("delinquencies_12m", 0) or 0)
+        dpd = int(features.get("days_past_due", 0) or 0)
+        leverage = float(features.get("leverage_ratio", 0.0))
+        previous_defaults = int(features.get("previous_defaults", 0) or 0)
+        limit_breaches = int(features.get("limit_breach_count", 0) or 0)
+        months_high_util = int(features.get("months_above_80_utilization", 0) or 0)
+
+        if utilization >= 0.80:
+            adverse.append(f"high utilization {utilization:.1%}")
+        if delinq > 0:
+            adverse.append(f"{delinq} delinquency event(s) in the last 12 months")
+        if dpd > 0:
+            adverse.append(f"{dpd} days past due")
+        if leverage >= 3.0:
+            adverse.append(f"leverage {leverage:.1f}x")
+        if previous_defaults > 0:
+            adverse.append(f"{previous_defaults} previous default(s)")
+        if limit_breaches > 0:
+            adverse.append(f"{limit_breaches} limit breach(es)")
+        if months_high_util > 0:
+            adverse.append(f"{months_high_util} month(s) above 80% utilization")
+
+        ews_triggered = sorted({
+            str(signal.get("id"))
+            for row in facilities
+            for signal in row.get("ews", [])
+            if signal.get("triggered") and signal.get("id")
+        })
+
+        adverse_question = any(
+            token in q
+            for token in (
+                "adverse", "indicator", "driver", "risk factor", "warning",
+                "utilization", "delinquen", "past due", "dpd", "leverage",
+            )
+        )
+        if adverse_question:
+            if adverse:
+                detail = "; ".join(adverse)
+                ews_text = (
+                    f" Triggered EWS signal(s): {', '.join(ews_triggered)}."
+                    if ews_triggered else ""
+                )
+                return (
+                    f"Borrower {evidence['borrower_id']} key adverse indicators: {detail}."
+                    f"{ews_text} Current risk direction: "
+                    f"{', '.join(directions) if directions else 'not recorded'}; "
+                    f"Watchlist={'yes' if watchlist else 'no'}; SICR={'yes' if sicr else 'no'}. "
+                    f"Governed max facility PD {max_pd:.2%}, max LGD {max_lgd:.2%}, "
+                    f"total EAD {total_ead:,.2f}, total ECL {total_ecl:,.2f}. "
+                    f"Current stage(s): {', '.join(stages)}. "
+                    f"Stage reason(s): {', '.join(reasons) if reasons else 'none recorded'}."
+                )
+            return (
+                f"Borrower {evidence['borrower_id']} has no adverse indicator crossing the "
+                "workbench thresholds for utilization, delinquency, DPD, leverage, previous "
+                "defaults or limit breaches. "
+                f"Current stage(s): {', '.join(stages)}; total EAD {total_ead:,.2f}; "
+                f"total ECL {total_ecl:,.2f}."
+            )
+
+        prefix = "DRAFT — human review required. " if use_case == "credit_review" else ""
+        adverse_text = "; ".join(adverse) if adverse else "no workbench adverse threshold is triggered"
+        return (
+            f"{prefix}Borrower {evidence['borrower_id']} has {len(facilities)} facility/facilities "
+            f"in {', '.join(stages)} with rating(s) {', '.join(ratings) if ratings else 'not recorded'}. "
+            f"Governed EAD is {total_ead:,.2f}, ECL is {total_ecl:,.2f}, "
+            f"max facility PD is {max_pd:.2%}, and max LGD is {max_lgd:.2%}. "
+            f"Key adverse indicators: {adverse_text}. "
+            f"Risk direction: {', '.join(directions) if directions else 'not recorded'}; "
+            f"Watchlist={'yes' if watchlist else 'no'}; SICR={'yes' if sicr else 'no'}. "
+            f"Recorded stage reason(s): {', '.join(reasons) if reasons else 'none recorded'}."
+        )
+
+
     def portfolio_detail(self, question, evidence):
         q = question.lower()
         if any(word in q for word in ("increase", "deteriorated most", "change since")):
             return "A single run cannot establish a change over time. Use the governed two-run movement endpoint; no causal explanation is inferred."
+
+        customer_concentration = (
+            ("customer" in q or "borrower" in q or "counterparty" in q)
+            and (
+                "concentration" in q
+                or "top 5" in q
+                or "top five" in q
+                or "riskiest" in q
+                or "largest" in q
+            )
+        )
+        if customer_concentration:
+            rows = evidence.get("top_borrowers_by_ecl", [])[:5]
+            if not rows:
+                return "No borrower-level concentration evidence is available for this run."
+            total_ead = float(evidence.get("ead", 0.0) or 0.0)
+            total_ecl = float(evidence.get("ecl", 0.0) or 0.0)
+            top5_ead = sum(float(row.get("ead", 0.0)) for row in rows)
+            top5_ecl = sum(float(row.get("ecl", 0.0)) for row in rows)
+            ranked = []
+            for idx, row in enumerate(rows, start=1):
+                ead = float(row.get("ead", 0.0))
+                ecl = float(row.get("ecl", 0.0))
+                ranked.append(
+                    f"{idx}) {row['borrower_id']} ({row.get('industry', 'n/a')}): "
+                    f"Stage {str(row.get('stage', 'n/a')).replace('Stage ', '')}, "
+                    f"rating {row.get('risk_rating', 'n/a')}, "
+                    f"max PD {float(row.get('max_pd', 0.0)):.2%}, "
+                    f"max LGD {float(row.get('max_lgd', 0.0)):.2%}, "
+                    f"EAD {ead:,.2f} ({ead / total_ead:.2%} of portfolio), "
+                    f"ECL {ecl:,.2f} ({ecl / total_ecl:.2%} of portfolio)"
+                    if total_ead and total_ecl else
+                    f"{idx}) {row['borrower_id']}: EAD {ead:,.2f}, ECL {ecl:,.2f}"
+                )
+            return (
+                "For 'riskiest customers', this view ranks borrowers by governed reference ECL, "
+                "which combines probability/severity with exposure rather than ranking by PD alone. "
+                + " | ".join(ranked)
+                + (
+                    f" | Top-5 concentration: {top5_ead / total_ead:.2%} of portfolio EAD and "
+                    f"{top5_ecl / total_ecl:.2%} of portfolio ECL."
+                    if total_ead and total_ecl else ""
+                )
+            )
 
         by_industry = evidence.get("by_industry", {})
         broad = any(
@@ -538,6 +662,31 @@ def _model_risk() -> tuple[dict, list[dict]]:
     return evidence, [{"type": "document", "path": report.name, "hash": digest(report.read_text())}]
 
 
+def _exact_analytics_intent(question: str, use_case: str) -> bool:
+    q = question.lower()
+    if use_case in ("borrower", "credit_review"):
+        return any(
+            token in q
+            for token in (
+                "adverse", "indicator", "driver", "risk factor", "warning",
+                "utilization", "delinquen", "past due", "dpd", "leverage",
+                "governed credit-risk decision", "main drivers",
+            )
+        )
+    if use_case == "portfolio":
+        customer_terms = ("customer" in q or "borrower" in q or "counterparty" in q)
+        concentration_terms = any(
+            token in q
+            for token in ("concentration", "top 5", "top five", "riskiest", "largest")
+        )
+        industry_risk = (
+            ("industr" in q or "sector" in q)
+            and ("risk" in q or "riskiest" in q or "risky" in q)
+        )
+        return (customer_terms and concentration_terms) or industry_risk
+    return False
+
+
 def answer(db, request, actor: dict) -> dict:
     request_id = uid()
     status = "ANSWERED"
@@ -582,6 +731,8 @@ def answer(db, request, actor: dict) -> dict:
                         evidence['workout_lgd'] = result
                         sources.append(source)
                         tool_calls.append('get_workout_lgd_validation')
+            if _exact_analytics_intent(request.question, request.use_case):
+                selected = DeterministicProvider()
             try:
                 response = selected.render(request.question, evidence, request.use_case)
             except (OSError, TimeoutError, ValueError, json.JSONDecodeError):
