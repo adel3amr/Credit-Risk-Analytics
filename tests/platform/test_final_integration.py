@@ -134,3 +134,50 @@ def test_deterministic_portfolio_summary_is_risk_complete():
     assert "Watchlist" in answer
     assert "Unsecured" in answer
     assert "Human-review priorities" in answer
+
+
+def test_riskiest_industry_is_metric_specific():
+    evidence = {
+        "run_id": "r1",
+        "borrower_count": 100,
+        "facility_count": 120,
+        "ead": 1000.0,
+        "ecl": 50.0,
+        "bank_gate": "BLOCKED",
+        "by_stage": {
+            "Stage 1": {"facilities": 100, "borrowers": 90, "ead": 800.0, "ecl": 25.0},
+            "Stage 2": {"facilities": 15, "borrowers": 12, "ead": 150.0, "ecl": 15.0},
+            "Stage 3": {"facilities": 5, "borrowers": 4, "ead": 50.0, "ecl": 10.0},
+        },
+        "by_industry": {
+            "Services": {
+                "borrowers": 45, "facilities": 55, "ead": 500.0, "ecl": 20.0,
+                "mean_pd": 0.035, "mean_lgd": 0.40, "loss_intensity": 0.04,
+            },
+            "Hospitality": {
+                "borrowers": 20, "facilities": 25, "ead": 180.0, "ecl": 12.0,
+                "mean_pd": 0.0523, "mean_lgd": 0.4541, "loss_intensity": 0.067,
+            },
+        },
+        "watchlist": {"borrowers": 10, "facilities": 12, "ead": 100.0, "ecl": 6.0},
+        "unsecured": {"borrowers": 25, "facilities": 28, "ead": 250.0, "ecl": 14.0},
+        "guaranteed": {"borrowers": 15, "facilities": 16, "ead": 120.0, "ecl": 4.0},
+        "portfolio_review_actions": [],
+        "risk_patterns": [],
+        "review_basis": "Top facilities by reference ECL.",
+        "top_risk_cases": [],
+        "count_basis": "Distinct borrowers and facility-level exposures.",
+    }
+    answer = copilot.DeterministicProvider().render(
+        "riskiest industry", evidence, "portfolio"
+    )
+    assert "no single universal definition" in answer.lower()
+    assert "Highest mean PD: Hospitality" in answer
+    assert "Highest ECL/EAD loss intensity: Hospitality" in answer
+    assert "Highest mean LGD: Hospitality" in answer
+    assert "Largest absolute ECL concentration: Services" in answer
+
+
+def test_conversational_providers_do_not_prepend_deterministic_block():
+    source = Path(copilot.__file__).read_text(encoding="utf-8")
+    assert 'return verified + "\\n\\nCopilot interpretation:' not in source
