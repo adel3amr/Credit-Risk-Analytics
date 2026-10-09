@@ -15,7 +15,7 @@ from sqlalchemy import func, select
 from . import audit, schema as s, service
 from .common import ROOT, digest, now, uid
 
-PROMPT_VERSION = "credit-risk-copilot-10"
+PROMPT_VERSION = "credit-risk-copilot-11"
 PROVIDER_VERSION = "deterministic-8"
 REFUSAL = "I do not have sufficient permitted evidence to answer this."
 INJECTION = re.compile(
@@ -349,65 +349,211 @@ def _verified_grounding(question: str, evidence: dict, use_case: str) -> str:
     return DeterministicProvider().render(question, evidence, use_case)
 
 
+def _flatten_context(value, prefix="", depth=0, max_depth=4):
+    """Convert nested governed evidence into compact business-readable lines."""
+    if depth > max_depth:
+        return []
+    lines = []
+    if isinstance(value, dict):
+        for key in sorted(value):
+            child = value[key]
+            name = f"{prefix}.{key}" if prefix else str(key)
+            if isinstance(child, (dict, list)):
+                lines.extend(_flatten_context(child, name, depth + 1, max_depth))
+            else:
+                lines.append(f"{name}={child}")
+    elif isinstance(value, list):
+        for idx, child in enumerate(value[:40]):
+            name = f"{prefix}[{idx}]"
+            if isinstance(child, (dict, list)):
+                lines.extend(_flatten_context(child, name, depth + 1, max_depth))
+            else:
+                lines.append(f"{name}={child}")
+        if len(value) > 40:
+            lines.append(f"{prefix}.additional_items={len(value) - 40}")
+    else:
+        lines.append(f"{prefix}={value}")
+    return lines
+
+
 def _llm_evidence_text(question: str, evidence: dict, use_case: str) -> str:
-    """Compact business-readable evidence for narrative providers."""
+    """Comprehensive governed context for narrative reasoning; no raw JSON dump."""
     if use_case == "portfolio":
         lines = [
-            f"Portfolio: borrowers={evidence.get('borrower_count', 0)}, "
-            f"facilities={evidence.get('facility_count', 0)}, "
-            f"EAD={evidence.get('ead', 0.0):.2f}, ECL={evidence.get('ecl', 0.0):.2f}."
+            "PORTFOLIO TOTALS",
+            f"run_id={evidence.get('run_id')}",
+            f"borrowers={evidence.get('borrower_count', 0)}",
+            f"facilities={evidence.get('facility_count', 0)}",
+            f"EAD={evidence.get('ead', 0.0):.2f}",
+            f"ECL={evidence.get('ecl', 0.0):.2f}",
+            f"reference_ECL={evidence.get('reference_ecl', evidence.get('ecl', 0.0))}",
+            f"override_adjustment={evidence.get('override_adjustment', 0.0)}",
+            f"controlled_reference_ECL={evidence.get('controlled_reference_ecl', evidence.get('ecl', 0.0))}",
+            f"research_gate={evidence.get('bank_gate')}",
+            "",
         ]
-        for name, row in sorted(evidence.get("by_stage", {}).items()):
-            lines.append(
-                f"{name}: facilities={row.get('facilities', 0)}, "
-                f"borrowers={row.get('borrowers', 0)}, EAD={row.get('ead', 0.0):.2f}, "
-                f"ECL={row.get('ecl', 0.0):.2f}."
-            )
-        for name, row in sorted(
-            evidence.get("by_industry", {}).items(),
-            key=lambda kv: (-float(kv[1].get("ecl", 0.0)), kv[0]),
-        ):
-            lines.append(
-                f"Industry {name}: borrowers={row.get('borrowers', 0)}, "
-                f"EAD={row.get('ead', 0.0):.2f}, ECL={row.get('ecl', 0.0):.2f}, "
-                f"mean_PD={row.get('mean_pd', 0.0):.6f}, "
-                f"mean_LGD={row.get('mean_lgd', 0.0):.6f}, "
-                f"ECL_to_EAD={row.get('loss_intensity', 0.0):.6f}."
-            )
+
+        dimensions = (
+            ("STAGE", "by_stage"),
+            ("INDUSTRY", "by_industry"),
+            ("PRODUCT", "by_product"),
+            ("RATING", "by_rating"),
+            ("RISK DIRECTION", "by_risk_direction"),
+            ("COLLATERAL TYPE", "by_collateral_type"),
+        )
+        for title, key in dimensions:
+            lines.append(title)
+            for name, row in sorted(evidence.get(key, {}).items()):
+                lines.append(
+                    f"{name}: borrowers={row.get('borrowers', 0)}, "
+                    f"facilities={row.get('facilities', 0)}, "
+                    f"EAD={row.get('ead', 0.0):.2f}, ECL={row.get('ecl', 0.0):.2f}, "
+                    f"mean_PD={row.get('mean_pd', 0.0):.6f}, "
+                    f"mean_LGD={row.get('mean_lgd', 0.0):.6f}, "
+                    f"EAD_share={row.get('ead_share', 0.0):.6f}, "
+                    f"ECL_share={row.get('ecl_share', 0.0):.6f}, "
+                    f"ECL_to_EAD={row.get('loss_intensity', 0.0):.6f}"
+                )
+            lines.append("")
+
+        lines.append("SPECIAL SEGMENTS")
         for key in ("watchlist", "unsecured", "guaranteed"):
             row = evidence.get(key, {})
             lines.append(
-                f"{key.title()}: borrowers={row.get('borrowers', 0)}, "
+                f"{key}: borrowers={row.get('borrowers', 0)}, "
                 f"facilities={row.get('facilities', 0)}, EAD={row.get('ead', 0.0):.2f}, "
-                f"ECL={row.get('ecl', 0.0):.2f}."
+                f"ECL={row.get('ecl', 0.0):.2f}, mean_PD={row.get('mean_pd', 0.0):.6f}, "
+                f"mean_LGD={row.get('mean_lgd', 0.0):.6f}, "
+                f"ECL_to_EAD={row.get('loss_intensity', 0.0):.6f}"
             )
-        for action in evidence.get("portfolio_review_actions", [])[:8]:
-            lines.append("Review action: " + str(action.get("reason", action.get("type", "review"))))
-        for row in evidence.get("risk_patterns", [])[:6]:
-            lines.append(
-                f"Risk pattern {row.get('pattern')}: borrowers={row.get('borrowers', 0)}, "
-                f"EAD={row.get('ead', 0.0):.2f}, mean_PD={row.get('mean_pd', 0.0):.6f}, "
-                f"ECL_to_EAD={row.get('ecl_to_ead', 0.0):.6f}."
-            )
-        return "\n".join(lines)
 
-    if use_case in ("borrower", "credit_review"):
-        lines = [f"Borrower {evidence.get('borrower_id')}, industry={evidence.get('industry')}."]
-        for row in evidence.get("facilities", []):
+        lines.append("")
+        lines.append("SCENARIO PD")
+        for name, value in sorted(evidence.get("scenario_mean_pd", {}).items()):
+            lines.append(f"{name}={float(value):.6f}")
+
+        lines.append("")
+        lines.append("EWS TRIGGERS")
+        for name, value in sorted(evidence.get("ews_trigger_counts", {}).items()):
+            lines.append(f"{name}={value}")
+
+        lines.append("")
+        lines.append("STAGE REASONS")
+        for name, value in sorted(evidence.get("stage_reason_counts", {}).items()):
+            lines.append(f"{name}={value}")
+
+        lines.append("")
+        lines.append("RISK INDICATOR COUNTS")
+        for name, value in sorted(evidence.get("risk_indicator_counts", {}).items()):
+            lines.append(f"{name}={value}")
+
+        lines.append("")
+        lines.append("RISK PATTERNS")
+        for row in evidence.get("risk_patterns", []):
             lines.append(
-                f"Facility {row.get('facility_id')}: product={row.get('product')}, "
+                f"{row.get('pattern')}: borrowers={row.get('borrowers', 0)}, "
+                f"EAD={row.get('ead', 0.0):.2f}, mean_PD={row.get('mean_pd', 0.0):.6f}, "
+                f"PD_vs_portfolio={row.get('pd_vs_portfolio', 0.0):.6f}, "
+                f"ECL_to_EAD={row.get('ecl_to_ead', 0.0):.6f}, "
+                f"loss_vs_portfolio={row.get('loss_vs_portfolio', 0.0):.6f}"
+            )
+
+        lines.append("")
+        lines.append("TOP BORROWERS BY ECL")
+        for idx, row in enumerate(evidence.get("top_borrowers_by_ecl", [])[:15], 1):
+            lines.append(
+                f"{idx}. {row.get('borrower_id')}: industry={row.get('industry')}, "
+                f"stage={row.get('stage')}, rating={row.get('risk_rating')}, "
+                f"risk_direction={row.get('risk_direction')}, watchlist={row.get('watchlist')}, "
+                f"sicr={row.get('sicr')}, facilities={row.get('facilities')}, "
+                f"EAD={row.get('ead', 0.0):.2f}, ECL={row.get('ecl', 0.0):.2f}, "
+                f"max_PD={row.get('max_pd', 0.0):.6f}, max_LGD={row.get('max_lgd', 0.0):.6f}"
+            )
+
+        lines.append("")
+        lines.append("TOP BORROWERS BY EAD")
+        for idx, row in enumerate(evidence.get("top_borrowers_by_ead", [])[:15], 1):
+            lines.append(
+                f"{idx}. {row.get('borrower_id')}: industry={row.get('industry')}, "
+                f"stage={row.get('stage')}, rating={row.get('risk_rating')}, "
+                f"EAD={row.get('ead', 0.0):.2f}, ECL={row.get('ecl', 0.0):.2f}, "
+                f"max_PD={row.get('max_pd', 0.0):.6f}, max_LGD={row.get('max_lgd', 0.0):.6f}"
+            )
+
+        lines.append("")
+        lines.append("TOP FACILITY RISK CASES")
+        for idx, row in enumerate(evidence.get("top_risk_cases", [])[:10], 1):
+            lines.append(
+                f"{idx}. facility={row.get('facility_id')}, borrower={row.get('borrower_id')}, "
+                f"industry={row.get('industry')}, product={row.get('product')}, "
                 f"stage={row.get('stage')}, rating={row.get('risk_rating')}, "
                 f"risk_direction={row.get('risk_direction')}, PD={row.get('pd')}, "
                 f"LGD={row.get('lgd')}, EAD={row.get('ead')}, ECL={row.get('ecl')}, "
                 f"collateral={row.get('collateral_type')}, "
-                f"collateral_coverage={row.get('collateral_coverage')}, "
                 f"guarantee_coverage={row.get('guarantee_coverage')}, "
-                f"stage_reasons={row.get('stage_reasons')}."
+                f"stage_reasons={row.get('stage_reasons')}"
+            )
+
+        lines.append("")
+        lines.append("REVIEW ACTIONS")
+        for idx, action in enumerate(evidence.get("portfolio_review_actions", [])[:10], 1):
+            lines.append(f"{idx}. " + "; ".join(_flatten_context(action, max_depth=2)))
+
+        lines.append("")
+        lines.append("VALIDATION CONCENTRATIONS")
+        for line in _flatten_context(evidence.get("concentrations", {}), max_depth=3):
+            lines.append(line)
+
+        if evidence.get("approved_overrides"):
+            lines.append("")
+            lines.append("APPROVED OVERRIDES")
+            for line in _flatten_context(evidence.get("approved_overrides", []), max_depth=3):
+                lines.append(line)
+
+        return "\n".join(lines)
+
+    if use_case in ("borrower", "credit_review"):
+        profile = evidence.get("source_profile", {})
+        features = profile.get("features", {})
+        lines = [
+            "BORROWER PROFILE",
+            f"borrower_id={evidence.get('borrower_id')}",
+            f"industry={evidence.get('industry')}",
+            f"observed_at={profile.get('observed_at')}",
+            f"research_gate={evidence.get('bank_gate')}",
+            "",
+            "BORROWER FEATURES",
+        ]
+        for key, value in sorted(features.items()):
+            lines.append(f"{key}={value}")
+
+        lines.append("")
+        lines.append("FACILITY DECISION TRACES")
+        for idx, row in enumerate(evidence.get("facilities", []), 1):
+            lines.extend(
+                [
+                    f"Facility {idx}: id={row.get('facility_id')}, product={row.get('product')}",
+                    f"  stage={row.get('stage')}, rating={row.get('risk_rating')}, "
+                    f"risk_direction={row.get('risk_direction')}, watchlist={row.get('watchlist')}, "
+                    f"sicr={row.get('sicr')}",
+                    f"  PD={row.get('pd')}, PIT_PD={row.get('pit_pd')}, "
+                    f"lifetime_PD={row.get('lifetime_pd')}, effective_PD={row.get('effective_pd')}",
+                    f"  scenario_PD={row.get('scenario_pd')}",
+                    f"  LGD={row.get('lgd')}, EAD={row.get('ead')}, ECL={row.get('ecl')}",
+                    f"  remaining_months={row.get('remaining_months')}, "
+                    f"collateral_type={row.get('collateral_type')}, "
+                    f"collateral_coverage={row.get('collateral_coverage')}, "
+                    f"guarantee_coverage={row.get('guarantee_coverage')}, lien_rank={row.get('lien_rank')}",
+                    f"  drawn={row.get('drawn')}, limit={row.get('limit')}, face={row.get('face')}",
+                    f"  stage_reasons={row.get('stage_reasons')}",
+                    f"  EWS={row.get('ews')}",
+                ]
             )
         return "\n".join(lines)
 
-    return _verified_grounding(question, evidence, use_case)
-
+    lines = ["MODEL-RISK / RESEARCH EVIDENCE"]
+    lines.extend(_flatten_context(evidence, max_depth=5))
+    return "\n".join(lines)
 
 BAD_NARRATIVE = re.compile(
     r"(json|python|code snippet|programming language|parse the data|data format|"
@@ -425,22 +571,26 @@ class OpenAIResponsesProvider:
     """Optional OpenAI narrative provider over governed evidence only."""
 
     name = "openai-responses"
-    version = "responses-v3-grounded"
+    version = "responses-v4-full-context"
 
     def __init__(self):
         self.key = os.environ.get("OPENAI_API_KEY", "")
-        self.model = os.environ.get("OPENAI_COPILOT_MODEL", "gpt-5.6-luna")
+        self.model = os.environ.get("OPENAI_COPILOT_MODEL", "gpt-6.1-sol")
         if not self.key:
             raise ValueError("OPENAI_API_KEY is required for the OpenAI Copilot provider")
 
     def render(self, question: str, evidence: dict, use_case: str) -> str:
         verified = _verified_grounding(question, evidence, use_case)
         instruction = (
-            "You are a governed Credit Risk Copilot. Use only supplied governed evidence. "
-            "The VERIFIED FACTS block is authoritative. Do not contradict it, invent facts, "
-            "recalculate or replace PD/LGD/EAD/ECL/SICR/staging, approve overrides, promote "
-            "models, or imply bank approval. Add concise professional interpretation only. "
-            "If evidence is insufficient, state that. Human review is required."
+            "You are a senior Credit Risk analyst operating a governed research Copilot. "
+            "Use the complete supplied platform evidence across borrower, facility, PD, rating, "
+            "EWS, Watchlist, SICR, staging, LGD, EAD, ECL, macro scenarios, concentrations, "
+            "risk patterns, validation, model-risk findings and governance. The verified "
+            "question-specific facts are authoritative where provided. Do not contradict them, "
+            "invent facts, replace governed calculations, approve overrides or promote models. "
+            "Reason deeply across the available evidence and answer the actual question directly. "
+            "Distinguish relative risk (PD/loss intensity), severity (LGD/security) and absolute "
+            "portfolio concentration (EAD/ECL). If evidence is insufficient, say exactly what is missing."
         )
         body = json.dumps(
             {
@@ -448,11 +598,16 @@ class OpenAIResponsesProvider:
                 "instructions": instruction,
                 "input": (
                     f"Use case: {use_case}\nQuestion: {question}\n\n"
-                    f"VERIFIED CREDIT-RISK FACTS:\n{verified}\n\n"
-                    "Rewrite and explain only these verified facts. Do not introduce any new "
-                    "numbers, rankings, causes, borrower counts, risk labels or comparisons."
+                    f"VERIFIED QUESTION-SPECIFIC FACTS:\n{verified}\n\n"
+                    f"FULL GOVERNED CONTEXT AVAILABLE FOR REASONING:\n"
+                    f"{_llm_evidence_text(question, evidence, use_case)}\n\n"
+                    "Answer the question using any relevant evidence above. Preserve the verified "
+                    "facts exactly where they apply. You may synthesize relationships, explain risk "
+                    "drivers and prioritize review areas, but do not invent facts or override governed "
+                    "calculations. For any exact ranking, concentration or arithmetic, rely on the "
+                    "verified facts or explicit supplied values."
                 ),
-                "max_output_tokens": 500,
+                "max_output_tokens": 900,
                 "store": False,
             }
         ).encode()
@@ -480,7 +635,7 @@ class OllamaProvider:
     """Optional local conversational provider; deterministic facts remain authoritative."""
 
     name = "ollama-local"
-    version = "ollama-v4-grounded"
+    version = "ollama-v5-full-context"
 
     def __init__(self):
         self.endpoint = os.environ.get("OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/generate")
@@ -488,20 +643,28 @@ class OllamaProvider:
 
     def render(self, question: str, evidence: dict, use_case: str) -> str:
         verified = _verified_grounding(question, evidence, use_case)
+        evidence_text = _llm_evidence_text(question, evidence, use_case)
         system = (
-            "You are a senior Credit Risk analyst. Answer the user's credit-risk question directly. "
-            "The VERIFIED CREDIT-RISK FACTS are the complete factual boundary for your answer. "
-            "Do not introduce any new number, ranking, cause, segment count, risk label or comparison "
-            "that is not explicitly stated there. Never discuss JSON, data formats, parsing, Python, "
-            "code, prompts or how the facts were supplied. Never output code. Do not alter governed "
-            "PD, LGD, EAD, ECL, staging or ratings. Do not approve credit decisions or model promotion. "
-            "If the question is ambiguous, preserve distinctions already made in the verified facts. "
-            "Return 2 to 5 concise bullets for a credit-risk professional."
+            "You are a senior Credit Risk analyst operating a governed research Copilot. "
+            "You have access to the full evidence packet for the selected scope: borrower and "
+            "facility attributes, PD, internal ratings, EWS, Watchlist, SICR, staging, LGD, EAD, "
+            "ECL, macro scenarios, concentrations, collateral/guarantees, risk patterns, model "
+            "validation, research findings and governance where available. Use all relevant evidence "
+            "needed to answer the user's question. Do not discuss data formats, JSON, parsing, Python, "
+            "code, prompts or the mechanics of how evidence was supplied. Never invent a number or "
+            "claim. The VERIFIED QUESTION-SPECIFIC FACTS are authoritative for exact calculations, "
+            "rankings and policy conclusions. You may synthesize qualitative relationships and explain "
+            "why facts matter. Distinguish PD/default risk, LGD/severity, EAD/concentration and ECL. "
+            "Do not say Stage 1 means high risk. Do not interpret a research/model gate as a ban on "
+            "new lending. Do not approve credit decisions, overrides or model promotion. "
+            "Answer directly in concise professional prose or bullets."
         )
         prompt = (
             f"Question: {question}\n\n"
-            f"VERIFIED CREDIT-RISK FACTS:\n{verified}\n\n"
-            "Explain only these facts. Do not add extra factual claims."
+            f"VERIFIED QUESTION-SPECIFIC FACTS:\n{verified}\n\n"
+            f"FULL GOVERNED CONTEXT AVAILABLE FOR REASONING:\n{evidence_text}\n\n"
+            "Use any relevant evidence above to answer the question. Keep exact quantitative claims "
+            "anchored to supplied values and the verified facts."
         )
         body = json.dumps(
             {
@@ -510,12 +673,16 @@ class OllamaProvider:
                 "prompt": prompt,
                 "stream": False,
                 "keep_alive": "30m",
-                "options": {"temperature": 0.05, "num_predict": 320},
+                "options": {
+                    "temperature": 0.08,
+                    "num_predict": int(os.environ.get("OLLAMA_NUM_PREDICT", "640")),
+                    "num_ctx": int(os.environ.get("OLLAMA_NUM_CTX", "16384")),
+                },
             }
         ).encode()
         req = Request(self.endpoint, data=body, headers={"Content-Type": "application/json"})
-        with urlopen(req, timeout=120) as response:  # nosec: explicit local/configured endpoint
-            result = json.loads(response.read(2_000_000))
+        with urlopen(req, timeout=180) as response:  # nosec: explicit local/configured endpoint
+            result = json.loads(response.read(4_000_000))
         answer = result.get("response")
         if not isinstance(answer, str) or not _valid_narrative(answer):
             return verified
@@ -731,8 +898,6 @@ def answer(db, request, actor: dict) -> dict:
                         evidence['workout_lgd'] = result
                         sources.append(source)
                         tool_calls.append('get_workout_lgd_validation')
-            if _exact_analytics_intent(request.question, request.use_case):
-                selected = DeterministicProvider()
             try:
                 response = selected.render(request.question, evidence, request.use_case)
             except (OSError, TimeoutError, ValueError, json.JSONDecodeError):
