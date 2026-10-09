@@ -560,11 +560,21 @@ BAD_NARRATIVE = re.compile(
     r"custom format|import json|load the data)",
     re.IGNORECASE,
 )
+INVALID_RISK_NARRATIVE = re.compile(
+    r"(stage\s*1.{0,80}(high|higher)\s+(credit\s+)?risk|"
+    r"(bank[- ]use|research|model).{0,80}gate.{0,100}(no new|cannot approve|ban).{0,40}(facilit|lend|credit))",
+    re.IGNORECASE | re.DOTALL,
+)
 
 
 def _valid_narrative(answer: str) -> bool:
     text = answer.strip()
-    return bool(text) and len(text) >= 40 and BAD_NARRATIVE.search(text) is None
+    return (
+        bool(text)
+        and len(text) >= 40
+        and BAD_NARRATIVE.search(text) is None
+        and INVALID_RISK_NARRATIVE.search(text) is None
+    )
 
 
 class OpenAIResponsesProvider:
