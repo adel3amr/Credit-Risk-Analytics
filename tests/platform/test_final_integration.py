@@ -340,3 +340,15 @@ def test_openai_default_is_current_stronger_model(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-only-placeholder")
     monkeypatch.delenv("OPENAI_COPILOT_MODEL", raising=False)
     assert copilot.OpenAIResponsesProvider().model == "gpt-6.1-sol"
+
+
+def test_copilot_rejects_known_credit_risk_misreadings():
+    assert not copilot._valid_narrative(
+        "The borrower is in Stage 1, indicating a high credit risk of default."
+    )
+    assert not copilot._valid_narrative(
+        "The bank-use gate is BLOCKED, so no new facilities can be approved."
+    )
+    assert copilot._valid_narrative(
+        "Stage 1 means the exposure has not met the project criteria for Stage 2 or Stage 3."
+    )
