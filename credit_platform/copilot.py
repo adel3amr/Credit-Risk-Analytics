@@ -908,6 +908,11 @@ def answer(db, request, actor: dict) -> dict:
                         evidence['workout_lgd'] = result
                         sources.append(source)
                         tool_calls.append('get_workout_lgd_validation')
+            # Exact ranking/concentration/driver questions use governed deterministic
+            # analytics for the final response. Full-context LLM reasoning remains
+            # available for open-ended interpretation and synthesis.
+            if _exact_analytics_intent(request.question, request.use_case):
+                selected = DeterministicProvider()
             try:
                 response = selected.render(request.question, evidence, request.use_case)
             except (OSError, TimeoutError, ValueError, json.JSONDecodeError):
