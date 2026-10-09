@@ -181,3 +181,102 @@ def test_riskiest_industry_is_metric_specific():
 def test_conversational_providers_do_not_prepend_deterministic_block():
     source = Path(copilot.__file__).read_text(encoding="utf-8")
     assert 'return verified + "\\n\\nCopilot interpretation:' not in source
+
+
+def test_customer_concentration_uses_borrower_ecl_ranking():
+    evidence = {
+        "run_id": "r1",
+        "borrower_count": 10,
+        "facility_count": 12,
+        "ead": 1000.0,
+        "ecl": 100.0,
+        "bank_gate": "BLOCKED",
+        "by_stage": {},
+        "by_industry": {},
+        "top_borrowers_by_ecl": [
+            {
+                "borrower_id": f"B{i}",
+                "industry": "Services",
+                "stage": "Stage 1",
+                "risk_rating": 3,
+                "ead": 50.0 + i,
+                "ecl": 10.0 - i,
+                "max_pd": 0.05 + i / 1000,
+                "max_lgd": 0.40,
+            }
+            for i in range(1, 6)
+        ],
+        "top_risk_cases": [],
+        "watchlist": {"borrowers": 0, "facilities": 0, "ead": 0.0, "ecl": 0.0},
+        "unsecured": {"borrowers": 0, "facilities": 0, "ead": 0.0, "ecl": 0.0},
+        "guaranteed": {"borrowers": 0, "facilities": 0, "ead": 0.0, "ecl": 0.0},
+        "portfolio_review_actions": [],
+        "risk_patterns": [],
+        "review_basis": "",
+        "count_basis": "",
+    }
+    answer = copilot.DeterministicProvider().render(
+        "riskiest 5 customers and their concentration", evidence, "portfolio"
+    )
+    assert "ranks borrowers by governed reference ECL" in answer
+    assert "Top-5 concentration:" in answer
+    assert "B1" in answer and "B5" in answer
+    assert copilot._exact_analytics_intent(
+        "riskiest 5 customers and their concentration", "portfolio"
+    )
+
+
+def test_borrower_adverse_indicators_include_source_features():
+    evidence = {
+        "borrower_id": "SME06857",
+        "source_profile": {
+            "features": {
+                "credit_utilization": 0.861,
+                "delinquencies_12m": 1,
+                "days_past_due": 0,
+                "leverage_ratio": 2.2,
+                "previous_defaults": 0,
+                "limit_breach_count": 0,
+                "months_above_80_utilization": 2,
+            }
+        },
+        "facilities": [
+            {
+                "stage": "Stage 1",
+                "pd": 0.0963,
+                "lgd": 0.42,
+                "ead": 600000.0,
+                "ecl": 30000.0,
+                "stage_reasons": ["no_stage2_or_stage3_trigger"],
+                "watchlist": False,
+                "sicr": False,
+                "ews": [],
+                "risk_rating": 5,
+                "risk_direction": "Watch",
+            },
+            {
+                "stage": "Stage 1",
+                "pd": 0.0963,
+                "lgd": 0.40,
+                "ead": 393689.60,
+                "ecl": 17790.24,
+                "stage_reasons": ["no_stage2_or_stage3_trigger"],
+                "watchlist": False,
+                "sicr": False,
+                "ews": [],
+                "risk_rating": 5,
+                "risk_direction": "Watch",
+            },
+        ],
+        "bank_gate": "BLOCKED",
+    }
+    answer = copilot.DeterministicProvider().render(
+        "what are the key adverse indicators?", evidence, "borrower"
+    )
+    assert "high utilization 86.1%" in answer
+    assert "1 delinquency event(s)" in answer
+    assert "2 month(s) above 80% utilization" in answer
+    assert "Stage 1" in answer
+    assert copilot._exact_analytics_intent(
+        "what are the key adverse indicators?", "borrower"
+    )
