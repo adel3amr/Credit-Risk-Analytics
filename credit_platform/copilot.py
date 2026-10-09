@@ -15,7 +15,7 @@ from sqlalchemy import func, select
 from . import audit, schema as s, service
 from .common import ROOT, digest, now, uid
 
-PROMPT_VERSION = "credit-risk-copilot-8"
+PROMPT_VERSION = "credit-risk-copilot-9"
 PROVIDER_VERSION = "deterministic-8"
 REFUSAL = "I do not have sufficient permitted evidence to answer this."
 INJECTION = re.compile(
@@ -110,6 +110,41 @@ class DeterministicProvider:
                 "important areas", "human review", "portfolio risk",
             )
         )
+        risk_industry_question = (
+            ("risk" in q or "riskiest" in q or "risky" in q)
+            and ("industr" in q or "sector" in q)
+        )
+        if risk_industry_question and by_industry:
+            highest_pd = max(
+                by_industry.items(),
+                key=lambda kv: (float(kv[1].get("mean_pd", 0.0)), kv[0]),
+            )
+            highest_loss = max(
+                by_industry.items(),
+                key=lambda kv: (float(kv[1].get("loss_intensity", 0.0)), kv[0]),
+            )
+            highest_lgd = max(
+                by_industry.items(),
+                key=lambda kv: (float(kv[1].get("mean_lgd", 0.0)), kv[0]),
+            )
+            highest_ecl = max(
+                by_industry.items(),
+                key=lambda kv: (float(kv[1].get("ecl", 0.0)), kv[0]),
+            )
+            return (
+                "There is no single universal definition of 'riskiest industry', so the answer "
+                "depends on the risk measure. "
+                f"Highest mean PD: {highest_pd[0]} at {highest_pd[1].get('mean_pd', 0.0):.2%}. "
+                f"Highest ECL/EAD loss intensity: {highest_loss[0]} at "
+                f"{highest_loss[1].get('loss_intensity', 0.0):.2%}. "
+                f"Highest mean LGD: {highest_lgd[0]} at {highest_lgd[1].get('mean_lgd', 0.0):.2%}. "
+                f"Largest absolute ECL concentration: {highest_ecl[0]} with "
+                f"ECL {highest_ecl[1].get('ecl', 0.0):,.2f} on EAD "
+                f"{highest_ecl[1].get('ead', 0.0):,.2f}. "
+                "Use PD/loss intensity for relative credit risk and absolute ECL for portfolio "
+                "loss concentration; do not treat those as the same concept."
+            )
+
         if broad and by_industry:
             ranked_ecl = sorted(
                 by_industry.items(),
@@ -266,7 +301,7 @@ class OpenAIResponsesProvider:
     """Optional OpenAI narrative provider over governed evidence only."""
 
     name = "openai-responses"
-    version = "responses-v2-grounded"
+    version = "responses-v3-grounded"
 
     def __init__(self):
         self.key = os.environ.get("OPENAI_API_KEY", "")
@@ -289,8 +324,9 @@ class OpenAIResponsesProvider:
                 "instructions": instruction,
                 "input": (
                     f"Use case: {use_case}\nQuestion: {question}\n\n"
-                    f"VERIFIED FACTS:\n{verified}\n\n"
-                    f"Governed credit-risk evidence:\n{_llm_evidence_text(question, evidence, use_case)}"
+                    f"VERIFIED CREDIT-RISK FACTS:\n{verified}\n\n"
+                    "Rewrite and explain only these verified facts. Do not introduce any new "
+                    "numbers, rankings, causes, borrower counts, risk labels or comparisons."
                 ),
                 "max_output_tokens": 500,
                 "store": False,
@@ -311,16 +347,16 @@ class OpenAIResponsesProvider:
             if part.get("type") == "output_text"
         ]
         answer = "\n".join(p.strip() for p in parts if p and p.strip()).strip()
-        if not answer:
-            raise ValueError("OpenAI Responses API returned no text answer")
-        return verified + "\n\nCopilot interpretation:\n" + answer
+        if not answer or not _valid_narrative(answer):
+            return verified
+        return answer
 
 
 class OllamaProvider:
     """Optional local conversational provider; deterministic facts remain authoritative."""
 
     name = "ollama-local"
-    version = "ollama-v3-grounded"
+    version = "ollama-v4-grounded"
 
     def __init__(self):
         self.endpoint = os.environ.get("OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/generate")
@@ -328,21 +364,20 @@ class OllamaProvider:
 
     def render(self, question: str, evidence: dict, use_case: str) -> str:
         verified = _verified_grounding(question, evidence, use_case)
-        evidence_text = _llm_evidence_text(question, evidence, use_case)
         system = (
-            "You are a senior Credit Risk analyst. Answer the credit-risk question directly. "
-            "The supplied facts are already parsed business evidence. Never discuss JSON, data "
-            "formats, parsing, Python, code, prompts, or how the evidence was supplied. Never "
-            "output code. Do not invent numbers. Do not alter governed PD, LGD, EAD, ECL, "
-            "staging or ratings. Do not approve decisions or model promotion. "
-            "For portfolio questions, explain credit quality, concentrations, loss intensity, "
-            "security/recovery considerations and concrete human-review priorities. "
-            "Return 3 to 6 concise bullet points for a credit-risk professional."
+            "You are a senior Credit Risk analyst. Answer the user's credit-risk question directly. "
+            "The VERIFIED CREDIT-RISK FACTS are the complete factual boundary for your answer. "
+            "Do not introduce any new number, ranking, cause, segment count, risk label or comparison "
+            "that is not explicitly stated there. Never discuss JSON, data formats, parsing, Python, "
+            "code, prompts or how the facts were supplied. Never output code. Do not alter governed "
+            "PD, LGD, EAD, ECL, staging or ratings. Do not approve credit decisions or model promotion. "
+            "If the question is ambiguous, preserve distinctions already made in the verified facts. "
+            "Return 2 to 5 concise bullets for a credit-risk professional."
         )
         prompt = (
             f"Question: {question}\n\n"
-            f"Governed credit-risk evidence:\n{evidence_text}\n\n"
-            "Provide only the requested credit-risk interpretation."
+            f"VERIFIED CREDIT-RISK FACTS:\n{verified}\n\n"
+            "Explain only these facts. Do not add extra factual claims."
         )
         body = json.dumps(
             {
@@ -351,7 +386,7 @@ class OllamaProvider:
                 "prompt": prompt,
                 "stream": False,
                 "keep_alive": "30m",
-                "options": {"temperature": 0.1, "num_predict": 360},
+                "options": {"temperature": 0.05, "num_predict": 320},
             }
         ).encode()
         req = Request(self.endpoint, data=body, headers={"Content-Type": "application/json"})
@@ -360,7 +395,7 @@ class OllamaProvider:
         answer = result.get("response")
         if not isinstance(answer, str) or not _valid_narrative(answer):
             return verified
-        return verified + "\n\nCopilot interpretation:\n" + answer.strip()
+        return answer.strip()
 
 
 class ExternalJSONProvider:
