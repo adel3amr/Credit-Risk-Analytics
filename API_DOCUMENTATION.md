@@ -1,10 +1,8 @@
 # API and access contract
 
-Additive S2 endpoint: `GET /api/v1/lgd-economic-validation` requires read permission
-and returns hash-checked frozen comparison rows. It cannot promote or score a model.
-Copilot model-risk requests mentioning S2/observable/economic/successor retrieve
-the latest S2 decision; other LGD requests retain explicitly labelled historical S1
-evidence. `prompt_version=credit-risk-copilot-2`, local provider `deterministic-2`.
+> **Current publication interface:** the deterministic risk services remain authoritative. The current Copilot prompt version is `credit-risk-copilot-11`; provider implementations include `deterministic-8`, `ollama-v5-full-context`, `responses-v4-full-context` and the explicit external-JSON adapter. Exact rankings, concentration calculations and borrower adverse-driver extraction are kept in governed deterministic analytics.
+
+`GET /api/v1/lgd-economic-validation` and `GET /api/v1/lgd-workout-validation` expose hash-checked frozen model-risk evidence. They cannot promote or score a research challenger. Historical S1/S2/R1/WN-1 evidence remains separately labelled and traceable.
 
 Run `python -m uvicorn credit_platform.api:app --host 127.0.0.1 --port 8000`. OpenAPI schemas: `/openapi.json`, interactive schema `/docs` (public schema only; data endpoints require credentials). UI `/` contains no embedded borrower data. Every protected request requires `Authorization: Bearer <credential>`. Credentials are provisioned/revoked locally, not by a client-selected role.
 
