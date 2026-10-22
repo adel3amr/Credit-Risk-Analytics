@@ -19,3 +19,6 @@ models/platform/
 .env.*
 !.env.example
 platform-data/
+
+# One-command public demo (local only)
+.venv/

@@ -8,45 +8,30 @@ This file describes the **current consolidated publication state**. Historical r
 
 - Public/default branch: `main`
 - Consolidated integration lineage: `release/final-institutional-platform`
-- Functional qualification baseline before this documentation refresh: `8deaeff3664a42812aff8ec01b0170628705cb49`
+- Verified full-workflow qualification: `502b1e8c37d9397c6df8e9ed8efbb3e7c085e658` (22 October 2026, before this launcher change)
 - Runtime: Python **3.12**
 - Current clean-run automated suite: **240 passed, 1 upstream warning**
 - V5 release checks: **30/30**
 - Reference shadow: **5,172 facilities**, **0 stage mismatches**, audit **VERIFIED**
 
-## Clean clone — Windows PowerShell
+## Clean-clone public demo (recommended)
 
-```powershell
-git clone --depth 1 https://github.com/adel3amr/Credit-Risk-Analytics.git
-cd Credit-Risk-Analytics
+See [RUN_INSTRUCTIONS.md](RUN_INSTRUCTIONS.md) for the quick Windows/macOS/Linux launcher and optional Ollama. On Windows, after cloning, run `py -3.12 run_demo.py`; on macOS/Linux run `python3.12 run_demo.py`. The launcher automates the same dependency, frozen-artifact and database initialization steps used below.
 
-py -3.12 -m venv .venv
-Set-ExecutionPolicy -Scope Process Bypass
-.\.venv\Scripts\Activate.ps1
+### Manual installation (advanced)
 
-python -m pip install --upgrade pip
-pip install -r requirements-platform-lock.txt
+The following commands are the explicit underlying setup after creating and activating a Python 3.12 virtual environment:
 
+```bash
+python -m pip install -r requirements-platform-lock.txt
 python scripts/run_v5.py
 python -m credit_platform.cli build-models
 python -m alembic upgrade head
 python -m credit_platform.cli seed-governance
-
-python -m streamlit run app.py
+python -m streamlit run app.py --server.port 8510
 ```
 
-The Streamlit workbench creates a local demo principal and a governed reference run when Risk Copilot evidence is first required. No paid LLM is needed.
-
-### Local Ollama
-
-```powershell
-ollama pull llama3.2
-$env:COPILOT_PROVIDER="ollama"
-$env:OLLAMA_MODEL="llama3.2"
-$env:OLLAMA_NUM_CTX="16384"
-$env:OLLAMA_NUM_PREDICT="640"
-python -m streamlit run app.py
-```
+The Streamlit workbench automatically creates a local demo actor and reference run when needed by Risk Copilot. No paid LLM is needed. For local conversational Ollama, see the run guide.
 
 ## Verification commands
 
@@ -77,7 +62,7 @@ The `Platform reference validation` workflow starts from a fresh Ubuntu runner a
 11. compiles the platform/research modules; and
 12. builds the Docker image.
 
-At the October 9, 2026 qualification baseline this produced **240 passed**, V5 **30/30**, PostgreSQL shadow reconciliation with **0 stage mismatches**, WN-1 persistence **VERIFIED**, Streamlit smoke **PASS**, and Docker build **PASS**.
+At the October 22, 2026 release qualification this produced **240 passed**, V5 **30/30**, PostgreSQL shadow reconciliation with **0 stage mismatches**, WN-1 persistence **VERIFIED**, Streamlit smoke **PASS**, and Docker build **PASS**.
 
 The separate `Validate V5 Risk Engine` workflow also passed on the same functional baseline.
 

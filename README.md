@@ -6,6 +6,32 @@ A full-stack **Credit Risk research platform** built to study how an end-to-end 
 
 > **Current publication state:** the public/default `main` line and `release/final-institutional-platform` contain the consolidated platform. Start with this README, then [PUBLICATION_READINESS.md](PUBLICATION_READINESS.md) for the validation/challenge map and exact reproducibility evidence.
 
+## Quick start — run the demo on your computer
+
+**Prerequisites:** [Git](https://git-scm.com/downloads) and [Python 3.12](https://www.python.org/downloads/). No Docker, database server, API key, or paid service required.
+
+**Windows PowerShell**
+
+```powershell
+git clone https://github.com/adel3amr/Credit-Risk-Analytics.git
+cd Credit-Risk-Analytics
+py -3.12 run_demo.py
+```
+
+**macOS / Linux**
+
+```bash
+git clone https://github.com/adel3amr/Credit-Risk-Analytics.git
+cd Credit-Risk-Analytics
+python3.12 run_demo.py
+```
+
+The launcher installs the pinned dependencies, builds the synthetic reference data/models, initializes SQLite and opens the local Streamlit demo at **http://localhost:8510**. Restart later using the same command; the setup is reused.
+
+**Optional free local AI:** [install Ollama](https://ollama.com/download), run `ollama pull llama3.2`, then launch with `py -3.12 run_demo.py --ollama` (Windows) or `python3.12 run_demo.py --ollama` (macOS/Linux). The project works without Ollama; GenAI is an optional narrative feature.
+
+**[Full installation, verification & troubleshooting →](RUN_INSTRUCTIONS.md)**
+
 ## What this project covers
 
 The repository goes beyond a standalone PD or LGD notebook. It connects the major components of a credit-risk function into one traceable system:
@@ -337,79 +363,9 @@ Credit-Risk-Analytics/
 └── .github/workflows/             # CI validation
 ```
 
-## Run the project
+## Run, verify, and reproduce
 
-> **Complete public run guide:** [RUN_INSTRUCTIONS.md](RUN_INSTRUCTIONS.md) covers both modes in full: the core platform without Ollama, and the enhanced local GenAI Copilot with Ollama installation/setup for Windows, macOS and Linux.
-
-
-Use **Python 3.12**. A clean GitHub Actions runner reproduces the full reference build before testing, and the same sequence is suitable for a fresh workstation.
-
-### Windows PowerShell — clean local demo
-
-```powershell
-git clone --depth 1 https://github.com/adel3amr/Credit-Risk-Analytics.git
-cd Credit-Risk-Analytics
-
-py -3.12 -m venv .venv
-Set-ExecutionPolicy -Scope Process Bypass
-.\.venv\Scripts\Activate.ps1
-
-python -m pip install --upgrade pip
-pip install -r requirements-platform-lock.txt
-
-python scripts/run_v5.py
-python -m credit_platform.cli build-models
-python -m alembic upgrade head
-python -m credit_platform.cli seed-governance
-
-python -m streamlit run app.py
-```
-
-Open the local URL shown by Streamlit, normally `http://localhost:8501`.
-
-The workbench automatically prepares a local demo principal and a governed reference run when the Risk Copilot first needs them. Generated raw/reference files are intentionally Git-ignored and rebuilt locally from the frozen generators and source controls.
-
-### Optional local Ollama Copilot — no API cost
-
-Install Ollama separately, make sure `llama3.2` is available, then launch with:
-
-```powershell
-ollama pull llama3.2
-
-$env:COPILOT_PROVIDER="ollama"
-$env:OLLAMA_MODEL="llama3.2"
-$env:OLLAMA_NUM_CTX="16384"
-$env:OLLAMA_NUM_PREDICT="640"
-
-python -m streamlit run app.py
-```
-
-The deterministic provider remains the zero-dependency default. Ollama adds local narrative reasoning while governed calculations remain outside the model.
-
-### Optional hosted provider
-
-An OpenAI Responses API adapter is retained as an optional integration example. It is **not required** to run or demonstrate the project and may incur separate API charges. Never commit API keys or platform credentials.
-
-### Verify the project
-
-```powershell
-python -m pytest -q
-python scripts/validate_v5.py
-python scripts/platform_shadow.py
-python -m credit_platform.cli audit-verify
-```
-
-The current hosted qualification baseline reports **240 passed**, V5 release checks **30/30**, **5,172** facilities reconciled, **0** stage mismatches, audit **VERIFIED**, PostgreSQL persistence **VERIFIED**, Streamlit headless startup **PASS**, and Docker image build **PASS**.
-
-### Docker / PostgreSQL
-
-Create a local ignored `.env` from `.env.example` with separate random database passwords, then:
-
-```bash
-docker compose up --build -d
-```
-
-See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for the clean-clone sequence and [DEPLOYMENT_OPERATIONS.md](DEPLOYMENT_OPERATIONS.md) for database/operations guidance.
+The short **Quick start** near the top is the recommended path for external reviewers. For advanced manual setup, test commands, and hosted-CI qualification evidence, see [RUN_INSTRUCTIONS.md](RUN_INSTRUCTIONS.md) and [REPRODUCIBILITY.md](REPRODUCIBILITY.md). The local launcher does not modify the frozen research decisions.
 
 ## Documentation
 

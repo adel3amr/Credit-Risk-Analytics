@@ -1,7 +1,7 @@
 # Final release readiness
 
 **Public research / professional-demonstration release: READY.**  
-**Current functional qualification baseline:** `8deaeff3664a42812aff8ec01b0170628705cb49` (9 October 2026).  
+**Verified full-workflow qualification:** `502b1e8c37d9397c6df8e9ed8efbb3e7c085e658` (22 October 2026, before public-launcher change).  
 **Publication review:** 22 October 2026.
 
 The current repository is runnable from a clean checkout, preserves its model/research challenge history, and exposes the consolidated platform through the public/default branch. It remains a research implementation using synthetic/publicly informed data; this status is about repository quality and reproducibility, not a live-bank approval claim.

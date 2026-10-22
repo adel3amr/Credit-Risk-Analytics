@@ -24,7 +24,7 @@ borrower/facility data
 
 Public/default branch: `main`  
 Integration lineage: `release/final-institutional-platform`  
-Functional qualification baseline: `664190e6f26913c785fc7e5dbfaa8cafb249adc1`
+Verified full-workflow qualification: `502b1e8c37d9397c6df8e9ed8efbb3e7c085e658` (22 October 2026, before public-launcher change)
 
 The publication branch preserves the histories of the reviewed red-team release, Marginal Interest research, WN-1 workout engine and the Streamlit/Copilot interface. No historical research branch was flattened or deleted.
 
