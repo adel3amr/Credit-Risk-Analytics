@@ -37,9 +37,9 @@ Independent arithmetic, held-out research recalculation, regression tests and re
 
 ## Software and operations
 
-PostgreSQL-compatible schema, migrations, least-privilege grants, Docker composition and CI job are implemented. Local PostgreSQL execution could not be completed: system package setup lacks required privileges and packaged PostgreSQL cannot create its non-root runtime user. Docker is unavailable in this workspace. Hosted platform CI has not been run. These are operational verification gates, not successful deployments.
+The consolidated release has now been qualified on fresh GitHub-hosted runners with PostgreSQL 16 migrations, the full 5,172-facility shadow calculation, audit verification, WN-1 PostgreSQL persistence, Streamlit headless startup and Docker image build. These checks establish reproducible reference-platform execution; they are not evidence of a production deployment.
 
-SQLite tests and backup/restore checks are development evidence only. Migration 0001 is an additive initial schema, with a frozen schema snapshot. Destructive downgrade is prohibited. Finalized evidence has database mutation guards. A database owner can still defeat these protections; audit hashes are not external WORM storage. Crash during a run may leave RUNNING state; operator recovery is required, and a new request key creates a replacement run without modifying the old result.
+Full Docker Compose service-lifecycle/restore testing, production backup/RPO/RTO, sustained concurrency/load/SLA testing and external observability/alert delivery remain outside the demonstrated scope. SQLite remains the local development/reference path. Destructive Alembic downgrade is prohibited. Finalized evidence has database mutation guards, but a database owner can still defeat database-local protections; audit hashes are not external WORM storage. Crash recovery remains operator-controlled.
 
 ## Security
 
@@ -47,7 +47,9 @@ High-entropy credentials are provisioned by a trusted local operator, expire, ca
 
 ## Interface and product
 
-The API serves a workflow UI with credential authentication, role-aware actions, portfolio, datasets, registry, findings, validation and decision detail. Static assets and API contracts were tested. Chromium download returned a truncated archive, so new browser interaction/layout verification remains incomplete. Existing Streamlit demonstration is retained and has no real authentication. Do not deploy that legacy app with confidential data.
+The API serves a credential-authenticated workflow interface and the repository retains the richer Streamlit research workbench. Hosted CI now verifies Streamlit headless startup, and the workbench has been exercised during local integration/testing. The earlier Chromium-download failure remains historical evidence; there is still no comprehensive automated cross-browser/layout qualification.
+
+The Streamlit identity selector is deliberately a demo RBAC surface rather than real authentication. Do not expose the research workbench with confidential data or treat it as a production identity boundary.
 
 ## Longitudinal and external data scope
 

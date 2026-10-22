@@ -333,7 +333,7 @@ Credit-Risk-Analytics/
 ├── migrations/                    # Alembic database migrations
 ├── tests/                         # automated validation and platform tests
 ├── docs/                          # historical methodology documentation
-├── outputs/                       # reproducible model / validation outputs
+├── outputs/                       # generated model / validation outputs (git-ignored; rebuilt locally)
 └── .github/workflows/             # CI validation
 ```
 
