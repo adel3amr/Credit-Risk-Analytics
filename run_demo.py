@@ -107,16 +107,18 @@ def main() -> int:
     if not 1 <= args.port <= 65535:
         parser.error("--port must be between 1 and 65535")
 
+    # Always use the disposable local SQLite demo, even if the shell has DATABASE_URL set.
+    os.environ["DATABASE_URL"] = "sqlite:///platform.db"
     provider = "ollama" if args.ollama else "deterministic"
     env = os.environ.copy()
     env["COPILOT_PROVIDER"] = provider
-    if args.ollama:
-        model = env.get("OLLAMA_MODEL", "llama3.2")
-        check_ollama(model)
-        env.setdefault("OLLAMA_MODEL", model)
-        env.setdefault("OLLAMA_NUM_CTX", "16384")
-        env.setdefault("OLLAMA_NUM_PREDICT", "640")
     try:
+        if args.ollama:
+            model = env.get("OLLAMA_MODEL", "llama3.2")
+            check_ollama(model)
+            env.setdefault("OLLAMA_MODEL", model)
+            env.setdefault("OLLAMA_NUM_CTX", "16384")
+            env.setdefault("OLLAMA_NUM_PREDICT", "640")
         setup(rebuild=args.rebuild)
         print(f"\nStarting Credit Risk research demo at http://localhost:{args.port}")
         print(f"Copilot: {provider}. Stop with Ctrl+C.\n", flush=True)
