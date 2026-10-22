@@ -1,5 +1,7 @@
 # Reproduce the current publication build
 
+For an end-user setup guide, including **both no-Ollama and local-Ollama paths plus Ollama installation**, see [RUN_INSTRUCTIONS.md](RUN_INSTRUCTIONS.md). This file focuses on reproducibility and qualification evidence.
+
 This file describes the **current consolidated publication state**. Historical research modules retain their own protocols and locks; they are linked below rather than being silently rewritten.
 
 ## Current lines

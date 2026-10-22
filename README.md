@@ -339,6 +339,9 @@ Credit-Risk-Analytics/
 
 ## Run the project
 
+> **Complete public run guide:** [RUN_INSTRUCTIONS.md](RUN_INSTRUCTIONS.md) covers both modes in full: the core platform without Ollama, and the enhanced local GenAI Copilot with Ollama installation/setup for Windows, macOS and Linux.
+
+
 Use **Python 3.12**. A clean GitHub Actions runner reproduces the full reference build before testing, and the same sequence is suitable for a fresh workstation.
 
 ### Windows PowerShell — clean local demo
