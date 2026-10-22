@@ -1,5 +1,7 @@
 # Executive architecture summary
 
+> **Historical architecture checkpoint (24 September 2026):** the operational-verification statements below belong to the earlier `platform/production-foundation` checkpoint. PostgreSQL shadow execution, Streamlit headless startup and Docker image build were subsequently verified in the consolidated release. See [FINAL_INSTITUTIONAL_PLATFORM.md](FINAL_INSTITUTIONAL_PLATFORM.md) and [PUBLICATION_READINESS.md](PUBLICATION_READINESS.md) for current evidence.
+
 The project now has an additive reference-platform implementation on `platform/production-foundation`, rooted in the newest completed research at ae9942a. Frozen V5 and research history remain unchanged.
 
 Implemented: dated canonical borrower/facility snapshots, data-quality checks and feature contracts; PostgreSQL-compatible schema/migrations; governed model loading; source/model/policy/run hashes; PD→EWS/staging→LGD→EAD→ECL decision traces; portfolio concentrations and movements; registry/findings/validation; controlled overrides; audit chain; authenticated API and workflow UI; operational health/logging; container and CI configuration.

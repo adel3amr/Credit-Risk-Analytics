@@ -1,5 +1,7 @@
 # Final platform validation report
 
+> **Historical independent-validation checkpoint:** this report intentionally preserves the 24 September source-independent validation and the limitations known at that time. Later platform qualification did not rewrite this evidence. For current release status, see [PUBLICATION_READINESS.md](PUBLICATION_READINESS.md), [FINAL_INSTITUTIONAL_PLATFORM.md](FINAL_INSTITUTIONAL_PLATFORM.md) and [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md).
+
 24 September 2026. Scope: whole-project reference platform on `platform/production-foundation`, rooted in newest research `ae9942a`. Independent here means source-independent recalculation and adverse tests; no external validator sign-off is claimed.
 
 ## Verified baseline and history

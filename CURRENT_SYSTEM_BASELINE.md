@@ -1,5 +1,7 @@
 # Current system baseline
 
+> **Historical baseline notice:** despite the original filename, this document preserves the 24 September baseline at `ae9942a`. It is not the October publication state. See [PUBLICATION_READINESS.md](PUBLICATION_READINESS.md) and [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for the current platform.
+
 Reference: `ae9942a`, inspected and rebuilt 24 September 2026. Repository-wide historical reconstruction remains in `validation_review/`; this work adds current evidence under `platform_evidence/` without replacing it.
 
 The current system generates 12,000 synthetic borrowers and 36 months of conduct, trains governed logistic PD and facility Gradient Boosting LGD, derives EWS/staging/rating, applies macro PD assumptions, calculates facility EAD/ECL, aggregates and displays CSV outputs through Streamlit. V4→V5 adds facility recovery and robust input checks; no wholesale V4 copy is required. Source and changed-file inventories are archived.

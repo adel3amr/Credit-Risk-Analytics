@@ -1,7 +1,9 @@
 # Current system state — final red-team release candidate
 
+> **Historical checkpoint notice:** this file records the final red-team state on `review/final-red-team-release`. It is preserved as validation history and is no longer the publication navigation point. For the current consolidated release use [README.md](README.md), [PUBLICATION_READINESS.md](PUBLICATION_READINESS.md), [FINAL_INSTITUTIONAL_PLATFORM.md](FINAL_INSTITUTIONAL_PLATFORM.md) and [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md).
+
 Baseline: `33d3ad4670bd7c5cfad31ac5d6b54f8f42224180`. Review branch:
-`review/final-red-team-release`. This document is the current navigation point;
+`review/final-red-team-release`. This document was the navigation point for that review checkpoint;
 historical reports retain their original populations, dates and conclusions.
 
 | Component | Current status | Governing evidence |

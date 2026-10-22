@@ -1,5 +1,7 @@
 # Final production-readiness assessment
 
+> **Historical readiness checkpoint:** this document preserves the September production-readiness assessment and model-gate chronology. Some software/infrastructure items below were subsequently qualified in hosted CI. The current public research-release status is [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md) and [PUBLICATION_READINESS.md](PUBLICATION_READINESS.md); institutional production approval remains outside the project.
+
 28 September addendum: [post-R1 preflight decision](lgd_hardening/DECISION.md).
 168 tests pass; R1 model gates remain unchanged and blocked. Recovery evidence
 capture/derivation is not available; the new contracts are controls, not captured
