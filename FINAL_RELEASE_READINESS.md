@@ -1,33 +1,39 @@
 # Final release readiness
 
-**Reference implementation: PASS WITH LIMITATIONS for local single-workspace synthetic use.**
-**Full deployment qualification: PARTIAL. Institutional production approval: BLOCKED.**
-No model was promoted. No modelling methodology or synthetic dataset changed.
+**Public research / professional-demonstration release: READY.**  
+**Current functional qualification baseline:** `8deaeff3664a42812aff8ec01b0170628705cb49` (9 October 2026).  
+**Publication review:** 22 October 2026.
 
-| Domain | Status | Evidence / residual requirement |
+The current repository is runnable from a clean checkout, preserves its model/research challenge history, and exposes the consolidated platform through the public/default branch. It remains a research implementation using synthetic/publicly informed data; this status is about repository quality and reproducibility, not a live-bank approval claim.
+
+| Domain | Publication status | Current evidence |
 |---|---|---|
-| Canonical data / feature contracts | PASS WITH LIMITATIONS | Schema, leakage/time/range tests; legitimate recovery-quality data absent |
-| PD / ratings | PASS WITH LIMITATIONS | Independent metrics and rating reconciliation; synthetic outcomes only |
-| EWS / Watchlist / SICR / staging | PASS WITH LIMITATIONS | Boundary tests and 5,172-facility independent reconstruction; internal policy only |
-| LGD active reference | PASS WITH LIMITATIONS | Preserved historical reference, explicit support and calibration limitations |
-| R1 model promotion | BLOCKED | Calibration/segment uncertainty/domain/data gates fail |
-| EAD / ECL / portfolio | PASS | Independent arithmetic, aggregate and shadow reconciliation within floating-point tolerance |
-| API / SQLite / migrations / audit / overrides | PASS WITH LIMITATIONS | Full suite, immutable evidence and two-person controls; no institutional penetration/load qualification |
-| Deterministic Copilot | PASS WITH LIMITATIONS | Numerical grounding, rejection, RBAC, unknown-run and integrity tests; finite refusal patterns not universal language coverage |
-| External LLM | BLOCKED for qualified deployment | Disabled by default; opt-in does not constitute validation |
-| PostgreSQL | PARTIAL | Baseline hosted migration/shadow/audit passed; final branch and restore not demonstrated |
-| Container | PARTIAL | Baseline hosted Docker build passed; Compose service lifecycle/restore not demonstrated |
-| Browser UI | NOT VERIFIED | Static resources and real HTTP passed; local browser installation failed |
-| CI | PARTIAL | Baseline platform passed; V5 dependency defect fixed; final hosted rerun required |
-| Security / authorization | PASS WITH LIMITATIONS for local reference | One shared workspace, not per-user/tenant isolation; external IAM/TLS/rate controls remain institutional work |
-| Monitoring / observability | PARTIAL | Support diagnostics, outcome metrics, audit/request logs implemented; no live alerting/SLA proof |
-| Reproducibility | PASS WITH LIMITATIONS | Pinned install and local suite; ignored reference data/models require documented deterministic build on clean clones |
-| Documentation / evidence | PASS | Current-state map, findings, independent results and frozen history retained |
+| Clean installation / dependencies | PASS | Python 3.12 + pinned `requirements-platform-lock.txt` on fresh GitHub runners |
+| V5 data/model rebuild | PASS | deterministic generation + trusted artifact hash controls |
+| Automated suite | PASS | **240 passed, 1 upstream warning** |
+| V5 release checks | PASS | **30/30** |
+| EAD/ECL/staging reconciliation | PASS | **5,172 facilities**, **0 stage mismatches** |
+| Audit chain | PASS | **VERIFIED** |
+| PostgreSQL | PASS for reference qualification | fresh migrations + full shadow + WN-1 persistence in hosted CI |
+| Streamlit | PASS for reference qualification | headless startup/health smoke in hosted CI; local demo exercised on Windows |
+| Docker image | PASS | hosted Docker build |
+| Risk Copilot | PASS for research demo | deterministic grounding + full-context Ollama path + exact-analytics routing + regression controls |
+| Documentation | PASS after publication refresh | README, reproducibility, Copilot guide, validation map and research history aligned |
+| Historical research evidence | PASS / preserved | V5, validation review, S1/S2/R1/hardening, Marginal Interest and WN-1 remain separately traceable |
+| LGD challenger promotion | NOT PROMOTED | adverse calibration/support/feature-transfer findings remain documented rather than hidden |
 
-## External closeout requirements
+## What a reviewer should read
 
-1. Run both workflows at the final candidate SHA. Confirm new-branch results, not only baseline results.
-2. On a Docker-capable host: set unique owner/app database secrets, run `docker compose up --build`, check readiness and actual browser role/drill-down/filters/Copilot workflows.
-3. Test PostgreSQL backup/restore with production-equivalent grants, migration owner separation and corruption recovery.
-4. Independently qualify institution data mapping, prediction-time recovery information, outcome representativeness, accounting methodology, calibration, monitoring and security controls.
-5. Keep challengers and simulator-only fields outside active reference and booked scoring. An institution may not treat the synthetic reference gate as approval.
+1. [README.md](README.md) — system overview and clean run.
+2. [PUBLICATION_READINESS.md](PUBLICATION_READINESS.md) — current state, evidence and challenge map.
+3. [FINAL_INDEPENDENT_VALIDATION_REPORT.md](FINAL_INDEPENDENT_VALIDATION_REPORT.md) — independent review.
+4. [MODEL_INVENTORY.md](MODEL_INVENTORY.md) — active/reference/research model inventory.
+5. [PLATFORM_CHANGELOG.md](PLATFORM_CHANGELOG.md) — classified evolution.
+6. [REPRODUCIBILITY.md](REPRODUCIBILITY.md) — clean-clone commands and CI proof.
+7. [GENAI_COPILOT_GUIDE.md](GENAI_COPILOT_GUIDE.md) — current Copilot design.
+
+## Remaining boundaries
+
+The repository does not claim real-bank empirical calibration, regulator/accounting approval, external IAM/MFA/TLS/perimeter deployment, penetration/load/SLA qualification, or a production monitoring/alerting estate. Those are external implementation/validation activities and do not prevent the repository from being a complete reproducible research demonstration.
+
+Historical failed challengers, blocked promotion decisions and adverse findings are intentionally retained. They are part of the project's model-risk evidence, not incomplete cleanup.

@@ -1,5 +1,7 @@
 # Final state and closeout
 
+> **Historical checkpoint notice:** this document preserves the September platform/Copilot closeout in its original sequence. It is not the current publication status. For the consolidated October release, use [PUBLICATION_READINESS.md](PUBLICATION_READINESS.md), [FINAL_INSTITUTIONAL_PLATFORM.md](FINAL_INSTITUTIONAL_PLATFORM.md), [REPRODUCIBILITY.md](REPRODUCIBILITY.md) and [GENAI_COPILOT_GUIDE.md](GENAI_COPILOT_GUIDE.md).
+
 Latest post-R1 hardening: `lgd_hardening/DECISION.md`. Baseline `14b8c4d`,
 preflight protocol `fe2f245`; 168 tests pass. Continuous calibration rejected,
 R1 retained, unavailable recovery-information requirement documented and enforced

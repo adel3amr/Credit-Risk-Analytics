@@ -4,6 +4,8 @@ A full-stack **Credit Risk research platform** built to study how an end-to-end 
 
 > **Research scope:** the portfolio and workout datasets are synthetic and publicly informed. The project is designed for research, learning and professional demonstration rather than live credit decisions.
 
+> **Current publication state:** the public/default `main` line and `release/final-institutional-platform` contain the consolidated platform. Start with this README, then [PUBLICATION_READINESS.md](PUBLICATION_READINESS.md) for the validation/challenge map and exact reproducibility evidence.
+
 ## What this project covers
 
 The repository goes beyond a standalone PD or LGD notebook. It connects the major components of a credit-risk function into one traceable system:
@@ -246,6 +248,8 @@ It can answer questions such as:
 
 The same canonical service layer supplies the portfolio facts used by the platform and the Copilot.
 
+For open-ended interpretation, the local Ollama provider receives a structured full-context evidence packet covering portfolio, borrower, facility, model-risk and governance evidence available to the selected scope. Exact rankings, concentrations and borrower-driver calculations remain anchored to deterministic governed analytics so narrative generation cannot silently replace the numerical engine.
+
 Controls include:
 
 - deterministic numerical grounding
@@ -291,17 +295,13 @@ The repository also includes:
 
 ## Final verification
 
-The final integration branch is:
-
-```text
-release/final-institutional-platform
-```
+The consolidated integration line is `release/final-institutional-platform`; the publication/default branch `main` is fast-forwarded to the same reviewed history for a clean public landing page.
 
 Latest verified engineering evidence:
 
 | Check | Result |
 |---|---|
-| Full automated suite | **230 passed** |
+| Full automated suite | **240 passed, 1 upstream warning** |
 | V5 release checks | **30 / 30 passed** |
 | Reference shadow calculation | **5,172 facilities reconciled** |
 | Stage mismatches | **0** |
@@ -339,14 +339,13 @@ Credit-Risk-Analytics/
 
 ## Run the project
 
-Use **Python 3.12**.
+Use **Python 3.12**. A clean GitHub Actions runner reproduces the full reference build before testing, and the same sequence is suitable for a fresh workstation.
 
-### Windows PowerShell — quickest full demo
+### Windows PowerShell — clean local demo
 
 ```powershell
-git clone https://github.com/adel3amr/Credit-Risk-Analytics.git
+git clone --depth 1 https://github.com/adel3amr/Credit-Risk-Analytics.git
 cd Credit-Risk-Analytics
-git checkout release/final-institutional-platform
 
 py -3.12 -m venv .venv
 Set-ExecutionPolicy -Scope Process Bypass
@@ -358,48 +357,37 @@ pip install -r requirements-platform-lock.txt
 python scripts/run_v5.py
 python -m credit_platform.cli build-models
 python -m alembic upgrade head
-
-python -m credit_platform.cli issue-token --name analyst --role analyst
-python -m credit_platform.cli issue-token --name manager --role manager
-python -m credit_platform.cli issue-token --name validator --role validator
-python -m credit_platform.cli issue-token --name auditor --role audit
-python -m credit_platform.cli issue-token --name admin --role admin
-
 python -m credit_platform.cli seed-governance
-python -m credit_platform.cli run-reference --operator analyst
 
 python -m streamlit run app.py
 ```
 
-Then open the local Streamlit URL shown in PowerShell, normally:
+Open the local URL shown by Streamlit, normally `http://localhost:8501`.
 
-```text
-http://localhost:8501
-```
+The workbench automatically prepares a local demo principal and a governed reference run when the Risk Copilot first needs them. Generated raw/reference files are intentionally Git-ignored and rebuilt locally from the frozen generators and source controls.
 
-The default Copilot provider is deterministic and requires no external API.
+### Optional local Ollama Copilot — no API cost
 
-### Optional local Ollama Copilot
-
-With Ollama installed and `llama3.2` available:
+Install Ollama separately, make sure `llama3.2` is available, then launch with:
 
 ```powershell
+ollama pull llama3.2
+
 $env:COPILOT_PROVIDER="ollama"
 $env:OLLAMA_MODEL="llama3.2"
+$env:OLLAMA_NUM_CTX="16384"
+$env:OLLAMA_NUM_PREDICT="640"
+
 python -m streamlit run app.py
 ```
 
-### Optional OpenAI Copilot
+The deterministic provider remains the zero-dependency default. Ollama adds local narrative reasoning while governed calculations remain outside the model.
 
-```powershell
-$env:COPILOT_PROVIDER="openai"
-$env:OPENAI_API_KEY="YOUR_KEY"
-python -m streamlit run app.py
-```
+### Optional hosted provider
 
-Never commit API keys or issued platform credentials.
+An OpenAI Responses API adapter is retained as an optional integration example. It is **not required** to run or demonstrate the project and may incur separate API charges. Never commit API keys or platform credentials.
 
-### Run the verification suite
+### Verify the project
 
 ```powershell
 python -m pytest -q
@@ -408,20 +396,23 @@ python scripts/platform_shadow.py
 python -m credit_platform.cli audit-verify
 ```
 
+The current hosted qualification baseline reports **240 passed**, V5 release checks **30/30**, **5,172** facilities reconciled, **0** stage mismatches, audit **VERIFIED**, PostgreSQL persistence **VERIFIED**, Streamlit headless startup **PASS**, and Docker image build **PASS**.
+
 ### Docker / PostgreSQL
 
-Create a local ignored `.env` with separate random passwords for `POSTGRES_PASSWORD` and `APP_DB_PASSWORD`, then:
+Create a local ignored `.env` from `.env.example` with separate random database passwords, then:
 
 ```bash
 docker compose up --build -d
 ```
 
-See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) and [DEPLOYMENT_OPERATIONS.md](DEPLOYMENT_OPERATIONS.md) for the full reference deployment workflow.
+See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for the clean-clone sequence and [DEPLOYMENT_OPERATIONS.md](DEPLOYMENT_OPERATIONS.md) for database/operations guidance.
 
 ## Documentation
 
 Start here:
 
+- [Publication readiness and validation map](PUBLICATION_READINESS.md)
 - [Final platform consolidation](FINAL_INSTITUTIONAL_PLATFORM.md)
 - [Architecture](TARGET_ARCHITECTURE.md)
 - [Executive architecture summary](EXECUTIVE_ARCHITECTURE_SUMMARY.md)

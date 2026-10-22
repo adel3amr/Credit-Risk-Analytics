@@ -119,3 +119,15 @@ prediction sorting, hidden-state scoring, remote push or booked adjustment.
   retained source hashes and representative facility explanations.
 * API / DOCUMENTATION: latest preflight disposition available to evidence and
   Copilot; no old holdout relabelled independent, no model promotion or ECL change.
+
+
+## Publication consolidation and full-context Copilot — October 2026
+
+- INTEGRATION: consolidated WN-1, reviewed red-team history and preserved Streamlit/Copilot lineage on `release/final-institutional-platform`; historical research branches remain reachable and unflattened.
+- VALIDATION: hosted qualification on a fresh runner reached **240 passed**, V5 **30/30**, 5,172-facility shadow reconciliation with **0 stage mismatches**, PostgreSQL/WN-1 persistence verification, Streamlit health smoke and Docker build.
+- BUG FIX / PORTABILITY: frozen text evidence hashes normalize LF/CRLF so controlled CSV identities verify on Windows and Linux without weakening content checks.
+- GENAI / UI: local demo evidence can bootstrap safely for the Streamlit research workbench; Ollama provider labels and startup behavior corrected.
+- GENAI / EVIDENCE: borrower features and portfolio evidence were expanded to include adverse indicators, scenario/segment/rating/collateral context, top borrowers/facilities, concentrations, risk patterns and review actions.
+- GENAI / VALIDATION: exact customer/industry rankings, concentration and borrower-driver questions route to deterministic governed analytics; open-ended narratives can use a full-context Ollama packet. Regression guards reject known misreadings such as equating Stage 1 with high risk or treating the research gate as a lending ban.
+- DOCUMENTATION: README, reproducibility, Copilot guide, release-readiness and publication map aligned to the current integrated platform.
+- METHODOLOGY: no historical model was silently promoted or rewritten. Research challengers retain their original statuses and evidence.

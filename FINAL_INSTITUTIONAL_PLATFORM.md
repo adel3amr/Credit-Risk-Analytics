@@ -1,6 +1,6 @@
 # Final institutional-platform consolidation
 
-Status date: 8 October 2026  
+Status date: 22 October 2026  
 Branch: `release/final-institutional-platform`
 
 ## Purpose
@@ -61,11 +61,25 @@ Controls retained:
 
 ## Verification baseline and release qualification
 
-The WN-1 branch reached **225 passing tests** and reconciled **5,172 facilities** before final consolidation. Those results are inherited evidence, not a claim that this integration commit has already passed hosted qualification.
+The WN-1 branch reached **225 passing tests** before consolidation. The consolidated platform has since been qualified on fresh hosted runners; current functional evidence is summarized below.
 
-The final branch is configured to run both the full V5 validation workflow and the platform workflow, including PostgreSQL migrations/shadow calculation, frozen workout-evidence verification, full pytest and Docker build. The first consolidation CI at commit `d01b7dc4fa6c4de16d31a9df7c99f3d0b612d32b` completed successfully on both workflows. Evidence from the platform run: **228 tests passed**, V5 release checks **30/30**, 5,172 facilities reconciled with zero stage mismatches, audit status **VERIFIED**, PostgreSQL persistence verified the WN-1 relational domain (including 8,000 borrowers/facilities/defaults, 31,815 workout snapshots and 64,838 recovery transactions), and the Docker image built successfully.
+The current hosted qualification baseline (`8deaeff3664a42812aff8ec01b0170628705cb49`) passed both full workflows. The platform workflow starts from a fresh checkout, rebuilds the V5 reference artifacts, runs the full suite, migrates PostgreSQL, executes the shadow calculation, persists WN-1, starts Streamlit headlessly and builds the Docker image.
 
-The qualification workflow now also starts the preserved Streamlit workbench headlessly against the PostgreSQL reference database and requires its health endpoint to respond before the release job can pass. Hosted CI remains the authoritative qualification evidence for each later consolidation commit.
+Current evidence:
+
+- **240 passed, 1 upstream warning**
+- V5 release checks **30/30**
+- **5,172 facilities** reconciled
+- EAD **2,091,914,075.83**
+- ECL **45,265,972.04**
+- **0 stage mismatches**
+- audit chain **VERIFIED**
+- PostgreSQL migrations/shadow **PASS**
+- WN-1 PostgreSQL persistence **VERIFIED**
+- Streamlit headless startup **PASS**
+- Docker image build **PASS**
+
+The final Risk Copilot also now carries a structured full-context evidence packet for open-ended local Ollama reasoning, while exact rankings, concentration calculations and borrower-driver extraction remain anchored to deterministic governed analytics.
 
 ## Claim boundary
 

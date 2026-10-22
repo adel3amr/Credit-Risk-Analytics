@@ -1,59 +1,121 @@
 # GenAI Credit Risk Copilot guide
 
-Version 2 adds an allowlisted S2 economic LGD validation source. Ask "Explain S2
-observable economic LGD and the promotion decision" in Model risk mode. Facts and
-numeric comparisons are read from the frozen decision and checked against source
-hashes. The answer explicitly distinguishes S1 from S2 and retains the no-promotion
-decision. Authentication, permissions, audit and provider controls remain unchanged.
-
 ## Purpose
 
-The Copilot explains existing governed outputs. It answers four controlled use cases: borrower explanation, portfolio summary, model-risk/validation explanation, and a draft credit review. Every narrative is marked for human review and is not an authoritative credit decision.
+Risk Copilot is a narrative/reasoning layer over the platform's governed Credit Risk evidence. It does **not** replace the deterministic PD, rating, EWS, Watchlist/SICR, staging, LGD, EAD or ECL engines.
 
-It does not estimate PD or LGD, calculate EAD or ECL, assign SICR/stage/watchlist status, approve an override, promote a model, or execute SQL supplied by a model. Those functions remain in the deterministic risk and governance services.
+Supported scopes:
 
-## Grounding and tool calling
+- portfolio analysis;
+- borrower explanation;
+- draft credit review;
+- model-risk / validation explanation.
 
-The request explicitly selects a use case. The service maps it to an allowlisted function:
+Every response is for human review and is not an authoritative credit decision.
 
-| Use case | Allowed source/tool |
-|---|---|
-| Borrower / credit review | Stored facility decision traces for one run and borrower |
-| Portfolio | Reconciled run portfolio and stage aggregation |
-| Model risk | Frozen authoritative LGD decision artifact |
+## Current architecture
 
-The response returns `facts`, `sources`, and `tool_calls` separately from the generated narrative. Missing entities produce an insufficient-evidence response. Prompt-injection patterns produce a refusal. There is no natural-language-to-SQL facility.
+```text
+governed data + stored run evidence
+        ↓
+canonical service / deterministic analytics
+        ↓
+question-specific verified facts
+        ↓
+full governed context packet
+        ↓
+deterministic provider OR local Ollama OR optional hosted provider
+        ↓
+human-review narrative + evidence/tool metadata
+```
 
-## Access, audit and privacy
+The deterministic layer remains authoritative for exact calculations. The language model may synthesize and explain, but it may not silently replace governed numbers or decisions.
 
-The endpoint requires the platform's bearer authentication and `read` permission. It inherits the platform's current shared institutional scope; the platform does not claim multi-tenant borrower entitlements. Only audit/admin roles can list Copilot request records. The immutable record stores actor, role, use case, hashes, provider/version, prompt version, tools and sources. It does not retain raw questions or answers.
+## Evidence available to the Copilot
 
-The default deterministic provider runs locally. No information leaves the platform. An external JSON provider can be enabled only with `COPILOT_PROVIDER=external-json`, `COPILOT_ALLOW_EXTERNAL=true`, an HTTPS endpoint, and a secret supplied outside Git. An institution must complete privacy, security, vendor and data-transfer approval before doing so. A future local model can implement the same provider interface.
+### Portfolio scope
 
-## Hallucination controls
+The context can include:
 
-Responses use retrieved structured facts, deterministic calculations stay outside the provider, model-risk statements come from the frozen decision, sources are returned to the UI, and absent evidence fails closed. The deterministic provider renders fixed templates. External output is still a draft and requires human review.
+- portfolio borrower/facility totals, EAD and ECL;
+- stage, industry, product, rating, risk-direction and collateral-type aggregations;
+- EAD/ECL shares, mean PD, mean LGD and loss intensity;
+- Watchlist, unsecured and guaranteed segments;
+- scenario mean PDs;
+- EWS trigger and stage-reason counts;
+- risk-indicator counts and risk patterns;
+- review actions;
+- top borrowers by ECL and EAD;
+- top facility risk cases;
+- concentration evidence;
+- approved overrides and controlled reference ECL where present.
+
+### Borrower / credit-review scope
+
+The context can include the complete admitted borrower feature vector and all selected-run facility traces: utilization, delinquency/DPD, leverage, qualitative factors, rating, risk direction, EWS, Watchlist, SICR, stage reasons, PIT/scenario/effective PDs, LGD, EAD, ECL, product, maturity, collateral, guarantees, lien rank, drawn/limit/face amounts and related decision evidence.
+
+### Model-risk scope
+
+The Copilot can retrieve the preserved authoritative validation/research evidence, including the economic LGD, hardening and WN-1 workout decisions used by the current platform.
+
+## Exact analytics vs narrative reasoning
+
+Questions that require exact rankings/concentrations or explicit borrower adverse-driver extraction are routed through deterministic governed analytics for the final numerical answer. Examples include:
+
+- "riskiest 5 customers and their concentration";
+- "riskiest industry";
+- "what are this borrower's key adverse indicators?"
+
+Open-ended interpretation can use the richer model context, for example:
+
+- "summarize the portfolio and prioritize human review";
+- "explain why this borrower deserves attention";
+- "explain the LGD validation story and why the challenger was not promoted."
+
+This separation keeps arithmetic/reconciliation inside the risk engine while still allowing richer language reasoning.
+
+## Local Ollama — recommended zero-cost demo
+
+```powershell
+$env:COPILOT_PROVIDER="ollama"
+$env:OLLAMA_MODEL="llama3.2"
+$env:OLLAMA_NUM_CTX="16384"
+$env:OLLAMA_NUM_PREDICT="640"
+python -m streamlit run app.py
+```
+
+Ollama receives a structured business-readable evidence packet rather than an unbounded raw-data dump. The larger local context window exposes the relevant platform evidence while reducing the chance that a smaller model becomes distracted by serialization details.
+
+## Other providers
+
+- `deterministic`: default, local, no model/API dependency.
+- `ollama`: local conversational reasoning.
+- `openai`: optional hosted Responses API adapter; not required and may incur separate charges.
+- `external-json`: explicit opt-in adapter for a configured HTTPS provider.
+
+`COPILOT_PROVIDER=auto` prefers a configured hosted key, then configured Ollama, otherwise deterministic.
+
+## Controls
+
+The current implementation includes:
+
+- role-aware governed evidence access;
+- allowlisted use cases/tool routing;
+- no generated SQL execution;
+- no autonomous approval/override/model promotion;
+- deterministic verified facts for numerical questions;
+- prompt-injection/refusal patterns;
+- narrative quality filters for known failure modes;
+- explicit guardrails against interpreting Stage 1 as "high risk";
+- explicit guardrails against interpreting a research/model gate as a ban on new lending;
+- provider failure fallback to deterministic evidence;
+- evidence/tool metadata and append-only request audit records;
+- human-review requirement.
+
+The audit record stores metadata/hashes rather than using generated prose as an authoritative decision record.
 
 ## Evaluation
 
-`tests/platform/copilot_benchmark.json` defines the curated reference questions, required tools/facts, prohibited claims and refusal cases. API tests verify numerical agreement with source runs, exact stage reasons, source attribution, metadata-only audit records, authorization, injection refusal, missing-evidence behavior, and external-provider opt-in. Results are frozen in `genai_evidence/copilot_evaluation_results.json`.
+Tests in `tests/platform/` cover provider selection, evidence completeness, concentration/ranking logic, borrower adverse indicators, injection refusal, known credit-risk misreadings, source integrity and platform permissions. The complete repository suite is run in CI.
 
-## API
-
-`POST /api/v1/copilot/query` accepts `question`, `use_case`, and the required `run_id`/`borrower_id`. `GET /api/v1/copilot/requests` is restricted to audit permission. See `API_DOCUMENTATION.md` for the schema and example.
-# S2-R1 evidence update
-
-Prompt version `credit-risk-copilot-3`, deterministic provider version
-`deterministic-3`: model-risk questions now retrieve the latest completed LGD
-decision while preserving historical S1 facts. The displayed current bias uses
-the **baseline** scenario explicitly, not whichever scenario row comes first.
-Ask “Explain S2 remediation and its promotion blockers.” The answer must identify
-the unpromoted version and the remaining failed gates, not imply bank approval.
-Retrieval validates source hashes and the decision's registered hash; corrupt
-latest evidence is rejected rather than silently replaced with an older result.
-# Latest preflight evidence — 28 September 2026
-
-Prompt/provider versions `credit-risk-copilot-4` / `deterministic-4` retrieve the
-post-R1 hardening disposition. R1 remains the retained model; the calibration is
-rejected and no new final holdout was opened. Ask “Explain the latest LGD
-hardening decision.” Original source findings remain linked and unchanged.
+For API contracts see [API_DOCUMENTATION.md](API_DOCUMENTATION.md). For architecture/risks see [GENAI_ARCHITECTURE.md](GENAI_ARCHITECTURE.md) and [GENAI_RISK_AND_CONTROLS.md](GENAI_RISK_AND_CONTROLS.md).
