@@ -721,11 +721,121 @@ class OpenAIResponsesProvider:
         return answer
 
 
+
+def _ollama_context(question: str, evidence: dict, use_case: str) -> tuple[str, bool]:
+    """Route verified context by question rather than dumping the entire portfolio.
+
+    The complete governed evidence still stays available to the deterministic
+    analytics engine and in the request's facts/audit trail. A researcher can
+    explicitly request 'full context' or set OLLAMA_FULL_CONTEXT=1.
+    """
+    q = question.lower()
+    comprehensive = (
+        os.environ.get("OLLAMA_FULL_CONTEXT", "0") == "1"
+        or any(term in q for term in (
+            "full context", "every metric", "all available evidence",
+            "complete evidence packet", "full detailed evidence",
+        ))
+    )
+    if comprehensive or use_case != "portfolio":
+        return _llm_evidence_text(question, evidence, use_case), comprehensive
+
+    lines = [
+        "RELEVANT GOVERNED PORTFOLIO EVIDENCE (synthetic units, not EUR)",
+        f"run_id={evidence.get('run_id')}",
+        f"borrowers={evidence.get('borrower_count', 0)}",
+        f"facilities={evidence.get('facility_count', 0)}",
+        f"EAD={evidence.get('ead', 0.0):.2f}",
+        f"ECL={evidence.get('ecl', 0.0):.2f}",
+        f"bank_use_gate={evidence.get('bank_gate', 'BLOCKED')}",
+    ]
+    dimension_focus = {
+        "by_industry": ("industry", "industr", "sector", "concentration", "risk", "review"),
+        "by_product": ("product", "loan", "overdraft", "trade", "facility type"),
+        "by_rating": ("rating", "grade", "migration"),
+        "by_risk_direction": ("direction", "deteriorat", "improv", "risk pattern"),
+        "by_collateral_type": ("collateral", "security", "unsecured", "secured"),
+    }
+
+    def add_mapping(title, source, count=5):
+        if not isinstance(source, dict) or not source:
+            return
+        lines.append("")
+        lines.append(title)
+        rows = list(source.items())
+        if all(isinstance(r, dict) and "ecl" in r for _, r in rows):
+            rows.sort(key=lambda item: (-float(item[1].get("ecl", 0.0)), item[0]))
+        for name, row in rows[:count]:
+            if isinstance(row, dict):
+                fields = ("borrowers", "facilities", "ead", "ecl",
+                          "mean_pd", "mean_lgd", "loss_intensity")
+                values = [
+                    f"{key}={float(row[key]):.6g}"
+                    for key in fields if isinstance(row.get(key), (int, float))
+                ]
+                lines.append(f"{name}: " + ", ".join(values))
+            else:
+                lines.append(f"{name}={row}")
+
+    add_mapping("STAGES", evidence.get("by_stage", {}), 3)
+    add_mapping("INDUSTRIES", evidence.get("by_industry", {}), 12 if
+                any(t in q for t in ("industr", "sector")) else 6)
+    for field, terms in dimension_focus.items():
+        if field == "by_industry":
+            continue
+        if any(term in q for term in terms):
+            add_mapping(field.upper(), evidence.get(field, {}), 12)
+
+    add_mapping("SPECIAL EXPOSURES", {
+        name: evidence[name] for name in ("watchlist", "unsecured", "guaranteed")
+        if isinstance(evidence.get(name), dict)
+    }, 3)
+
+    for key in ("scenario_mean_pd", "ews_trigger_counts",
+                "stage_reason_counts", "risk_indicator_counts"):
+        if key == "scenario_mean_pd" or any(
+            t in q for t in ("ews", "warning", "risk", "driver",
+                             "stage", "scenario", "macro", "deteriorat", "review")
+        ):
+            add_mapping(key.upper(), evidence.get(key, {}), 7)
+
+    review = evidence.get("portfolio_review_actions", [])
+    if review:
+        lines.append("")
+        lines.append("HUMAN REVIEW ACTIONS")
+        for item in review[:5]:
+            if isinstance(item, dict):
+                lines.append("; ".join(_flatten_context(item, max_depth=2)))
+    patterns = evidence.get("risk_patterns", [])
+    if patterns and any(t in q for t in ("pattern", "driver", "risk", "deteriorat")):
+        lines.append("")
+        lines.append("RISK PATTERNS")
+        for item in patterns[:5]:
+            if isinstance(item, dict):
+                lines.append("; ".join(_flatten_context(item, max_depth=2)))
+
+    if any(t in q for t in (
+        "borrower", "customer", "counterparty", "top", "largest",
+        "case", "facility", "concentration"
+    )):
+        for key, limit in (("top_borrowers_by_ecl", 5),
+                           ("top_borrowers_by_ead", 3),
+                           ("top_risk_cases", 4)):
+            rows = evidence.get(key, [])
+            if rows:
+                lines.append("")
+                lines.append(key.upper())
+                for row in rows[:limit]:
+                    if isinstance(row, dict):
+                        lines.append("; ".join(_flatten_context(row, max_depth=2)))
+    return "\n".join(lines), False
+
+
 class OllamaProvider:
     """Optional local conversational provider; deterministic facts remain authoritative."""
 
     name = "ollama-local"
-    version = "ollama-v5-full-context"
+    version = "ollama-v6-relevant-context"
 
     def __init__(self):
         self.endpoint = os.environ.get("OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/generate")
@@ -733,13 +843,11 @@ class OllamaProvider:
 
     def render(self, question: str, evidence: dict, use_case: str) -> str:
         verified = _verified_grounding(question, evidence, use_case)
-        evidence_text = _llm_evidence_text(question, evidence, use_case)
+        evidence_text, comprehensive = _ollama_context(question, evidence, use_case)
         system = (
             "You are a senior Credit Risk analyst operating a governed research Copilot. "
-            "You have access to the full evidence packet for the selected scope: borrower and "
-            "facility attributes, PD, internal ratings, EWS, Watchlist, SICR, staging, LGD, EAD, "
-            "ECL, macro scenarios, concentrations, collateral/guarantees, risk patterns, model "
-            "validation, research findings and governance where available. Use all relevant evidence "
+            "You are given question-relevant governed evidence for borrower and portfolio risk, "
+            "with calculations already performed by the deterministic engine. Use relevant evidence "
             "needed to answer the user's question. Do not discuss data formats, JSON, parsing, Python, "
             "code, prompts or the mechanics of how evidence was supplied. Never invent a number or "
             "claim. The VERIFIED QUESTION-SPECIFIC FACTS are authoritative for exact calculations, "
@@ -752,10 +860,17 @@ class OllamaProvider:
         prompt = (
             f"Question: {question}\n\n"
             f"VERIFIED QUESTION-SPECIFIC FACTS:\n{verified}\n\n"
-            f"FULL GOVERNED CONTEXT AVAILABLE FOR REASONING:\n{evidence_text}\n\n"
+            f"GOVERNED EVIDENCE FOR THIS QUESTION:\n{evidence_text}\n\n"
             "Use any relevant evidence above to answer the question. Keep exact quantitative claims "
             "anchored to supplied values and the verified facts."
         )
+        # The 16K context reservation and 640-token output caused long CPU
+        # latency for small local models. Small requests use modest budgets.
+        # Explicit comprehensive evidence keeps the advanced, slower path.
+        configured_ctx = int(os.environ.get("OLLAMA_NUM_CTX", "4096"))
+        configured_predict = int(os.environ.get("OLLAMA_NUM_PREDICT", "480"))
+        ctx_limit = 16384 if comprehensive else 4096
+        output_limit = 640 if comprehensive else 400
         body = json.dumps(
             {
                 "model": self.model,
@@ -765,8 +880,8 @@ class OllamaProvider:
                 "keep_alive": "30m",
                 "options": {
                     "temperature": 0.08,
-                    "num_predict": int(os.environ.get("OLLAMA_NUM_PREDICT", "640")),
-                    "num_ctx": int(os.environ.get("OLLAMA_NUM_CTX", "16384")),
+                    "num_predict": max(128, min(configured_predict, output_limit)),
+                    "num_ctx": max(2048, min(configured_ctx, ctx_limit)),
                 },
             }
         ).encode()
