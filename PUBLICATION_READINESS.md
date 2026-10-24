@@ -1,7 +1,7 @@
 # Publication readiness and validation map
 
-Status: **READY FOR PUBLIC RESEARCH RELEASE**  
-Review date: **22 October 2026**
+Status: **READY FOR PUBLIC RESEARCH RELEASE** — institutional bank-use gate **BLOCKED**  
+Review date: **24 October 2026**
 
 This is the front-door map for reviewers who want to understand what is current, what is historical, how to run the project, and where the model challenges and validation evidence live.
 
@@ -24,7 +24,7 @@ borrower/facility data
 
 Public/default branch: `main`  
 Integration lineage: `release/final-institutional-platform`  
-Verified full-workflow qualification: `502b1e8c37d9397c6df8e9ed8efbb3e7c085e658` (22 October 2026, before public-launcher change)
+Verified full-workflow qualification: `79a031192f4477351528e7384004d1d4e970a488` (24 October 2026, main and release)
 
 The publication branch preserves the histories of the reviewed red-team release, Marginal Interest research, WN-1 workout engine and the Streamlit/Copilot interface. No historical research branch was flattened or deleted.
 
@@ -32,7 +32,7 @@ The publication branch preserves the histories of the reviewed red-team release,
 
 The clean hosted workflow at the functional baseline reported:
 
-- **240 passed, 1 upstream warning**;
+- **256 passed, 1 upstream warning**;
 - V5 release checks **30/30**;
 - **5,172** reference facilities reconciled;
 - EAD **2,091,914,075.83**;
@@ -61,7 +61,7 @@ A fresh runner regenerates ignored reference CSV/output/model artifacts before t
 | Marginal Interest | incremental value of impaired-facility accrued/suspended interest | interest-specific incremental value inconclusive | `marginal_interest/` |
 | WN-1 workout engine | dated component recovery architecture, cure/recovery/security/cost/macro evidence | component challenger blocked by calibration/support/selection findings | `workout_vnext/`, `WORKOUT_PLATFORM_CLOSEOUT.md` |
 | Final red-team / platform consolidation | software controls, schema, lineage, input handling, Copilot, PostgreSQL/Docker/UI qualification | defects fixed; evidence preserved; final reference workflows green | `FINAL_RED_TEAM_REPORT.md`, `FINAL_INSTITUTIONAL_PLATFORM.md` |
-| Full-context Risk Copilot | borrower drivers, customer/industry concentration, LLM grounding and known narrative errors | exact analytics deterministic; Ollama gets richer governed context; regression guards added | `GENAI_COPILOT_GUIDE.md`, `tests/platform/test_final_integration.py` |
+| Local Risk Copilot | borrower drivers, portfolio/industry concentration, narrative grounding, Windows performance | exact analytics deterministic; Ollama uses question-relevant context by default with optional full-context mode and visible fallback | `GENAI_COPILOT_GUIDE.md`, `tests/platform/test_ollama_context.py` |
 
 ## Current reference vs research-only
 
@@ -78,7 +78,7 @@ See [MODEL_INVENTORY.md](MODEL_INVENTORY.md) for model-by-model status.
 
 ## How to run
 
-For a clean workstation follow [REPRODUCIBILITY.md](REPRODUCIBILITY.md). The shortest Windows demo sequence is also in [README.md](README.md).
+For a clean workstation start with [RUN_INSTRUCTIONS.md](RUN_INSTRUCTIONS.md). The two-command Windows/macOS/Linux entry path is in [README.md](README.md). The deeper qualification record is in [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 
 No paid LLM is needed. The default Copilot is deterministic; local Ollama can be enabled for richer narrative reasoning.
 

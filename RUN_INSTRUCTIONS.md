@@ -1,6 +1,6 @@
 # Run the Credit Risk Analytics demo
 
-**Two steps after installing Git and Python 3.12:** clone the repository, then run the launcher. It creates its own virtual environment, installs pinned packages, generates the synthetic reference data/models, initializes the local database, and starts Streamlit. No API key, PostgreSQL server, Docker, or paid service is needed for this local demo.
+**Two steps after installing Git and Python 3.12:** clone the repository, then run the launcher. It creates its own virtual environment, installs pinned packages, generates the synthetic reference data/models, initializes the local database, and starts Streamlit. On a clean machine the first build takes longer than later restarts. No API key, PostgreSQL server, Docker, or paid service is needed for this local demo.
 
 ## 1. Install prerequisites
 
@@ -27,7 +27,7 @@ python3.12 run_demo.py
 
 Open **http://localhost:8510** if the browser does not open automatically. Select a demo role using the sidebar. You can explore the Portfolio Cockpit, Borrower Credit File, Risk Management, Model Validation (select Model Validation role), and Risk Copilot.
 
-The first run prepares locally generated data. Later runs use the same command and reuse the completed installation.
+The first run prepares locally generated data. Later runs use the same command and reuse the completed installation **provided the build inputs have not changed**. Updating the repository with build-relevant code changes may require re-running setup.
 
 ## 3. Optional: enable conversational GenAI with Ollama
 
@@ -49,7 +49,7 @@ py -3.12 run_demo.py --ollama
 python3.12 run_demo.py --ollama
 ```
 
-You will see **Ollama local GenAI + deterministic grounding** in Risk Copilot. Ollama runs locally; no paid provider is needed. Numerical risk calculations are performed by the deterministic engine. Actual LLM answer quality is not guaranteed; human review is required.
+In Risk Copilot the configured provider is **Ollama local GenAI + deterministic grounding**. Successful conversational answers show `ollama-local` as their actual provider. Exact analytical questions may route to `deterministic-local` by design; timeout/unusable-answer fallbacks display a clear warning. Ollama runs locally; no paid provider is needed. Numerical risk calculations are performed by the deterministic engine. Generated text requires human review.
 
 ## Useful commands
 
@@ -66,8 +66,10 @@ Press **Ctrl+C** in the running terminal to stop the app. If setup fails halfway
 
 - **Python 3.12 not found:** install Python 3.12, reopen the terminal, and use the commands above. Do not rely on an unsupported default Python version.
 - **`git` not found:** install Git, reopen the terminal, and retry cloning.
-- **Port already in use:** append `--port 8511` and open http://localhost:8511.
+- **Port already in use:** stop the earlier Streamlit process with Ctrl+C or append `--port 8511` and open http://localhost:8511.
 - **Ollama not reachable or model missing:** start the Ollama app/service; run `ollama pull llama3.2`, then retry `--ollama`.
+- **Ollama responds to simple questions but times out in the Copilot:** make sure you're on the current `main` branch (`git pull --ff-only origin main`). Typical portfolio questions now use **question-focused evidence**, a capped 4K context and a capped 400-token answer. Requests for `full context` are intentionally slower; use them only when needed.
+- **An existing project already has working models:** if you just pulled an interface/Copilot update, you can run `.\\.venv\\Scripts\\python.exe -m streamlit run app.py --server.port 8510` on Windows after setting `$env:COPILOT_PROVIDER=\"ollama\"`, instead of rebuilding the reference models. See the normal launcher path above for fresh installations.
 - **Broken local outputs after changing code:** use `--rebuild`. The script regenerates only the local reference environment; it does not retrain or promote any frozen research challengers.
 - **Want to run commands manually?** The exact lower-level sequence is in [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 

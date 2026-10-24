@@ -11,7 +11,7 @@ flowchart TD
  T --> V[Validation + model-risk evidence]
  D --> F[Question-specific deterministic facts]
  V --> F
- F --> C[Structured full-context evidence packet]
+ F --> C[Question-relevant evidence / optional full-context packet]
  C --> R{Provider}
  R --> L[Deterministic local]
  R --> O[Ollama local]
@@ -42,7 +42,7 @@ The packet is structured and business-readable; it is not an unrestricted raw da
 ## Providers
 
 - **deterministic** — default local provider; no LLM or API dependency.
-- **ollama** — local conversational provider; current implementation version `ollama-v5-full-context`.
+- **ollama** — local conversational provider; current implementation version `ollama-v6-relevant-context`.
 - **openai** — optional hosted Responses API provider; current adapter version `responses-v4-full-context`.
 - **external-json** — explicit HTTPS adapter requiring opt-in.
 - **auto** — chooses a configured hosted key, then configured Ollama, otherwise deterministic.

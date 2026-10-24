@@ -98,6 +98,7 @@ def check_ollama(model: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run the local Credit Risk research demo")
     parser.add_argument("--ollama", action="store_true", help="Use the optional local LLM")
+    parser.add_argument("--setup-only", action="store_true", help="Prepare all data/models without launching the dashboard (CI/advanced)")
     parser.add_argument("--rebuild", action="store_true", help="Regenerate the local reference data/models")
     parser.add_argument("--port", type=int, default=8510, help="Local Streamlit port (default: 8510)")
     args = parser.parse_args()
@@ -117,9 +118,12 @@ def main() -> int:
             model = env.get("OLLAMA_MODEL", "llama3.2")
             check_ollama(model)
             env.setdefault("OLLAMA_MODEL", model)
-            env.setdefault("OLLAMA_NUM_CTX", "16384")
-            env.setdefault("OLLAMA_NUM_PREDICT", "640")
+            env.setdefault("OLLAMA_NUM_CTX", "4096")
+            env.setdefault("OLLAMA_NUM_PREDICT", "400")
         setup(rebuild=args.rebuild)
+        if args.setup_only:
+            print("Demo installation complete; dashboard not started (--setup-only).")
+            return 0
         print(f"\nStarting Credit Risk research demo at http://localhost:{args.port}")
         print(f"Copilot: {provider}. Stop with Ctrl+C.\n", flush=True)
         subprocess.run(

@@ -22,7 +22,7 @@ canonical service / deterministic analytics
         ↓
 question-specific verified facts
         ↓
-full governed context packet
+question-relevant governed context (optional full evidence on request)
         ↓
 deterministic provider OR local Ollama OR optional hosted provider
         ↓
@@ -79,12 +79,12 @@ This separation keeps arithmetic/reconciliation inside the risk engine while sti
 ```powershell
 $env:COPILOT_PROVIDER="ollama"
 $env:OLLAMA_MODEL="llama3.2"
-$env:OLLAMA_NUM_CTX="16384"
-$env:OLLAMA_NUM_PREDICT="640"
+$env:OLLAMA_NUM_CTX="4096"
+$env:OLLAMA_NUM_PREDICT="400"
 python -m streamlit run app.py
 ```
 
-Ollama receives a structured business-readable evidence packet rather than an unbounded raw-data dump. The larger local context window exposes the relevant platform evidence while reducing the chance that a smaller model becomes distracted by serialization details.
+Ollama receives a structured, **question-relevant** governed evidence packet, not an unbounded raw portfolio dump. Normal portfolio questions use at most a 4,096-token context budget and 400-token response budget. To deliberately request more extensive (slower) context, ask for **full context** in the question or set `OLLAMA_FULL_CONTEXT=1` and use a larger `OLLAMA_NUM_CTX`. All exact risk calculations stay in the deterministic engine. If Ollama times out or fails a basic quality check, the UI explicitly identifies the deterministic fallback.
 
 ## Other providers
 

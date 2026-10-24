@@ -1,8 +1,8 @@
 # Final release readiness
 
 **Public research / professional-demonstration release: READY.**  
-**Verified full-workflow qualification:** `502b1e8c37d9397c6df8e9ed8efbb3e7c085e658` (22 October 2026, before public-launcher change).  
-**Publication review:** 22 October 2026.
+**Verified full-workflow qualification:** `79a031192f4477351528e7384004d1d4e970a488` (24 October 2026, both branches).  
+**Publication review:** 24 October 2026.
 
 The current repository is runnable from a clean checkout, preserves its model/research challenge history, and exposes the consolidated platform through the public/default branch. It remains a research implementation using synthetic/publicly informed data; this status is about repository quality and reproducibility, not a live-bank approval claim.
 
@@ -10,14 +10,14 @@ The current repository is runnable from a clean checkout, preserves its model/re
 |---|---|---|
 | Clean installation / dependencies | PASS | Python 3.12 + pinned `requirements-platform-lock.txt` on fresh GitHub runners |
 | V5 data/model rebuild | PASS | deterministic generation + trusted artifact hash controls |
-| Automated suite | PASS | **240 passed, 1 upstream warning** |
+| Automated suite | PASS | **256 passed, 1 upstream warning** |
 | V5 release checks | PASS | **30/30** |
 | EAD/ECL/staging reconciliation | PASS | **5,172 facilities**, **0 stage mismatches** |
 | Audit chain | PASS | **VERIFIED** |
 | PostgreSQL | PASS for reference qualification | fresh migrations + full shadow + WN-1 persistence in hosted CI |
-| Streamlit | PASS for reference qualification | headless startup/health smoke in hosted CI; local demo exercised on Windows |
+| Streamlit | PASS for reference qualification | headless startup/health smoke in hosted Linux CI; local demo exercised by project owner on Windows |
 | Docker image | PASS | hosted Docker build |
-| Risk Copilot | PASS for research demo | deterministic grounding + full-context Ollama path + exact-analytics routing + regression controls |
+| Risk Copilot | PASS for research demo | deterministic grounding + question-relevant Ollama context, optional full-context retrieval, visible fallback + exact-analytics routing |
 | Documentation | PASS after publication refresh | README, reproducibility, Copilot guide, validation map and research history aligned |
 | Historical research evidence | PASS / preserved | V5, validation review, S1/S2/R1/hardening, Marginal Interest and WN-1 remain separately traceable |
 | LGD challenger promotion | NOT PROMOTED | adverse calibration/support/feature-transfer findings remain documented rather than hidden |

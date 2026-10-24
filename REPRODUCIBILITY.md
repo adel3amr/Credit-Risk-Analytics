@@ -8,9 +8,9 @@ This file describes the **current consolidated publication state**. Historical r
 
 - Public/default branch: `main`
 - Consolidated integration lineage: `release/final-institutional-platform`
-- Verified full-workflow qualification: `502b1e8c37d9397c6df8e9ed8efbb3e7c085e658` (22 October 2026, before this launcher change)
+- Last independently confirmed fully green integrated build: `79a031192f4477351528e7384004d1d4e970a488` (24 October 2026; main and release branches)
 - Runtime: Python **3.12**
-- Current clean-run automated suite: **240 passed, 1 upstream warning**
+- Current clean-run automated suite: **256 passed, 1 upstream warning**
 - V5 release checks: **30/30**
 - Reference shadow: **5,172 facilities**, **0 stage mismatches**, audit **VERIFIED**
 
@@ -47,7 +47,7 @@ For the PostgreSQL path, use `docker compose up --build -d` after creating an ig
 
 ## What the clean CI actually proves
 
-The `Platform reference validation` workflow starts from a fresh Ubuntu runner and PostgreSQL 16 service, then:
+The standard Linux `Platform reference validation` workflow starts from a fresh Ubuntu runner and PostgreSQL 16 service, then:
 
 1. installs `requirements-platform-lock.txt`;
 2. regenerates the frozen V5 reference data with `scripts/run_v5.py`;
@@ -62,7 +62,7 @@ The `Platform reference validation` workflow starts from a fresh Ubuntu runner a
 11. compiles the platform/research modules; and
 12. builds the Docker image.
 
-At the October 22, 2026 release qualification this produced **240 passed**, V5 **30/30**, PostgreSQL shadow reconciliation with **0 stage mismatches**, WN-1 persistence **VERIFIED**, Streamlit smoke **PASS**, and Docker build **PASS**.
+At the October 24, 2026 qualification this produced **256 passed**, V5 **30/30**, PostgreSQL shadow reconciliation with **0 stage mismatches**, WN-1 persistence **VERIFIED**, Streamlit smoke **PASS**, and Docker build **PASS**.
 
 The separate `Validate V5 Risk Engine` workflow also passed on the same functional baseline.
 
@@ -70,7 +70,7 @@ The separate `Validate V5 Risk Engine` workflow also passed on the same function
 
 `data/raw/*.csv`, `data/processed/*.csv`, `outputs/*`, local databases and generated platform model binaries are intentionally ignored. They are rebuilt locally. Frozen research cohorts/results that form part of the research evidence are versioned inside their dedicated modules.
 
-Frozen text identities normalize LF/CRLF line endings before hashing so the same controlled CSV content verifies across Linux and Windows checkouts.
+Frozen text identities normalize LF/CRLF line endings for declared text evidence on Windows while retaining exact hashes for binary artifacts. This is not permission to alter frozen values. The public-release Windows smoke workflow tests installation and local reference setup independently.
 
 ## Research reproduction map
 

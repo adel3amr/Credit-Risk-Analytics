@@ -1,0 +1,40 @@
+name: Windows clean-demo validation
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    paths:
+      - 'run_demo.py'
+      - 'app.py'
+      - 'src/**'
+      - 'credit_platform/**'
+      - 'scripts/**'
+      - 'notebooks/**'
+      - 'config/**'
+      - 'workout_vnext/**'
+      - 'requirements-platform-lock.txt'
+      - 'tests/**'
+      - '.github/workflows/windows-demo.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  windows-clean-clone:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Complete fresh Windows demo setup without starting Streamlit
+        run: python run_demo.py --setup-only
+      - name: Verify generated V5 evidence and platform integrity
+        run: |
+          .\.venv\Scripts\python.exe scripts/validate_v5.py
+          .\.venv\Scripts\python.exe -m credit_platform.cli audit-verify
+      - name: Public launcher, Windows evidence, and Ollama context tests
+        run: |
+          .\.venv\Scripts\python.exe -m pytest -q tests/test_public_launcher.py tests/platform/test_wn1_windows_checkout.py tests/platform/test_ollama_context.py tests/platform/test_copilot_narrative.py
