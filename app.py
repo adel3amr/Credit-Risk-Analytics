@@ -538,7 +538,12 @@ with tabs[3]:
         "external-json": "Configured external provider + deterministic grounding",
         "deterministic": "Deterministic governed provider",
     }.get(provider_setting, provider_setting)
-    st.caption(f"Provider: {provider_name}")
+    st.caption(f"Configured provider: {provider_name}")
+    if provider_setting == "deterministic":
+        st.info(
+            "Local AI is not enabled. Restart in PowerShell using "
+            "py -3.12 run_demo.py --ollama to enable the Ollama model."
+        )
 
     use_label = st.selectbox(
         "Copilot mode",
@@ -593,6 +598,8 @@ with tabs[3]:
                 borrower_id=borrower_id or None,
             )
             result = governed_copilot.answer(db, request, actor)
+            if result.get("provider_note"):
+                st.warning(result["provider_note"])
             if result["status"] == "ANSWERED":
                 st.markdown(result["answer"])
             else:

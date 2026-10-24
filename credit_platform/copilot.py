@@ -15,8 +15,8 @@ from sqlalchemy import func, select
 from . import audit, schema as s, service
 from .common import ROOT, digest, now, uid
 
-PROMPT_VERSION = "credit-risk-copilot-11"
-PROVIDER_VERSION = "deterministic-8"
+PROMPT_VERSION = "credit-risk-copilot-12"
+PROVIDER_VERSION = "deterministic-9"
 REFUSAL = "I do not have sufficient permitted evidence to answer this."
 INJECTION = re.compile(
     r"(ignore\s+(all|previous|prior|the\s+validation)|system\s+prompt|developer\s+message|"
@@ -63,6 +63,11 @@ class DeterministicProvider:
         if use_case in ("borrower", "credit_review"):
             return self.borrower_detail(question, evidence, use_case)
         if use_case == "portfolio":
+            if any(phrase in question.lower() for phrase in (
+                "summarize", "summary", "risk profile", "important areas",
+                "human review", "portfolio risk",
+            )):
+                return self.portfolio_summary(evidence)
             stages = ", ".join(
                 f"{k}: {v['facilities']} facilities / ECL {v['ecl']:,.2f}"
                 for k, v in sorted(evidence["by_stage"].items())
@@ -81,6 +86,81 @@ class DeterministicProvider:
             "at prediction time and operational proxies failed. The challenger was therefore "
             "not promoted; the explicit downturn overlay is restricted to sensitivity use."
         )
+
+
+    def portfolio_summary(self, evidence):
+        """An interpretable, fact-based summary even without an LLM."""
+        fmt = lambda x: f"{float(x or 0)/1e6:,.2f}m" if abs(float(x or 0)) >= 1e6 else f"{float(x or 0):,.2f}"
+        sectors = evidence.get("by_industry", {})
+        lines = [
+            "### Portfolio risk overview",
+            f"**{int(evidence['borrower_count']):,} scored borrowers** across "
+            f"**{int(evidence['facility_count']):,} facilities**. "
+            f"EAD: **{fmt(evidence['ead'])}**; governed ECL: "
+            f"**{fmt(evidence['ecl'])}** (synthetic monetary units).",
+            "",
+            "**Stage distribution**",
+        ]
+        for name in ("Stage 1", "Stage 2", "Stage 3"):
+            stage = evidence.get("by_stage", {}).get(name)
+            if stage:
+                lines.append(
+                    f"- **{name}:** {int(stage['facilities']):,} facilities; "
+                    f"ECL {fmt(stage['ecl'])}."
+                )
+        if sectors:
+            top_ecl = max(sectors.items(), key=lambda x: (float(x[1].get("ecl", 0)), x[0]))
+            top_pd = max(sectors.items(), key=lambda x: (float(x[1].get("mean_pd", 0)), x[0]))
+            top_loss = max(sectors.items(), key=lambda x: (float(x[1].get("loss_intensity", 0)), x[0]))
+            lines.extend([
+                "",
+                "**Industry risks worth examining**",
+                f"- **Largest absolute ECL:** {top_ecl[0]} ({fmt(top_ecl[1]['ecl'])}).",
+                f"- **Highest mean PD:** {top_pd[0]} ({top_pd[1]['mean_pd']:.2%}).",
+                f"- **Highest ECL/EAD intensity:** {top_loss[0]} "
+                f"({top_loss[1]['loss_intensity']:.2%}).",
+                "These are different measures: concentration does not mean highest relative risk.",
+            ])
+        watch = evidence.get("watchlist", {})
+        unsecured = evidence.get("unsecured", {})
+        lines.extend([
+            "",
+            "**Watchlist and unsecured exposure**",
+            f"- **Watchlist:** {int(watch.get('borrowers', 0)):,} borrowers; EAD {fmt(watch.get('ead', 0))}.",
+            f"- **Unsecured:** {int(unsecured.get('borrowers', 0)):,} borrowers; EAD {fmt(unsecured.get('ead', 0))}.",
+            "",
+            "**Human-review priorities**",
+        ])
+        actions = []
+        for action in evidence.get("portfolio_review_actions", []):
+            kind = action.get("type")
+            if kind == "deteriorating_high_utilization":
+                actions.append(
+                    f"Review {int(action['borrowers']):,} deteriorating, high-utilization "
+                    f"borrowers (EAD {fmt(action['ead'])})."
+                )
+            elif kind == "unsecured_stage_2_3":
+                actions.append(
+                    f"Review collateral and recovery for {int(action['borrowers']):,} "
+                    f"unsecured Stage 2/3 borrowers (EAD {fmt(action['ead'])})."
+                )
+            elif kind == "industry_concentration":
+                actions.append(
+                    f"Review {action['industry']} concentration: mean PD "
+                    f"{action['mean_pd']:.2%} versus portfolio "
+                    f"{action['portfolio_mean_pd']:.2%}; EAD {fmt(action['ead'])}."
+                )
+            elif action.get("reason"):
+                actions.append(str(action["reason"]))
+        lines.extend("- " + detail for detail in actions[:5])
+        if not actions:
+            lines.append("- Review watchlist and stage migration.")
+        lines.extend([
+            "",
+            f"**Bank-use gate: {evidence.get('bank_gate', 'NOT ASSESSED')}.** "
+            "Research only, not an approved credit decision.",
+        ])
+        return "\n".join(lines)
 
 
     def borrower_detail(self, question, evidence, use_case):
@@ -695,7 +775,10 @@ class OllamaProvider:
             result = json.loads(response.read(4_000_000))
         answer = result.get("response")
         if not isinstance(answer, str) or not _valid_narrative(answer):
-            return verified
+            raise ValueError(
+                "Ollama returned an empty or unsuitable narrative; try again "
+                "or use a larger local model."
+            )
         return answer.strip()
 
 
@@ -871,6 +954,8 @@ def answer(db, request, actor: dict) -> dict:
     sources: list[dict] = []
     evidence: dict = {}
     selected = provider()
+    requested_provider = selected.name
+    provider_note = None
     if INJECTION.search(request.question):
         status, response = "REFUSED", REFUSAL
     else:
@@ -913,12 +998,22 @@ def answer(db, request, actor: dict) -> dict:
             # available for open-ended interpretation and synthesis.
             if _exact_analytics_intent(request.question, request.use_case):
                 selected = DeterministicProvider()
+                if requested_provider != selected.name:
+                    provider_note = (
+                        "Exact risk rankings and drivers use governed deterministic analytics. "
+                        "Open-ended analysis uses the configured LLM."
+                    )
             try:
                 response = selected.render(request.question, evidence, request.use_case)
-            except (OSError, TimeoutError, ValueError, json.JSONDecodeError):
-                # Conversational providers are optional. A provider outage must never
-                # remove the deterministic governed explanation.
+            except (OSError, TimeoutError, ValueError, json.JSONDecodeError) as exc:
+                unavailable = selected.name
                 selected = DeterministicProvider()
+                if unavailable != selected.name:
+                    provider_note = (
+                        f"{unavailable} failed ({type(exc).__name__}: {str(exc)[:180]}). "
+                        "Showing a verified deterministic response instead. "
+                        "Check the Ollama service and installed model."
+                    )
                 response = selected.render(request.question, evidence, request.use_case)
         except (service.NotFound, service.Conflict):
             status, response = "INSUFFICIENT_EVIDENCE", REFUSAL
@@ -930,6 +1025,8 @@ def answer(db, request, actor: dict) -> dict:
         "sources": sources,
         "tool_calls": tool_calls,
         "provider": selected.name,
+        "requested_provider": requested_provider,
+        "provider_note": provider_note,
         "provider_version": selected.version,
         "prompt_version": PROMPT_VERSION,
         "human_review_required": True,
