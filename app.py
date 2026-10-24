@@ -98,21 +98,21 @@ def _ensure_reference_run(db):
 
 st.set_page_config(page_title="Credit Risk Analytics — V5", layout="wide")
 st.title("Credit Risk Analytics & IFRS 9 Decisioning System — V5")
-st.caption("PD • LGD • EWS • IFRS 9-style staging • ECL • governed interventions • GenAI Copilot")
+st.caption("Synthetic research portfolio • All monetary amounts in synthetic units (SU), not EUR • PD / LGD / ECL • GenAI Copilot")
 
 def pct(v, decimals=2):
     return f"{float(v):.{decimals}%}"
 
 def format_money(v):
-    return f"€{float(v):,.2f}"
+    return f"SU {float(v):,.2f}"
 
 def compact_money(v):
     """Compact display for portfolio headline KPIs only."""
     value = float(v)
     if abs(value) >= 1_000_000_000:
-        return f"€{value / 1_000_000_000:.2f}bn"
+        return f"SU {value / 1_000_000_000:.2f}bn"
     if abs(value) >= 1_000_000:
-        return f"€{value / 1_000_000:.2f}m"
+        return f"SU {value / 1_000_000:.2f}m"
     return format_money(value)
 
 DEMO_IDENTITIES = {
@@ -345,7 +345,7 @@ with tabs[1]:
     h.metric("ECL", format_money(x.ecl))
     st.markdown("#### Decision summary")
     ews=str(x["risk_direction"]) if "risk_direction" in df.columns else "—"
-    st.write(f"**{x.risk_band}** model risk · **{ews}** EWS · **{x.stage}** accounting classification. "
+    st.write(f"**{x.risk_band}** borrower credit risk · **{ews}** EWS · **{x.stage}** accounting classification. "
              f"Internal Risk Rating is **{int(x.risk_rating)}/10 ({x.rating_status})**. "
              f"Exposure is **{format_money(x.ead)}** with LGD of **{pct(x.lgd)}** and expected loss of **{format_money(x.ecl)}**.")
     st.subheader("Exposure & recovery")
@@ -388,7 +388,7 @@ with tabs[1]:
             st.subheader("Facility LGD and ECL trace")
             show=[z for z in ["facility_id","product_type","ead_at_default","collateral_type","collateral_coverage","lien_rank","guarantee_coverage","predicted_lgd","remaining_months","stage","facility_pd_12m","facility_lifetime_pd","facility_ecl"] if z in fac.columns]
             st.dataframe(fac[show].style.format({
-                'ead_at_default': '€{:,.2f}', 'facility_ecl': '€{:,.2f}',
+                'ead_at_default': 'SU {:,.2f}', 'facility_ecl': 'SU {:,.2f}',
                 'predicted_lgd': '{:.2%}', 'facility_pd_12m': '{:.2%}', 'facility_lifetime_pd': '{:.2%}',
             }), hide_index=True, width="stretch")
             st.caption("Stage 1: 12-month forward-looking PD × LGD × EAD. Stage 2: facility lifetime PD × LGD × EAD. Stage 3: LGD × EAD. Borrower ECL is the sum of these facilities.")
